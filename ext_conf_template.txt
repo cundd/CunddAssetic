@@ -1,0 +1,2 @@
+# cat=basic/enable/010; type=boolean; label=Enable clear all cache hook: If enabled, the hook will remove all temporary files on the clear all cache command. Is enabled by default.
+enableClearAllCacheHook = 1

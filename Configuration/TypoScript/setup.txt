@@ -1,0 +1,29 @@
+includeLibs.CunddAssetic = EXT:CunddAssetic/Classes/Includes.php
+
+plugin.CunddAssetic = USER
+plugin.CunddAssetic {
+	userFunc = Tx_CunddAssetic_Plugin->main
+	#userFunc = Cundd\Assetic\Plugin->main
+
+	# Enable development mode to always compile files
+	development = 0
+
+	# Configure stylesheets with numeric prefix
+	stylesheets {
+
+	}
+
+	filter_for_type {
+		sass = Sass\SassFilter
+		scss = Sass\ScssFilter
+		less = LessFilter
+	}
+
+	filter_binaries {
+		# lessFilter = /usr/local/bin/node
+	}
+
+}
+
+# Include Assetic in page header
+page.headerData.40001 =< plugin.CunddAssetic
