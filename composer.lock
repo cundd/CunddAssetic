@@ -1,32 +1,55 @@
 {
-    "hash": "d496f4fa867d68bc53140f58496d77c9",
+    "hash": "3c7d635d74533720fa63950a8a7de175",
     "packages": [
         {
             "name": "kriswallsmith/assetic",
-            "version": "v1.0.4",
+            "version": "dev-node-visitor",
             "source": {
                 "type": "git",
                 "url": "http://github.com/kriswallsmith/assetic.git",
-                "reference": "v1.0.4"
+                "reference": "96168e26fef02ad1757a917a450f80255c8aa5a0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/kriswallsmith/assetic/zipball/v1.0.4",
-                "reference": "v1.0.4",
+                "url": "https://github.com/kriswallsmith/assetic/archive/96168e26fef02ad1757a917a450f80255c8aa5a0.zip",
+                "reference": "96168e26fef02ad1757a917a450f80255c8aa5a0",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.1"
+                "php": ">=5.3.1",
+                "symfony/process": ">=2.1.0,<2.3-dev"
             },
-            "time": "2012-08-28 05:18:28",
+            "require-dev": {
+                "twig/twig": ">=1.6.0,<2.0",
+                "leafo/lessphp": "*",
+                "leafo/scssphp": "*",
+                "ptachoire/cssembed": "*",
+                "leafo/scssphp-compass": "*"
+            },
+            "suggest": {
+                "twig/twig": "Assetic provides the integration with the Twig templating engine",
+                "leafo/lessphp": "Assetic provides the integration with the lessphp LESS compiler",
+                "leafo/scssphp": "Assetic provides the integration with the scssphp SCSS compiler",
+                "ptachoire/cssembed": "Assetic provides the integration with phpcssembed to embed data uris",
+                "leafo/scssphp-compass": "Assetic provides the integration with the SCSS compass plugin"
+            },
+            "time": "2012-12-14 18:32:20",
             "type": "library",
-            "installation-source": "dist",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1-dev"
+                }
+            },
+            "installation-source": "source",
             "autoload": {
                 "psr-0": {
                     "Assetic": "src/"
-                }
+                },
+                "files": [
+                    "src/functions.php"
+                ]
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -44,14 +67,180 @@
                 "compression",
                 "minification"
             ]
+        },
+        {
+            "name": "symfony/process",
+            "version": "v2.1.4",
+            "target-dir": "Symfony/Component/Process",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/Process",
+                "reference": "v2.1.4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/symfony/Process/archive/v2.1.4.zip",
+                "reference": "v2.1.4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "time": "2012-11-19 20:53:52",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.1-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\Process": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Process Component",
+            "homepage": "http://symfony.com"
         }
     ],
-    "packages-dev": null,
+    "packages-dev": [
+        {
+            "name": "leafo/lessphp",
+            "version": "v0.3.8",
+            "source": {
+                "type": "git",
+                "url": "http://github.com/leafo/lessphp",
+                "reference": "v0.3.8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/leafo/lessphp/zipball/v0.3.8",
+                "reference": "v0.3.8",
+                "shasum": ""
+            },
+            "time": "2012-08-18 19:16:09",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "classmap": [
+                    "lessc.inc.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT",
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Leaf Corcoran",
+                    "email": "leafot@gmail.com",
+                    "homepage": "http://leafo.net"
+                }
+            ],
+            "description": "lessphp is a compiler for LESS written in PHP.",
+            "homepage": "http://leafo.net/lessphp/"
+        },
+        {
+            "name": "leafo/scssphp",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/leafo/scssphp",
+                "reference": "ff8983e6bf942c742b4752432124925c960daa20"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/leafo/scssphp/archive/ff8983e6bf942c742b4752432124925c960daa20.zip",
+                "reference": "ff8983e6bf942c742b4752432124925c960daa20",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.0"
+            },
+            "require-dev": {
+                "php": ">=5.3.0"
+            },
+            "time": "2012-11-30 19:34:08",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "classmap": [
+                    "scss.inc.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT",
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Leaf Corcoran",
+                    "email": "leafot@gmail.com",
+                    "homepage": "http://leafo.net"
+                }
+            ],
+            "description": "scssphp is a compiler for SCSS written in PHP.",
+            "homepage": "http://leafo.net/scssphp/"
+        },
+        {
+            "name": "leafo/scssphp-compass",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/leafo/scssphp-compass",
+                "reference": "f1631ddb17731326863954d99b39694f0bbed6ec"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/leafo/scssphp-compass/archive/f1631ddb17731326863954d99b39694f0bbed6ec.zip",
+                "reference": "f1631ddb17731326863954d99b39694f0bbed6ec",
+                "shasum": ""
+            },
+            "require": {
+                "leafo/scssphp": "dev-master"
+            },
+            "time": "2012-08-02 02:04:32",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "classmap": [
+                    "compass.inc.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Leaf Corcoran",
+                    "email": "leafot@gmail.com",
+                    "homepage": "http://leafo.net"
+                }
+            ],
+            "description": "Compass for scssphp",
+            "homepage": "http://leafo.net/scssphp/"
+        }
+    ],
     "aliases": [
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": [
-
-    ]
+    "stability-flags": {
+        "kriswallsmith/assetic": 20,
+        "leafo/scssphp-compass": 20
+    }
 }

@@ -8,22 +8,46 @@ plugin.CunddAssetic {
 	# Enable development mode to always compile files
 	development = 0
 
-	# Configure stylesheets with numeric prefix
+	# Configure stylesheets
 	stylesheets {
+
+	#	### Example
+	#	### Define the stylesheet to include
+	#	base = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Local/page.scss
+	#	base {
+	#		### Add functions that will be called on the filter
+	#		functions {
+	#			### Add a numeric prefix to allow the function to called
+	#			### multiple times
+	#			0-addImportPath = fileadmin/framework/local/sass/
+	#			1-addImportPath = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Core/
+	#			2-addImportPath = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Library/
+	#		}
+	#	}
 
 	}
 
 	filter_for_type {
-		sass = Sass\SassFilter
-		scss = Sass\ScssFilter
-		less = LessFilter
+		sass = Assetic\Filter\Sass\SassFilter
+		scss = Assetic\Filter\Sass\ScssFilter
+
+		# ### Example
+		# ### Use the PHP Sass compiler for scss files
+		# scss = Assetic\Filter\ScssphpFilter
 	}
 
 	filter_binaries {
+		### Change the path to the filter binaries. I.e. if node.js is installed
+		### into /usr/local/bin/
 		# lessFilter = /usr/local/bin/node
 	}
-
 }
+
+# If the TypoScript constant developmentMode is set, use CunddAssetic in
+# development mode too
+[globalVar = LIT:1 = {$developmentMode}]
+plugin.CunddAssetic.development = {$developmentMode}
+[global]
 
 # Include Assetic in page header
 page.headerData.40001 =< plugin.CunddAssetic

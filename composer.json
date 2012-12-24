@@ -14,7 +14,11 @@
     ],
     "require": {
         "php": ">=5.3.1",
-        "kriswallsmith/assetic": ">=1.0"
+        "kriswallsmith/assetic": "dev-node-visitor"
+    },
+    "require-dev": {
+        "leafo/lessphp": "*",
+        "leafo/scssphp-compass": "dev-master"
     },
     "autoload": {
         "psr-0": { "Cundd": "Classes/" }

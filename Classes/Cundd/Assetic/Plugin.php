@@ -51,12 +51,6 @@ class Plugin {
 	protected $conf;
 
 	/**
-	 * The prefix for filter class names
-	 * @var string
-	 */
-	protected $filterClassPrefix = 'Assetic\\Filter\\';
-
-	/**
 	 * Output configured stylesheets as link tags
 	 *
 	 * Some processing will be done according to the TypoScript setup of the stylesheets.
@@ -68,12 +62,16 @@ class Plugin {
 	 */
 	public function main($content, $conf) {
 		$this->conf = $conf;
-		$targetName = 'styles.css';
+
+		$outputFileName = 'styles.css';
+		if (isset($conf['output'])) {
+			$outputFileName = $conf['output'];
+		}
 
 		if ($this->isDevelopment()) {
-			$renderedStylesheet = $this->compile($targetName);
+			$renderedStylesheet = $this->compile($outputFileName);
 		} else {
-			$renderedStylesheet = '/typo3temp/cundd_assetic/' . $targetName;
+			$renderedStylesheet = '/typo3temp/cundd_assetic/' . $outputFileName;
 		}
 		$content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
 
@@ -83,12 +81,12 @@ class Plugin {
 	/**
 	 * Collects the files and tells assetic to compile the files
 	 *
-	 * @param string $targetName	Name of the output file
+	 * @param string $outputFileName	Name of the output file
 	 * @return string Returns the path to the compiled file
 	 */
-	public function compile($targetName) {
-		$options = array();
+	public function compile($outputFileName) {
 		$pathToWeb = defined('PATH_site') ? PATH_site : '';
+		$pluginLevelOptions = array();
 		$pathToRenderedFiles = $pathToWeb . '/typo3temp/cundd_assetic/';
 
 		$assetCollection = new AssetCollection();
@@ -101,21 +99,23 @@ class Plugin {
 		$factory->setFilterManager($this->filterManager);
 
 		// Get the options
-		$options = array(
-			'output' => $targetName
+		$pluginLevelOptions = array(
+			'output' => $outputFileName
 		);
 		if (isset($this->conf['options.'])) {
-			$options = $this->conf['options.'];
+			$pluginLevelOptions = $this->conf['options.'];
 		}
 
 		// Check for the development mode
-		$options['debug'] = $this->isDevelopment();
+		$pluginLevelOptions['debug'] = $this->isDevelopment();
 
 		// Loop through all configured stylesheets
 		foreach ($this->conf['stylesheets.'] as $assetKey => $stylesheet) {
 			if (!is_array($stylesheet)) {
 				$asset = NULL;
+				$filter = NULL;
 				$assetFilters = array();
+				$currentOptions = array();
 				$stylesheetType = '';
 				$stylesheetConf = is_array($this->conf['stylesheets.'][$assetKey . '.']) ? $this->conf['stylesheets.'][$assetKey . '.'] : array();
 
@@ -126,7 +126,7 @@ class Plugin {
 					$stylesheetType = substr(strrchr($stylesheet, '.'), 1);
 				}
 
-				$stylesheet = $pathToWeb . $stylesheet;
+				$stylesheet = \t3lib_div::getFileAbsFileName($stylesheet);
 
 				// Make sure the filter manager nows the filter
 				if (!$this->filterManager->has($stylesheetType)) {
@@ -139,33 +139,97 @@ class Plugin {
 					$assetFilters = array($stylesheetType);
 				}
 
+				// Check if there are filter functions
+				if (isset($stylesheetConf['functions.'])) {
+					if (!$filter) {
+						$filter = $this->getFilterForType($stylesheetType);
+					}
+					$this->applyFunctionsToFilterForType($filter, $stylesheetConf, $stylesheetType);
+				}
+
+				// Check if there are special options for this stylesheet
+				if (isset($stylesheetConf['options.'])) {
+					$currentOptions = $stylesheetConf['options.'];
+				} else {
+					$currentOptions = $pluginLevelOptions;
+				}
+				$this->pd($currentOptions);
+
 				$asset = $factory->createAsset(
 					array($stylesheet),
 					$assetFilters,
-					$options
+					$currentOptions
 				);
 				$assetCollection->add($asset);
 			}
 		}
 
 		// Set the output file name
-		$assetCollection->setTargetPath($options['output']);
+		$assetCollection->setTargetPath($pluginLevelOptions['output']);
 		$assetManager->set('cundd_assetic', $assetCollection);
 
 		// Write the new file if something changed
-		if ($assetCollection->getLastModified() > filemtime('/typo3temp/cundd_assetic/' . $options['output'])) {
-			try {
-				$writer->writeManagerAssets($assetManager);
-			} catch (\Exception $exception) {
-				if ($this->isDevelopment()) {
-					throw $exception;
-				} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-					$output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
-					t3lib_div::devLog($output);
-				}
+		#if ($assetCollection->getLastModified() > filemtime('/typo3temp/cundd_assetic/' . $pluginLevelOptions['output'])) {
+		try {
+			$writer->writeManagerAssets($assetManager);
+		} catch (\Exception $exception) {
+			if ($this->isDevelopment()) {
+				throw $exception;
+			} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
+				$output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
+				\t3lib_div::devLog($output);
 			}
 		}
-		return '/typo3temp/cundd_assetic/' . $options['output'];
+		#}
+		return '/typo3temp/cundd_assetic/' . $pluginLevelOptions['output'];
+	}
+
+	/**
+	 * Invokes the functions of the filter
+	 * @param  Filter $filter					The filter to apply to
+	 * @param  array $stylesheetConfiguration	The stylesheet configuration
+	 * @param  string $stylesheetType			The stylesheet type
+	 * @return Filter							Returns the filter
+	 */
+	protected function applyFunctionsToFilterForType($filter, $stylesheetConfiguration, $stylesheetType) {
+		if (!$stylesheetType) {
+			throw new \UnexpectedValueException('The given stylesheet type is invalid "' . $stylesheetType . '"', 1355910725);
+		}
+		$functions = $stylesheetConfiguration['functions.'];
+		ksort($functions);
+		foreach ($functions as $function => $data) {
+			if (!is_array($data)) {
+				$data = array($data);
+			}
+			$this->prepareFunctionParameters($data);
+
+			// Check if the function has a numerator as prefix strip that off
+			if ($function[1] === '-' && is_numeric($function[0])) {
+				$function = substr($function, 2);
+			}
+
+			$this->pd("Call function $function on filter", $filter, $data);
+			$result = call_user_func_array(array($filter, $function), $data);
+		}
+		$this->pd($filter);
+		$this->filterManager->set($stylesheetType, $filter);
+		return $filter;
+	}
+
+	/**
+	 * Prepares the data to be passed to a filter function.
+	 *
+	 * I.e. expands paths to their absolute path.
+	 *
+	 * @param  array $parameters Reference to the data array
+	 * @return void
+	 */
+	protected function prepareFunctionParameters(&$parameters) {
+		foreach ($parameters as $key => &$parameter) {
+			if (strpos($parameter, '.') !== FALSE || strpos($parameter, DIRECTORY_SEPARATOR) !== FALSE) {
+				$parameter = \t3lib_div::getFileAbsFileName($parameter);
+			}
+		}
 	}
 
 	/**
@@ -211,6 +275,11 @@ class Plugin {
 	 * @return Filter       The filter
 	 */
 	protected function getFilterForType($type) {
+		// If the filter manager has an according filter return it
+		if ($this->filterManager->has($type)) {
+			return $this->filterManager->get($type);
+		}
+
 		$filter = NULL;
 		$filterBinaryPath = NULL;
 		$filterClass = ucfirst($type) . 'Filter';
@@ -229,15 +298,15 @@ class Plugin {
 			$filterBinaryPath = $filterBinaries[$filterClassIdentifier];
 		}
 
-		// Add the prefix
-		$filterClass = $this->filterClassPrefix . $filterClass;
-
 		if (class_exists($filterClass)) {
 			if ($filterBinaryPath) {
 				$filter = new $filterClass($filterBinaryPath);
 			} else {
 				$filter = new $filterClass();
 			}
+		} else {
+			throw new \LogicException('Filter class ' . $filterClass . ' not found', 1355846301);
+
 		}
 		return $filter;
 	}
@@ -250,107 +319,10 @@ class Plugin {
 	 * @return	string The printed content
 	 */
 	public function pd($var1 = '__iresults_pd_noValue') {
-		static $counter = 0;
-		static $scriptDir = '';
-		static $didSetDebug = FALSE;
-
-		$printPathInformation = TRUE;
-		$bt = NULL;
-		$output = '';
-		$printTags = TRUE;
-		$printAnchor = TRUE;
-		$outputHandling = 0; // 0 = normal, 1 = shell, 2 >= non XML
-		$traceLevel = PHP_INT_MAX;
-
-		if ($outputHandling) {
-			$printAnchor = FALSE;
-			$printTags = FALSE;
-			ob_start();
+		if (class_exists('Tx_Iresults')) {
+			$arguments = func_get_args();
+			call_user_func_array(array('Tx_Iresults', 'pd'), $arguments);
 		}
-
-		// Output the dumps
-		if ($printTags) {
-			if ($printAnchor) {
-				echo "<a href='#ir_debug_anchor_bottom_$counter' name='ir_debug_anchor_top_$counter' style='background:#555;color:#fff;font-size:0.6em;'>&gt; bottom</a>";
-			}
-			echo '<div class="ir_debug_container" style="text-align:left;"><pre class="ir_debug">';
-		}
-		$args = func_get_args();
-		foreach ($args as $var) {
-			if ($var !== '__iresults_pd_noValue') {
-				var_dump($var);
-			}
-		}
-
-		$i = 0;
-		if ($printPathInformation) {
-			$bt = NULL;
-			$options = FALSE;
-			if (defined('DEBUG_BACKTRACE_IGNORE_ARGS')) {
-				$options = DEBUG_BACKTRACE_PROVIDE_OBJECT & DEBUG_BACKTRACE_IGNORE_ARGS;
-			}
-
-			if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
-				$bt = debug_backtrace($options, 10);
-			} else {
-				$bt = debug_backtrace($options);
-			}
-
-			$function = @$bt[$i]['function'];
-			while($function == 'pd' OR $function == 'call_user_func_array' OR
-				  $function == 'call_user_func') {
-				$i++;
-				$function = @$bt[$i]['function'];
-			}
-
-			// Set the static trace level
-			if ($traceLevel === PHP_INT_MAX) {
-				if (isset($_GET['tracelevel'])) {
-					$traceLevel = (int) $_GET['tracelevel'];
-				} else {
-					$traceLevel = -1;
-				}
-			}
-			$i += $traceLevel;
-
-			// Set the static script dir
-			if (!$scriptDir) {
-				$scriptDir = dirname($_SERVER['SCRIPT_FILENAME']);
-			}
-			$file = str_replace($scriptDir, '', @$bt[$i]['file']);
-			if ($printTags) {
-				echo "<span style='font-size:0.8em'>
-						<a href='file://" . @$bt[$i]['file'] . "' target='_blank'>" . $file . ' @ ' . @$bt[$i]['line'] . "</a>
-					</span>";
-			} else if ($outputHandling < 2) {
-				echo "\033[0;35m" . $file . ' @ ' . @$bt[$i]['line'] . "\033[0m" . PHP_EOL;
-			} else {
-				echo $file . ' @ ' . @$bt[$i]['line'] . PHP_EOL;
-			}
-		}
-
-		if ($printTags) {
-			echo '</pre></div>';
-			if ($printAnchor) {
-				echo "<a href='#ir_debug_anchor_top_$counter' name='ir_debug_anchor_bottom_$counter' style='background:#555;color:#fff;font-size:0.6em;'>&gt; top</a><br />";
-				$counter++;
-			}
-		}
-
-		/*
-		 * If the output was captured, read it and write it to the STDOUT.
-		 */
-		if ($outputHandling) {
-			$output = ob_get_contents();
-			ob_end_clean();
-
-			if ($outputHandling >= 2) {
-				self::say($output);
-			} else {
-				fwrite(STDOUT, $output);
-			}
-		}
-		return $output;
 	}
 }
 ?>
