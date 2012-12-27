@@ -89,6 +89,9 @@ class Plugin {
 		$pluginLevelOptions = array();
 		$pathToRenderedFiles = $pathToWeb . '/typo3temp/cundd_assetic/';
 
+		if (!class_exists('Assetic\\Asset\\AssetCollection', TRUE)) {
+			throw new \LogicException('The Assetic classes could not be found', 1356543545);
+		}
 		$assetCollection = new AssetCollection();
 		$assetManager = new AssetManager();
 		$writer = new AssetWriter($pathToRenderedFiles);
@@ -126,7 +129,10 @@ class Plugin {
 					$stylesheetType = substr(strrchr($stylesheet, '.'), 1);
 				}
 
+
+				$this->pd($stylesheet);
 				$stylesheet = \t3lib_div::getFileAbsFileName($stylesheet);
+				$this->pd($stylesheet);
 
 				// Make sure the filter manager nows the filter
 				if (!$this->filterManager->has($stylesheetType)) {

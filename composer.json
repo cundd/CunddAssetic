@@ -18,7 +18,9 @@
     },
     "require-dev": {
         "leafo/lessphp": "*",
-        "leafo/scssphp-compass": "dev-master"
+        "leafo/scssphp": "*",
+        "ptachoire/cssembed": "*",
+        "leafo/scssphp-compass": "*"
     },
     "autoload": {
         "psr-0": { "Cundd": "Classes/" }

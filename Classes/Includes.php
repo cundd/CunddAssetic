@@ -23,6 +23,6 @@
 
 ini_set('display_errors', TRUE);
 
-require_once(__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__ . '/Cundd/Assetic/Plugin.php');
 class_alias('\\Cundd\\Assetic\\Plugin', 'Tx_CunddAssetic_Plugin', TRUE);
 ?>
