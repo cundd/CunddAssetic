@@ -1,0 +1,76 @@
+<f:layout name="Default" />
+
+This Template is responsible for creating a table of domain objects.
+
+If you modify this template, do not forget to change the overwrite settings
+in /Configuration/ExtensionBuilder/settings.yaml:
+  Resources:
+    Private:
+      Templates:
+        List.html: keep
+
+Otherwise your changes will be overwritten the next time you save the extension in the extension builder
+
+<f:section name="content">
+<style type="text/css">
+	.button {
+		background-color: #F6F6F6;
+		background-image: url('../../images/backgrounds/button.png');
+		background-image: linear-gradient(center top, #F6F6F6 10%, #D5D5D5 90%);
+		background-image: -moz-linear-gradient(center top, #F6F6F6 10%, #D5D5D5 90%);
+		background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0.1, #F6F6F6), color-stop(0.9, #D5D5D5));
+		background-position: bottom;
+		background-repeat: repeat-x;
+		border: 1px solid #7C7C7C;
+		border-radius: 1px;
+		-moz-border-radius: 1px;
+		color: #434343;
+		cursor: pointer;
+
+		padding: 2px 4px 2px 4px;
+
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+		font-size: 11px;
+		line-height: 16px;
+		margin: 0px;
+	}
+	.button:hover {
+		background-color: #C8C8C8;
+		background-image: url('../../images/backgrounds/button-hover.png');
+		background-image: linear-gradient(center top, #F6F6F6 10%, #C8C8C8 90%);
+		background-image: -moz-linear-gradient(center top, #F6F6F6 10%, #BDBCBC 90%);
+		background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0.1, #F6F6F6), color-stop(0.9, #C8C8C8));
+		background-position: bottom;
+		background-repeat: repeat-x;
+		border: 1px solid #737F91;
+		color: #1E1E1E;
+		cursor: pointer;
+	}
+	table td {
+		padding: 2px;
+	}
+</style>
+<h1>Listing for Asset</h1>
+
+<f:flashMessages />
+
+<table  class="tx_assetic" >
+	<tr>
+		<th><f:translate key="tx_assetic_domain_model_asset.last_modified" /></th>
+		<th><f:translate key="tx_assetic_domain_model_asset.source_root" /></th>
+		<th><f:translate key="tx_assetic_domain_model_asset.source_path" /></th>
+		<th><f:translate key="tx_assetic_domain_model_asset.target_path" /></th>
+	</tr>
+
+	<f:for each="{assets}" as="asset">
+		<tr>
+			<td> <f:format.date format="d.m.Y - H:i:s">@{asset.lastModified}</f:format.date></td>
+			<td> {asset.sourceRoot}</td>
+			<td> {asset.sourcePath}</td>
+			<td> {asset.targetPath}</td>
+		</tr>
+	</f:for>
+</table>
+
+<f:link.action action="compile" class="button">Compile</f:link.action>
+</f:section>

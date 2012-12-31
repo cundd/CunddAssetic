@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" datatype="plaintext" original="messages" date="2012-12-28T17:22:57Z" product-name="assetic">
+		<header/>
+		<body>
+
+			<trans-unit id="content.description">
+				<source>Content</source>
+			</trans-unit>
+			<trans-unit id="last_modified.description">
+				<source>Assets last modification time (mtime)</source>
+			</trans-unit>
+			<trans-unit id="source_root.description">
+				<source>Directory of the source</source>
+			</trans-unit>
+			<trans-unit id="source_path.description">
+				<source>Asset source file name</source>
+			</trans-unit>
+			<trans-unit id="target_path.description">
+				<source>Asset target file name</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

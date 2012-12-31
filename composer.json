@@ -1,0 +1,28 @@
+{
+    "name": "cundd/assetic",
+    "description": "Assetic for TYPO3 CMS",
+    "keywords": ["assets", "compression", "minification", "typo3"],
+    "homepage": "https://github.com/kriswallsmith/assetic",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Daniel Corn",
+            "email": "info@cundd.net",
+            "homepage": "http://cundd.net/"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.1",
+        "kriswallsmith/assetic": "dev-node-visitor"
+    },
+    "require-dev": {
+        "leafo/lessphp": "*",
+        "leafo/scssphp": "*",
+        "ptachoire/cssembed": "*",
+        "leafo/scssphp-compass": "*"
+    },
+    "autoload": {
+        "psr-0": { "Cundd": "Classes/" }
+    }
+}
