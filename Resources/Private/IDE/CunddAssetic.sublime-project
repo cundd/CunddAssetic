@@ -2,13 +2,16 @@
 	"folders":
 	[
 		{
-			"path": "/Applications/MAMP/web_cvjm/typo3conf/ext/CunddAssetic"
-		},
-		{
 			"path": "/Applications/MAMP/web_cvjm/typo3conf/ext/cundd_composer"
 		},
 		{
 			"path": "/Applications/MAMP/web_cvjm/typo3/sysext/extbase"
+		},
+		{
+			"path": "/Applications/MAMP/web_cvjm/typo3_src-6.0.0/typo3/sysext/extensionmanager"
+		},
+		{
+			"path": "/Applications/MAMP/web_cvjm/typo3conf/ext/assetic"
 		}
 	]
 }
