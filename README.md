@@ -3,12 +3,14 @@ Cundd Assetic
 
 Integrate the [Assetic asset management framework](https://github.com/kriswallsmith/assetic) into your TYPO3 CMS installation.
 
+
 Installation
 ------------
 
 1. First you have to install the required [Cundd Composer extension](https://github.com/cundd/CunddComposer) and let [Composer](http://getcomposer.org/) install all the dependencies
 2. Include the static TypoScript files
 3. Configure the assets you want to be loaded
+
 
 Usage
 -----
@@ -20,7 +22,8 @@ Usage
             custom_identifier_for_the_asset = fileadmin/stylesheets/style.css
         }
     }
-    
+
+
 ### Multiple assets
 
     plugin.CunddAssetic {
@@ -29,7 +32,8 @@ Usage
             identifier_for_asset_2 = fileadmin/stylesheets/style.css
         }
     }
-    
+
+
 ### With SASS
 
 If your web server and web user are configured to be able to use the `sass` command line tool, from within your TYPO3 installation, you could use the following:
@@ -40,6 +44,7 @@ If your web server and web user are configured to be able to use the `sass` comm
         }
     }
 
+
 ### With SASS in PHP
 
 If you have to use SASS without the original Ruby implementation you can use a PHP version of SASS written by [leafo](http://leafo.net/scssphp/). All you have to do is to make sure the library is installed (using Composer) and that the Scssphp filter is used for *.scss files:
@@ -48,15 +53,17 @@ If you have to use SASS without the original Ruby implementation you can use a P
         stylesheets {
             custom_identifier_for_the_asset = fileadmin/bootstrap/lib/bootstrap.scss
         }
-        
+
         filter_for_type {
             scss = Assetic\Filter\ScssphpFilter
         }
     }
 
+
 ### With other CSS preprocessors
 
 Analog you can use other CSS preprocessors. The [Assetic Github Page](https://github.com/kriswallsmith/assetic#filters) provides a (incomplete) list of all filters provided with the installed Assetic version.
+
 
 Development mode
 ----------------
@@ -68,10 +75,11 @@ To make sure that the assets are compiled each time, the frontend page is refres
     }
 
 By default Cundd Assetic is configured not to compile files if NO backend user is logged in. So a client will not see changes that you may have overlooked. To allow file compilation without a logged in backend user you can change the `allow_compile_without_login` configuration, in your TypoScript or the Constant editor.
-    
+
     plugin.CunddAssetic {
         allow_compile_without_login = 1
     }
+
 
 Advanced
 --------
@@ -96,14 +104,15 @@ If you want to invoke a method multiple times you can just add a numeric prefix 
             1-addImportPath = fileadmin/core/sass/
         }
     }
-    
+
+
 ### Configure the filter binary paths
 
 In some cases you may have to specify the path to a CSS preprocessor to match your OS' configuration. This can be done through the `filter_binaries` directive in your TypoScript
-    
+
     plugin.CunddAssetic {
         filter_binaries {
-	    	# Change the path to the filter binaries. I.e. if node.js is installed 
+	    	# Change the path to the filter binaries. I.e. if node.js is installed
 	    	# into /usr/local/bin/
     		lessFilter = /usr/local/bin/node
 	    }
