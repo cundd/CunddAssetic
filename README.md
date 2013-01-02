@@ -70,7 +70,7 @@ To make sure that the assets are compiled each time, the frontend page is refres
 By default Cundd Assetic is configured not to compile files if NO backend user is logged in. So a client will not see changes that you may have overlooked. To allow file compilation without a logged in backend user you can change the `allow_compile_without_login` configuration, in your TypoScript or the Constant editor.
     
     plugin.CunddAssetic {
-        allow_compile_without_login
+        allow_compile_without_login = 1
     }
 
 Advanced
