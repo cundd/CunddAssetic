@@ -25,15 +25,16 @@ namespace Cundd\Assetic\Controller;
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
 
+require_once(__DIR__ . '/../Plugin.php');
 use Cundd\Assetic\Plugin;
+
 \Tx_CunddComposer_Autoloader::register();
 
-echo '<pre>';
-debug_print_backtrace(NULL, 5);
-echo '</pre>';
+// echo '<pre>';
+// debug_print_backtrace(NULL, 5);
+// echo '</pre>';
 
 
-require_once(__DIR__ . '/../Plugin.php');
 // if (!version_compare(TYPO3_version, '6.0.0', '>=')) {
 // 	class_alias('Cundd\\Assetic\\Controller\\AssetController', 'Tx_Assetic_Controller_AssetController', FALSE);
 // }
