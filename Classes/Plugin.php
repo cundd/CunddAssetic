@@ -39,6 +39,10 @@ use Assetic\Filter;
  * @package Cundd_Assetic
  */
 class Plugin {
+	/**
+	 * Cache identifier for the hash
+	 */
+	const CACHE_IDENTIFIER_HASH = 'cache_identifier_hash';
 
 	/**
 	 * @var tslib_content
@@ -55,6 +59,12 @@ class Plugin {
 	 * @var array
 	 */
 	protected $configuration;
+
+	/**
+	 * The name of the output file
+	 * @var string
+	 */
+	protected $outputFileName;
 
 	/**
 	 * Path to the output file directory
@@ -90,6 +100,7 @@ class Plugin {
 	 * @return Assetic\Asset\AssetCollection
 	 */
 	public function collectAssets() {
+		$this->profile('Will collect assets');
 		$pathToWeb = $this->getPathToWeb();
 		$pluginLevelOptions = $this->getPluginLevelOptions();
 
@@ -166,6 +177,7 @@ class Plugin {
 		// Set the output file name
 		$assetCollection->setTargetPath($this->getCurrentOutputFilename());
 		$assetManager->set('cundd_assetic', $assetCollection);
+		$this->profile('Did collect assets');
 		return $assetCollection;
 	}
 
@@ -174,25 +186,54 @@ class Plugin {
 	 * @return string Returns the path to the compiled file
 	 */
 	public function compile() {
-		$pathToRenderedFiles = $this->getPathToWeb() . $this->getOutputFileDir();
-		$writer = new AssetWriter($pathToRenderedFiles);
+		$absolutePathToRenderedFiles = $this->getPathToWeb() . $this->getOutputFileDir();
+		$writer = new AssetWriter($absolutePathToRenderedFiles);
 
 		// Write the new file if something changed
 		if ($this->willCompile()) {
+			$this->removePreviousFilteredAssetFile();
+			$this->profile('Will compile asset');
 			#if ($assetCollection->getLastModified() > filemtime($this->getOutputFileDir() . $pluginLevelOptions['output'])) {
 			try {
 				$writer->writeManagerAssets($this->getAssetManager());
 			} catch (\Exception $exception) {
 				if ($this->isDevelopment()) {
+					if (is_a($exception, 'Exception_ScssException')) {
+						$this->pd($exception->getUserInfo());
+					}
 					throw $exception;
+
 				} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
 					$output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
 					\t3lib_div::devLog($output);
 				}
 			}
 			#}
+			$this->profile('Did compile asset');
 		}
-		return $this->getOutputFileDir() . $this->getCurrentOutputFilename();
+		return $this->getOutputFileDir() . $this->moveTempFileToFileWithHash();
+	}
+
+	/**
+	 * Moves the filtered temporary file to the path with the hash in the name.
+	 * @return string Returns the new file name
+	 */
+	protected function moveTempFileToFileWithHash() {
+		$fileHash = '';
+		$finalFileName = '';
+		$hashAlgorithm = 'sha1';
+		$outputFileDir = $this->getPathToWeb() . $this->getOutputFileDir();
+		$outputFileTempPath = $outputFileDir . $this->getCurrentOutputFilename();
+		$outputFileFinalPath = '';
+
+		// Create the file hash
+		$fileHash = hash_file($hashAlgorithm, $outputFileTempPath);
+		$finalFileName = $this->getCurrentOutputFilenameWithoutHash() . '_' . $fileHash . '.css';
+		$outputFileFinalPath = $outputFileDir . $finalFileName;
+
+		// Move the temp file to the new file
+		rename($outputFileTempPath, $outputFileFinalPath);
+		return $finalFileName;
 	}
 
 	/**
@@ -321,17 +362,87 @@ class Plugin {
 	}
 
 	/**
-	 * Returns the current output filename
+	 * Returns the current output filename without the hash
 	 * @return string
 	 */
-	public function getCurrentOutputFilename() {
-		$outputFileName = 'styles.css';
+	public function getCurrentOutputFilenameWithoutHash() {
+		$outputFileName = 'styles';
 
 		// Get the output name from the configuration
 		if (isset($this->configuration['output'])) {
 			$outputFileName = $this->configuration['output'];
 		}
 		return $outputFileName;
+	}
+
+	/**
+	 * Returns the current output filename
+	 * @return string
+	 */
+	public function getCurrentOutputFilename() {
+		if (!$this->outputFileName) {
+			// Add a hash for caching
+			$newHash = $this->getHash();
+			$this->outputFileName = $this->getCurrentOutputFilenameWithoutHash();
+			$this->outputFileName .= '_' . $newHash;
+			$this->outputFileName .= '.css';
+		}
+		return $this->outputFileName;
+	}
+
+	/**
+	 * Returns the hash for the current asset version
+	 * @return string
+	 */
+	protected function getHash() {
+		$entry = '';
+
+		// If $entry is null, it hasn't been cached. Calculate the value and store it in the cache:
+		if ($this->isDevelopment() || FALSE === ($entry = $this->getPreviousHash())) {
+			$entry = time();
+
+			// Save value in cache
+			$this->setCache(self::CACHE_IDENTIFIER_HASH, $entry);
+		}
+		return $entry;
+	}
+
+	/**
+	 * Returns the hash from the cache, or an emptry string if it wasn't set.
+	 * @return string
+	 */
+	protected function getPreviousHash() {
+		$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+		//$matchingFiles = glob($filepath . '_' . '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]' . '.css');
+		$matchingFiles = glob($filepath . '_' . '*' . '.css');
+		// echo '<pre>';
+		// var_dump($matchingFiles);
+		// echo '</pre>';
+
+		if (!$matchingFiles) {
+			return '';
+		}
+		$lastMatchingFile = end($matchingFiles);
+		return substr($lastMatchingFile, strlen($filepath) + 1);
+
+		return '' . $this->getCache(self::CACHE_IDENTIFIER_HASH);
+	}
+
+	/**
+	 * Remove the previous filtered asset file
+	 * @return boolean	Returns TRUE if the file was removed, otherwise FALSE
+	 */
+	public function removePreviousFilteredAssetFile() {
+		$previousHash = $this->getPreviousHash();
+
+		$this->pd($previousHash, 'Remove');
+		if ($previousHash) {
+			$this->pd('Remove');
+
+			$oldFilteredAssetFile = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash() . '_' . $cachedHash . '.css';
+			return unlink($oldFilteredAssetFile);
+		}
+		return FALSE;
 	}
 
 	/**
@@ -409,15 +520,68 @@ class Plugin {
 	}
 
 	/**
+	 * Stores the value for the given identifier in the cache
+	 * @param string $identifier Identifier key
+	 * @param mixed $value      Value to store
+	 */
+	protected function setCache($identifier, $value) {
+		if (is_callable('2apc_store')) {
+			apc_store($identifier, $value);
+		} else {
+			$tags = array();
+ 			$lifetime = 60 * 60 * 24; // * 365 * 10;
+
+			$cacheInstance = $GLOBALS['typo3CacheManager']->getCache('assetic_cache');
+			$cacheInstance->set($identifier, $value, $tags, $lifetime);
+		}
+	}
+
+	/**
+	 * Returns the value for the given identifier in the cache
+	 * @param string $identifier Identifier key
+	 * @return mixed
+	 */
+	protected function getCache($identifier) {
+		if (is_callable('2apc_fetch')) {
+			return apc_fetch($identifier);
+		}
+		$cacheInstance = $GLOBALS['typo3CacheManager']->getCache('assetic_cache');
+		return $cacheInstance->get($identifier);
+	}
+
+	/**
 	 * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
 	 *
 	 * @param	mixed	$var1
 	 * @return	string The printed content
 	 */
 	public function pd($var1 = '__iresults_pd_noValue') {
-		if (class_exists('Tx_Iresults')) {
+		static $willDebug = -1;
+		if ($willDebug === -1) {
+			$willDebug = FALSE;
+			if (
+				(isset($_GET['cundd_assetic_debug']) && $_GET['cundd_assetic_debug'])
+				|| (isset($_POST['cundd_assetic_debug']) && $_POST['cundd_assetic_debug'])
+				) {
+				$willDebug = TRUE;
+			}
+		}
+
+		if (class_exists('Tx_Iresults') && $willDebug) {
 			$arguments = func_get_args();
 			call_user_func_array(array('Tx_Iresults', 'pd'), $arguments);
+		}
+	}
+
+	/**
+	 * Print a profiling message.
+	 *
+	 * @param	string $msg
+	 * @return	string The printed content
+	 */
+	public function profile($msg = '') {
+		if (class_exists('Tx_Iresults_Profiler')) {
+			\Tx_Iresults_Profiler::profile($msg);
 		}
 	}
 }
