@@ -42,7 +42,7 @@ class Plugin {
 	/**
 	 * Cache identifier for the hash
 	 */
-	const CACHE_IDENTIFIER_HASH = 'cache_identifier_hash';
+	const CACHE_IDENTIFIER_HASH = 'cundd_assetic_cache_identifier_hash';
 
 	/**
 	 * @var tslib_content
@@ -83,15 +83,16 @@ class Plugin {
 	 * @author Daniel Corn <info@cundd.net>
 	 */
 	public function main($content, $conf) {
+		$this->profile('Cundd Assetic plugin begin');
 		$this->configuration = $conf;
-		if ($this->isDevelopment()) {
+		if ($this->willCompile()) {
 			$this->collectAssets();
 			$renderedStylesheet = $this->compile();
 		} else {
 			$renderedStylesheet = $this->getOutputFileDir() . $this->getCurrentOutputFilename();
 		}
 		$content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
-
+		$this->profile('Cundd Assetic plugin end');
 		return $content;
 	}
 
@@ -226,9 +227,12 @@ class Plugin {
 		$outputFileTempPath = $outputFileDir . $this->getCurrentOutputFilename();
 		$outputFileFinalPath = '';
 
-		// Create the file hash
+		// Create the file hash and store it in the cache
 		$fileHash = hash_file($hashAlgorithm, $outputFileTempPath);
+		$this->setCache(self::CACHE_IDENTIFIER_HASH, $fileHash);
 		$finalFileName = $this->getCurrentOutputFilenameWithoutHash() . '_' . $fileHash . '.css';
+
+		$this->_setCurrentOutputFilename($finalFileName);
 		$outputFileFinalPath = $outputFileDir . $finalFileName;
 
 		// Move the temp file to the new file
@@ -304,9 +308,14 @@ class Plugin {
 		if (!isset($GLOBALS['BE_USER'])
 			|| !isset($GLOBALS['BE_USER']->user)
 			|| !intval($GLOBALS['BE_USER']->user['uid'])) {
-			return (bool)(intval($this->configuration['allow_compile_without_login']));
+
+			$this->pd('no BE_USER, is dev:', $this->isDevelopment(),
+				(bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login'])));
+
+			return (bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login']));
 		}
-		return TRUE;
+		$this->pd('has BE_USER, is dev:', $this->isDevelopment());
+		return $this->isDevelopment();
 	}
 
 	/**
@@ -377,6 +386,9 @@ class Plugin {
 
 	/**
 	 * Returns the current output filename
+	 *
+	 * The current output filename may be changed if when the hash of the
+	 * filtered asset file is generated
 	 * @return string
 	 */
 	public function getCurrentOutputFilename() {
@@ -386,24 +398,44 @@ class Plugin {
 			$this->outputFileName = $this->getCurrentOutputFilenameWithoutHash();
 			$this->outputFileName .= '_' . $newHash;
 			$this->outputFileName .= '.css';
+			$this->pd($this->outputFileName);
 		}
+			$this->pd($this->outputFileName);
 		return $this->outputFileName;
 	}
+
+	/**
+	 * Sets the current output filename
+	 * @param string $outputFileName
+	 * @return string
+	 */
+	protected function _setCurrentOutputFilename($outputFileName) {
+		$this->outputFileName = $outputFileName;
+	}
+
 
 	/**
 	 * Returns the hash for the current asset version
 	 * @return string
 	 */
 	protected function getHash() {
-		$entry = '';
+
+		$this->pd($this->willCompile(),
+			$this->getPreviousHash(),
+			($this->willCompile() || FALSE === ($entry = $this->getPreviousHash())),
+			(FALSE === ($entry = $this->getPreviousHash()))
+			);
+
+		$entry = $this->getPreviousHash();
 
 		// If $entry is null, it hasn't been cached. Calculate the value and store it in the cache:
-		if ($this->isDevelopment() || FALSE === ($entry = $this->getPreviousHash())) {
+		if ($this->willCompile() || !$entry) {
 			$entry = time();
 
 			// Save value in cache
 			$this->setCache(self::CACHE_IDENTIFIER_HASH, $entry);
 		}
+		$this->pd($entry);
 		return $entry;
 	}
 
@@ -412,20 +444,23 @@ class Plugin {
 	 * @return string
 	 */
 	protected function getPreviousHash() {
-		$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
-		//$matchingFiles = glob($filepath . '_' . '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]' . '.css');
-		$matchingFiles = glob($filepath . '_' . '*' . '.css');
-		// echo '<pre>';
-		// var_dump($matchingFiles);
-		// echo '</pre>';
+		$previousHash = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH);
+		if (!$previousHash) {
+			$suffix = '.css';
+			$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+			//$matchingFiles = glob($filepath . '_' . '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]' . '.css');
+			$matchingFiles = glob($filepath . '_' . '*' . $suffix);
+			// echo '<pre>';
+			// var_dump($matchingFiles);
+			// echo '</pre>';
 
-		if (!$matchingFiles) {
-			return '';
+			if (!$matchingFiles) {
+				return '';
+			}
+			$lastMatchingFile = end($matchingFiles);
+			$previousHash = substr($lastMatchingFile, strlen($filepath) + 1, (-1 * strlen($suffix)));
 		}
-		$lastMatchingFile = end($matchingFiles);
-		return substr($lastMatchingFile, strlen($filepath) + 1);
-
-		return '' . $this->getCache(self::CACHE_IDENTIFIER_HASH);
+		return $previousHash;
 	}
 
 	/**
@@ -514,9 +549,25 @@ class Plugin {
 			}
 		} else {
 			throw new \LogicException('Filter class ' . $filterClass . ' not found', 1355846301);
-
 		}
 		return $filter;
+	}
+
+
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+	// READING AND WRITING THE CACHE
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+	/**
+	 * Returns the value for the given identifier in the cache
+	 * @param string $identifier Identifier key
+	 * @return mixed
+	 */
+	protected function getCache($identifier) {
+		if (is_callable('apc_fetch')) {
+			return apc_fetch($identifier);
+		}
+		$cacheInstance = $GLOBALS['typo3CacheManager']->getCache('assetic_cache');
+		return $cacheInstance->get($identifier);
 	}
 
 	/**
@@ -525,7 +576,7 @@ class Plugin {
 	 * @param mixed $value      Value to store
 	 */
 	protected function setCache($identifier, $value) {
-		if (is_callable('2apc_store')) {
+		if (is_callable('apc_store')) {
 			apc_store($identifier, $value);
 		} else {
 			$tags = array();
@@ -536,19 +587,11 @@ class Plugin {
 		}
 	}
 
-	/**
-	 * Returns the value for the given identifier in the cache
-	 * @param string $identifier Identifier key
-	 * @return mixed
-	 */
-	protected function getCache($identifier) {
-		if (is_callable('2apc_fetch')) {
-			return apc_fetch($identifier);
-		}
-		$cacheInstance = $GLOBALS['typo3CacheManager']->getCache('assetic_cache');
-		return $cacheInstance->get($identifier);
-	}
 
+
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+	// DEBUGGING AND PROFILING
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
 	/**
 	 * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
 	 *
