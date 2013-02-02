@@ -32,6 +32,7 @@ use Assetic\AssetWriter;
 use Assetic\AssetManager;
 use Assetic\FilterManager;
 use Assetic\Filter;
+ini_set('display_errors', TRUE);
 
 /**
  * Assetic Plugin
@@ -118,7 +119,8 @@ class Plugin {
 		$factory->setFilterManager($this->filterManager);
 
 		// Loop through all configured stylesheets
-		foreach ($this->configuration['stylesheets.'] as $assetKey => $stylesheet) {
+		$stylesheets = $this->configuration['stylesheets.'];
+		foreach ($stylesheets as $assetKey => $stylesheet) {
 			if (!is_array($stylesheet)) {
 				$asset = NULL;
 				$filter = NULL;
@@ -176,6 +178,8 @@ class Plugin {
 		}
 
 		// Set the output file name
+
+		$this->profile('Set output file ' . $this->getCurrentOutputFilename());
 		$assetCollection->setTargetPath($this->getCurrentOutputFilename());
 		$assetManager->set('cundd_assetic', $assetCollection);
 		$this->profile('Did collect assets');
@@ -222,21 +226,30 @@ class Plugin {
 	protected function moveTempFileToFileWithHash() {
 		$fileHash = '';
 		$finalFileName = '';
-		$hashAlgorithm = 'sha1';
+
+		// $hashAlgorithm = 'crc32';
+		// $hashAlgorithm = 'sha1';
+		$hashAlgorithm = 'md5';
+
+		$outputFilenameWithoutHash = $this->getCurrentOutputFilenameWithoutHash();
 		$outputFileDir = $this->getPathToWeb() . $this->getOutputFileDir();
 		$outputFileTempPath = $outputFileDir . $this->getCurrentOutputFilename();
 		$outputFileFinalPath = '';
 
 		// Create the file hash and store it in the cache
+		$this->profile('Will create file hash');
 		$fileHash = hash_file($hashAlgorithm, $outputFileTempPath);
-		$this->setCache(self::CACHE_IDENTIFIER_HASH, $fileHash);
-		$finalFileName = $this->getCurrentOutputFilenameWithoutHash() . '_' . $fileHash . '.css';
+		$this->profile('Did create file hash');
+		$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $outputFilenameWithoutHash, $fileHash);
+		$finalFileName = $outputFilenameWithoutHash . '_' . $fileHash . '.css';
 
 		$this->_setCurrentOutputFilename($finalFileName);
 		$outputFileFinalPath = $outputFileDir . $finalFileName;
 
 		// Move the temp file to the new file
+		$this->profile('Will move compiled asset');
 		rename($outputFileTempPath, $outputFileFinalPath);
+		$this->profile('Did move compiled asset');
 		return $finalFileName;
 	}
 
@@ -375,11 +388,25 @@ class Plugin {
 	 * @return string
 	 */
 	public function getCurrentOutputFilenameWithoutHash() {
-		$outputFileName = 'styles';
+		$outputFileName = '';
 
+		/*
+		 * If an output file name is set in the configuration use it, otherwise
+		 * create it by combining the file names of the assets.
+		 */
 		// Get the output name from the configuration
 		if (isset($this->configuration['output'])) {
 			$outputFileName = $this->configuration['output'];
+		} else {
+			// Loop through all configured stylesheets
+			$stylesheets = $this->configuration['stylesheets.'];
+			foreach ($stylesheets as $assetKey => $stylesheet) {
+				if (!is_array($stylesheet)) {
+					$stylesheetFileName = basename($stylesheet);
+					$stylesheetFileName = str_replace(array('.', ' '), '', $stylesheetFileName);
+					$outputFileName .= $stylesheetFileName . '_';
+				}
+			}
 		}
 		return $outputFileName;
 	}
@@ -433,7 +460,7 @@ class Plugin {
 			$entry = time();
 
 			// Save value in cache
-			$this->setCache(self::CACHE_IDENTIFIER_HASH, $entry);
+			$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), $entry);
 		}
 		$this->pd($entry);
 		return $entry;
@@ -444,7 +471,7 @@ class Plugin {
 	 * @return string
 	 */
 	protected function getPreviousHash() {
-		$previousHash = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH);
+		$previousHash = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash());
 		if (!$previousHash) {
 			$suffix = '.css';
 			$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
@@ -474,7 +501,7 @@ class Plugin {
 		if ($previousHash) {
 			$this->pd('Remove');
 
-			$oldFilteredAssetFile = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash() . '_' . $cachedHash . '.css';
+			$oldFilteredAssetFile = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash() . '_' . $previousHash . '.css';
 			return unlink($oldFilteredAssetFile);
 		}
 		return FALSE;

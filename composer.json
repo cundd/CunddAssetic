@@ -5,6 +5,7 @@
     "homepage": "https://github.com/kriswallsmith/assetic",
     "type": "library",
     "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Daniel Corn",
@@ -18,9 +19,21 @@
     },
     "require-dev": {
         "leafo/lessphp": "*",
-        "leafo/scssphp": "*"
+        "iresults/scssphp": "*",
+        "cundd/assetic_additions": "*"
     },
     "autoload": {
         "psr-0": { "Cundd": "Classes/" }
-    }
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/cundd/assetic_additions.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/iresults/scssphp.git"
+        }
+    ]
 }
+
