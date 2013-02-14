@@ -471,10 +471,13 @@ class Plugin {
 	 * @return string
 	 */
 	protected function getPreviousHash() {
+		$suffix = '.css';
+		$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+
 		$previousHash = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash());
-		if (!$previousHash) {
-			$suffix = '.css';
-			$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+		$previousHashFilePath = $filepath . '_' . $previousHash . $suffix;
+
+		if (!$previousHash || !file_exists($previousHashFilePath)) {
 			//$matchingFiles = glob($filepath . '_' . '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]' . '.css');
 			$matchingFiles = glob($filepath . '_' . '*' . $suffix);
 			// echo '<pre>';
@@ -590,6 +593,7 @@ class Plugin {
 	 * @return mixed
 	 */
 	protected function getCache($identifier) {
+		// $this->pd('getCache', $identifier);
 		if (is_callable('apc_fetch')) {
 			return apc_fetch($identifier);
 		}
@@ -603,6 +607,7 @@ class Plugin {
 	 * @param mixed $value      Value to store
 	 */
 	protected function setCache($identifier, $value) {
+		// $this->pd('setCache', $identifier, $value);
 		if (is_callable('apc_store')) {
 			apc_store($identifier, $value);
 		} else {
