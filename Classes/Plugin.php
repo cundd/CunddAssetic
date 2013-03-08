@@ -51,6 +51,12 @@ class Plugin {
 	public $cObj;
 
 	/**
+	 * Indicates if the assets will compile
+	 * @var boolean
+	 */
+	protected $willCompile = -1;
+
+	/**
 	 * Assetic asset manager
 	 * @var Assetic\AssetManager
 	 */
@@ -86,11 +92,24 @@ class Plugin {
 	public function main($content, $conf) {
 		$this->profile('Cundd Assetic plugin begin');
 		$this->configuration = $conf;
+
+		// Check if the assets should be compiled
 		if ($this->willCompile()) {
 			$this->collectAssets();
 			$renderedStylesheet = $this->compile();
 		} else {
 			$renderedStylesheet = $this->getOutputFileDir() . $this->getCurrentOutputFilename();
+
+			/*
+			 * Check if the expected output file exists. If it doesn't, set
+			 * willCompile to TRUE and call the main rountine again
+			 */
+			$absolutePathToRenderedFile = $this->getPathToWeb() . $renderedStylesheet;
+			if (!file_exists($absolutePathToRenderedFile)) {
+				$this->willCompile = TRUE;
+				return $this->main($content, $conf);
+			}
+			$this->pd($this->getOutputFileDir() . $this->getCurrentOutputFilename(), $this->getOutputFileDir(), $this->getCurrentOutputFilename());
 		}
 		$content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
 		$this->profile('Cundd Assetic plugin end');
@@ -317,18 +336,22 @@ class Plugin {
 	 * @return boolean
 	 */
 	public function willCompile() {
-		// If no backend user is logged in, check if it is allowed
-		if (!isset($GLOBALS['BE_USER'])
-			|| !isset($GLOBALS['BE_USER']->user)
-			|| !intval($GLOBALS['BE_USER']->user['uid'])) {
+		if ($this->willCompile === -1) {
+			// If no backend user is logged in, check if it is allowed
+			if (!isset($GLOBALS['BE_USER'])
+				|| !isset($GLOBALS['BE_USER']->user)
+				|| !intval($GLOBALS['BE_USER']->user['uid'])) {
 
-			$this->pd('no BE_USER, is dev:', $this->isDevelopment(),
-				(bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login'])));
+				$this->pd('no BE_USER, is dev:', $this->isDevelopment(),
+					(bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login'])));
 
-			return (bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login']));
+				$this->willCompile = (bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login']));
+			} else {
+				$this->pd('has BE_USER, is dev:', $this->isDevelopment());
+				$this->willCompile = $this->isDevelopment();
+			}
 		}
-		$this->pd('has BE_USER, is dev:', $this->isDevelopment());
-		return $this->isDevelopment();
+		return $this->willCompile;
 	}
 
 	/**
