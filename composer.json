@@ -19,7 +19,7 @@
     },
     "require-dev": {
         "leafo/lessphp": "*",
-        "iresults/scssphp": "*",
+        "leafo/scssphp": "*",
         "cundd/assetic_additions": "*"
     },
     "autoload": {
@@ -29,10 +29,6 @@
         {
             "type": "git",
             "url": "https://github.com/cundd/assetic_additions.git"
-        },
-        {
-            "type": "git",
-            "url": "https://github.com/iresults/scssphp.git"
         }
     ]
 }
