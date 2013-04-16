@@ -30,11 +30,6 @@ use Cundd\Assetic\Plugin;
 
 \Tx_CunddComposer_Autoloader::register();
 
-// echo '<pre>';
-// debug_print_backtrace(NULL, 5);
-// echo '</pre>';
-
-
 // if (!version_compare(TYPO3_version, '6.0.0', '>=')) {
 // 	class_alias('Cundd\\Assetic\\Controller\\AssetController', 'Tx_Assetic_Controller_AssetController', FALSE);
 // }
@@ -105,17 +100,17 @@ if (!class_exists('Cundd\\Assetic\\Controller\\AssetController', FALSE)) {
 		public function compileAction() {
 			$compiler = $this->getCompiler();
 			if ($compiler) {
-				$this->pd('hallo');
+				$compiler->forceCompile();
 				$compiler->collectAssets();
+				$compiler->clearHashCache();
 
 				try {
-					$compiler->compile();
-
-					$outputFileLink = $compiler->getOutputFilePath();
+					$outputFileLink = $compiler->compile();
+					#$outputFileLink = $compiler->getOutputFilePath();
 					if (defined('TYPO3_MODE') && TYPO3_MODE === 'BE') {
 						$outputFileLink = '../' . $outputFileLink;
 					}
-					$outputFileLink = '<a href="' . $outputFileLink . '">' . $compiler->getOutputFilePath() . '</a>';
+					$outputFileLink = '<a href="' . $outputFileLink . '" target="_blank">' . $compiler->getOutputFilePath() . '</a>';
 					$this->flashMessageContainer->add('Stylesheets have been compiled to ' . $outputFileLink, '', \t3lib_Flashmessage::OK);
 				} catch (\Exception $exception) {
 					$this->flashMessageContainer->add('Could not compile files: #' . $exception->getCode() . ': ' . $exception->getMessage());

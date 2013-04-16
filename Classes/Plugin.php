@@ -111,7 +111,7 @@ class Plugin {
 			 */
 			$absolutePathToRenderedFile = $this->getPathToWeb() . $renderedStylesheet;
 			if (!file_exists($absolutePathToRenderedFile)) {
-				$this->willCompile = TRUE;
+				$this->forceCompile();
 				return $this->main($content, $conf);
 			}
 			$this->pd($this->getOutputFileDir() . $this->getCurrentOutputFilename(), $this->getOutputFileDir(), $this->getCurrentOutputFilename());
@@ -239,8 +239,9 @@ class Plugin {
 			}
 			#}
 			$this->profile('Did compile asset');
+			return $this->getOutputFileDir() . $this->moveTempFileToFileWithHash();
 		}
-		return $this->getOutputFileDir() . $this->moveTempFileToFileWithHash();
+		return '';
 	}
 
 	/**
@@ -262,6 +263,7 @@ class Plugin {
 
 		// Create the file hash and store it in the cache
 		$this->profile('Will create file hash');
+
 		$fileHash = hash_file($hashAlgorithm, $outputFileTempPath);
 		$this->profile('Did create file hash');
 		$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $outputFilenameWithoutHash, $fileHash);
@@ -334,6 +336,14 @@ class Plugin {
 			return (bool) intval($this->configuration['development']);
 		}
 		return FALSE;
+	}
+
+	/**
+	 * Force the recompilation
+	 * @return void
+	 */
+	public function forceCompile() {
+		$this->willCompile = TRUE;
 	}
 
 	/**
@@ -455,7 +465,7 @@ class Plugin {
 			$this->outputFileName .= '.css';
 			$this->pd($this->outputFileName);
 		}
-			$this->pd($this->outputFileName);
+		$this->pd($this->outputFileName);
 		return $this->outputFileName;
 	}
 
@@ -474,13 +484,6 @@ class Plugin {
 	 * @return string
 	 */
 	protected function getHash() {
-
-		$this->pd($this->willCompile(),
-			$this->getPreviousHash(),
-			($this->willCompile() || FALSE === ($entry = $this->getPreviousHash())),
-			(FALSE === ($entry = $this->getPreviousHash()))
-			);
-
 		$entry = $this->getPreviousHash();
 
 		// If $entry is null, it hasn't been cached. Calculate the value and store it in the cache:
@@ -507,15 +510,7 @@ class Plugin {
 			$previousHashFilePath = $filepath . '_' . $previousHash . $suffix;
 
 			if (!$previousHash || !file_exists($previousHashFilePath)) {
-				$this->profile('Will call glob');
-				//$matchingFiles = glob($filepath . '_' . '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]' . '.css');
-				$matchingFiles = glob($filepath . '_' . '*' . $suffix);
-				$this->profile('Did call glob');
-
-				// echo '<pre>';
-				// var_dump($matchingFiles);
-				// echo '</pre>';
-
+				$matchingFiles = $this->findPreviousFilteredAssetFiles($filepath, $suffix);
 				if (!$matchingFiles) {
 					return '';
 				}
@@ -529,20 +524,42 @@ class Plugin {
 	}
 
 	/**
-	 * Remove the previous filtered asset file
+	 * Remove the previous filtered Asset file
 	 * @return boolean	Returns TRUE if the file was removed, otherwise FALSE
 	 */
 	public function removePreviousFilteredAssetFile() {
-		$previousHash = $this->getPreviousHash();
+		$success = TRUE;
 
-		$this->pd($previousHash, 'Remove');
-		if ($previousHash) {
-			$this->pd('Remove');
-
-			$oldFilteredAssetFile = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash() . '_' . $previousHash . '.css';
-			return unlink($oldFilteredAssetFile);
+		$suffix = '.css';
+		$filepath = $this->getPathToWeb() . $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+		$matchingFiles = $this->findPreviousFilteredAssetFiles($filepath, $suffix);
+		if (!$matchingFiles) {
+			return '';
 		}
-		return FALSE;
+		foreach ($matchingFiles as $oldFilteredAssetFile) {
+			$success *= unlink($oldFilteredAssetFile);
+		}
+		return $success;
+	}
+
+	/**
+	 * Returns an array of previously filtered Asset files
+	 * @param string $filepath
+	 * @param string $suffix
+	 * @return array
+	 */
+	protected function findPreviousFilteredAssetFiles($filepath, $suffix = '.css') {
+		$this->profile('Will call glob');
+		$matchingFiles = glob($filepath . '_' . '*' . $suffix);
+		$this->profile('Did call glob');
+
+		if (!$matchingFiles) {
+			return array();
+		}
+
+		// Sort by mtime
+		usort($matchingFiles, function($a, $b) { return filemtime($a) - filemtime($b); });
+		return $matchingFiles;
 	}
 
 	/**
@@ -653,6 +670,15 @@ class Plugin {
 			$cacheInstance->set($identifier, $value, $tags, $lifetime);
 		}
 	}
+
+	/**
+	 * Remove the cached hash
+	 * @return void
+	 */
+	public function clearHashCache() {
+		$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $outputFilenameWithoutHash, '');
+	}
+
 
 
 
