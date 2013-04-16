@@ -105,6 +105,7 @@ if (!class_exists('Cundd\\Assetic\\Controller\\AssetController', FALSE)) {
 		public function compileAction() {
 			$compiler = $this->getCompiler();
 			if ($compiler) {
+				$this->pd('hallo');
 				$compiler->collectAssets();
 
 				try {

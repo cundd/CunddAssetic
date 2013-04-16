@@ -32,7 +32,6 @@ use Assetic\AssetWriter;
 use Assetic\AssetManager;
 use Assetic\FilterManager;
 use Assetic\Filter;
-ini_set('display_errors', TRUE);
 
 /**
  * Assetic Plugin
@@ -78,6 +77,12 @@ class Plugin {
 	 * @var string
 	 */
 	protected $outputFileDir = 'typo3temp/cundd_assetic/';
+
+	/**
+	 * Previous hash
+	 * @var string
+	 */
+	protected $previousHash = '';
 
 	/**
 	 * Output configured stylesheets as link tags
@@ -494,26 +499,33 @@ class Plugin {
 	 * @return string
 	 */
 	protected function getPreviousHash() {
-		$suffix = '.css';
-		$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+		if (!$this->previousHash) {
+			$suffix = '.css';
+			$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
 
-		$previousHash = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash());
-		$previousHashFilePath = $filepath . '_' . $previousHash . $suffix;
+			$previousHash = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash());
+			$previousHashFilePath = $filepath . '_' . $previousHash . $suffix;
 
-		if (!$previousHash || !file_exists($previousHashFilePath)) {
-			//$matchingFiles = glob($filepath . '_' . '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]' . '.css');
-			$matchingFiles = glob($filepath . '_' . '*' . $suffix);
-			// echo '<pre>';
-			// var_dump($matchingFiles);
-			// echo '</pre>';
+			if (!$previousHash || !file_exists($previousHashFilePath)) {
+				$this->profile('Will call glob');
+				//$matchingFiles = glob($filepath . '_' . '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]' . '.css');
+				$matchingFiles = glob($filepath . '_' . '*' . $suffix);
+				$this->profile('Did call glob');
 
-			if (!$matchingFiles) {
-				return '';
+				// echo '<pre>';
+				// var_dump($matchingFiles);
+				// echo '</pre>';
+
+				if (!$matchingFiles) {
+					return '';
+				}
+				$lastMatchingFile = end($matchingFiles);
+				$previousHash = substr($lastMatchingFile, strlen($filepath) + 1, (-1 * strlen($suffix)));
 			}
-			$lastMatchingFile = end($matchingFiles);
-			$previousHash = substr($lastMatchingFile, strlen($filepath) + 1, (-1 * strlen($suffix)));
+
+			$this->previousHash = $previousHash;
 		}
-		return $previousHash;
+		return $this->previousHash;
 	}
 
 	/**
