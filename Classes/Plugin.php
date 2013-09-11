@@ -304,7 +304,12 @@ class Plugin {
 			}
 
 			$this->pd("Call function $function on filter", $filter, $data);
-			$result = call_user_func_array(array($filter, $function), $data);
+			if (is_callable(array($filter, $function))) {
+				$result = call_user_func_array(array($filter, $function), $data);
+			} else {
+				trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
+				$result = FALSE;
+			}
 		}
 		$this->pd($filter);
 		$this->filterManager->set($stylesheetType, $filter);
