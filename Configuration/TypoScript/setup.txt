@@ -56,6 +56,7 @@ plugin.CunddAssetic {
 	}
 
 	allow_compile_without_login = {$module.tx_assetic.settings.allow_compile_without_login}
+	experimental = {$module.tx_assetic.settings.experimental}
 }
 
 
