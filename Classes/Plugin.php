@@ -27,6 +27,7 @@ use Assetic\Asset\AssetCollection;
 // use Assetic\Asset\FileAsset;
 // use Assetic\Asset\GlobAsset;
 
+use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
 use Assetic\AssetWriter;
 use Assetic\AssetManager;
@@ -96,6 +97,13 @@ class Plugin {
 	 * @var bool
 	 */
 	protected $experimental = -1;
+
+	/**
+	 * Previously filtered asset files that will be removed
+	 *
+	 * @var array
+	 */
+	protected $filesToRemove = array();
 
 	/**
 	 * Output configured stylesheets as link tags
@@ -244,11 +252,14 @@ class Plugin {
 			#if ($assetCollection->getLastModified() > filemtime($this->getOutputFileDir() . $pluginLevelOptions['output'])) {
 			try {
 				$writer->writeManagerAssets($this->getAssetManager());
+			} catch (FilterException $exception) {
+				return $this->handleFilterException($exception);
 			} catch (\Exception $exception) {
 				if ($this->isDevelopment()) {
 					if (is_a($exception, 'Exception_ScssException')) {
 						$this->pd($exception->getUserInfo());
 					}
+
 					throw $exception;
 
 				} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
@@ -264,13 +275,55 @@ class Plugin {
 	}
 
 	/**
-	 * Previously filtered asset files that will be removed
+	 * Handles filter exceptions
 	 *
-	 * @var array
+	 * @param \Assetic\Exception\FilterException $exception
+	 * @throws \Assetic\Exception\FilterException if run in CLI mode
+	 * @return string
 	 */
-	protected $filesToRemove = array();
+	protected function handleFilterException(FilterException $exception) {
+		if ($this->isDevelopment()) {
+			if(php_sapi_name() == 'cli') {
+				throw $exception;
+			}
 
+			$i = 0;
+			$code = '';
+			$backtrace = $exception->getTrace();
 
+			$heading = 'Caught Assetic error #' . $exception->getCode() . ': ' . $exception->getMessage();
+			while ($step = current($backtrace)) {
+				$code .= '#' . $i . ': ' . $step['file'] . '(' . $step['line'] . '): ';
+				if (isset($step['class'])) {
+					$code .= $step['class'] . $step['type'];
+				}
+				$code .= $step['function'] . '(arguments: ' . count($step['args']) . ')' . PHP_EOL;
+				next($backtrace);
+				$i++;
+			}
+			$styles = array(
+				'width' 			=> '100%',
+				'overflow' 			=> 'scroll',
+				'border' 			=> '1px solid #777',
+				'background' 		=> '#ccc',
+				'padding' 			=> '5px',
+				'-moz-box-sizing' 	=> 'border-box',
+				'box-sizing' 		=> 'border-box',
+				'box-shadow'		=> 'inset 0 0 4px rgba(0, 0, 0, 0.3)',
+				'font-family'		=> 'sans-serif',
+			);
+			array_walk($styles, function(&$value, $key) {
+				$value = $key . ':' . $value;
+			});
+			$style = implode(';', $styles);
+
+			echo '<div style="' . $style . '">' . $heading . PHP_EOL . '<pre>' . $code .'</pre></div>';
+		} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
+			$code = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
+			\t3lib_div::devLog($code, 'assetic');
+		}
+		return '';
+	}
 
 	/**
 	 * Moves the filtered temporary file to the path with the hash in the name
