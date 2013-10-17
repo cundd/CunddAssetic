@@ -2,30 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d7985e8e-bfb4-4841-9235-6c9dd882393a" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/.name" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dictionaries/COD.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Classes/Command/CompileCommandController.php" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/CunddAssetic.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/composer.lock" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/magicento.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/scopes/scope_settings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Classes/Plugin.php" afterPath="$PROJECT_DIR$/Classes/Plugin.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Configuration/TypoScript/constants.txt" afterPath="$PROJECT_DIR$/Configuration/TypoScript/constants.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext_localconf.php" afterPath="$PROJECT_DIR$/ext_localconf.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Configuration/TypoScript/setup.txt" afterPath="$PROJECT_DIR$/Configuration/TypoScript/setup.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ext_emconf.php" afterPath="$PROJECT_DIR$/ext_emconf.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="CunddAssetic.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381842951613" ignored="false" />
+    <file path="/Dummy.txt" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381993887474" ignored="false" />
     <file path="/CompileCommand.php" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381503246456" ignored="false" />
     <file path="/ext_localconf.php" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381751634924" ignored="false" />
-    <file path="/Plugin.php" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381822315820" ignored="false" />
+    <file path="/Plugin.php" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381932122215" ignored="false" />
     <file path="/a.dummy" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381751145765" ignored="false" />
     <file path="/CompileCommandController.php" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381824031473" ignored="false" />
     <file path="/constants.txt" changelist="d7985e8e-bfb4-4841-9235-6c9dd882393a" time="1381751533092" ignored="false" />
@@ -52,37 +38,28 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Plugin.php" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Plugin.php" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Classes/Plugin.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="385" column="64" selection-start="11878" selection-end="11878" vertical-scroll-proportion="-215.375">
+            <state line="885" column="50" selection-start="25432" selection-end="25432" vertical-scroll-proportion="0.33333334">
               <folding>
-                <element signature="e#1149#1183#0" expanded="true" />
-                <marker date="1381843369000" expanded="true" signature="11689:12129" placeholder="..." />
-                <marker date="1381843369000" expanded="true" signature="11689:11972" placeholder="..." />
-                <marker date="1381843369000" expanded="true" signature="11689:11972" placeholder="..." />
-                <marker date="1381843369000" expanded="true" signature="11689:13583" placeholder="..." />
-                <marker date="1381843369000" expanded="true" signature="11689:13933" placeholder="..." />
-                <marker date="1381843369000" expanded="true" signature="11706:11972" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12011:12356" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12127:12299" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12158:12180" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12210:12232" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12264:12293" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12414:12932" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12577:12927" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12966:13671" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="12966:13584" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="13146:13666" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="13146:13666" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="13146:13584" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="13305:13659" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="13305:13584" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="13376:13584" placeholder="{...}" />
-                <marker date="1381843369000" expanded="true" signature="13385:13443" placeholder="/*...*/" />
-                <marker date="1381843369000" expanded="true" signature="13385:13443" placeholder="/*...*/" />
-                <marker date="1381843369000" expanded="true" signature="13451:13500" placeholder="/*...*/" />
-                <marker date="1381843369000" expanded="true" signature="13817:13882" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="11689:13992" placeholder="..." />
+                <marker date="1381932124000" expanded="true" signature="11706:13977" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="12011:12356" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="12127:12299" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="12158:12180" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="12210:12232" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="12264:12293" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="12414:12932" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="12577:12927" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="12966:13671" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="13146:13666" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="13305:13659" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="13376:13650" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="13385:13443" placeholder="/*...*/" />
+                <marker date="1381932124000" expanded="true" signature="13451:13500" placeholder="/*...*/" />
+                <marker date="1381932124000" expanded="true" signature="13706:13803" placeholder="{...}" />
+                <marker date="1381932124000" expanded="true" signature="13835:13900" placeholder="{...}" />
               </folding>
             </state>
           </provider>
@@ -124,10 +101,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CompileCommandController.php" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="CompileCommandController.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Classes/Command/CompileCommandController.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="282" column="0" selection-start="6326" selection-end="6326" vertical-scroll-proportion="-0.3265306">
+            <state line="342" column="0" selection-start="8107" selection-end="8107" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -136,7 +113,7 @@
       <file leaf-file-name="CommandController.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase/Classes/Mvc/Controller/CommandController.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="219" column="4" selection-start="8264" selection-end="8741" vertical-scroll-proportion="-0.6666667">
+            <state line="219" column="4" selection-start="8264" selection-end="8741" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -145,7 +122,7 @@
       <file leaf-file-name="ext_localconf.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ext_localconf.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="2" selection-start="461" selection-end="461" vertical-scroll-proportion="-8.666667">
+            <state line="13" column="2" selection-start="461" selection-end="461" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -163,7 +140,7 @@
       <file leaf-file-name="ext_emconf.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ext_emconf.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="21" selection-start="743" selection-end="743" vertical-scroll-proportion="0.0">
+            <state line="29" column="21" selection-start="874" selection-end="874" vertical-scroll-proportion="-14.0">
               <folding />
             </state>
           </provider>
@@ -191,8 +168,9 @@
         <option value="$PROJECT_DIR$/Configuration/TypoScript/constants.txt" />
         <option value="$PROJECT_DIR$/Configuration/TypoScript/setup.txt" />
         <option value="$PROJECT_DIR$/ext_localconf.php" />
-        <option value="$PROJECT_DIR$/Classes/Plugin.php" />
         <option value="$PROJECT_DIR$/Classes/Command/CompileCommandController.php" />
+        <option value="$PROJECT_DIR$/Classes/Plugin.php" />
+        <option value="$PROJECT_DIR$/ext_emconf.php" />
       </list>
     </option>
   </component>
@@ -268,11 +246,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Configuration" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="TypoScript" />
+              <option name="myItemId" value="vendor" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -301,42 +275,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="Classes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CunddAssetic" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CunddAssetic" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Classes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Controller" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CunddAssetic" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CunddAssetic" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Classes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Command" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -488,19 +426,20 @@
     <frame x="69" y="22" width="1660" height="1418" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="File Transfer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32961586" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17967781" sideWeight="0.67" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18959108" sideWeight="0.67" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="File Transfer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -551,7 +490,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" />
+    <option name="LAST_COMMIT_MESSAGE" value="" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -601,6 +540,50 @@
         <state line="49" column="20" selection-start="1259" selection-end="1259" vertical-scroll-proportion="0.33914423" />
       </provider>
     </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/php/lib/php.jar!/com/jetbrains/php/lang/psi/stubs/data/Core_c.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="171" column="6" selection-start="4537" selection-end="4537" vertical-scroll-proportion="0.3427896" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Classes/Plugin.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="885" column="50" selection-start="25432" selection-end="25432" vertical-scroll-proportion="0.33333334">
+          <folding>
+            <marker date="1381932124000" expanded="true" signature="11689:13992" placeholder="..." />
+            <marker date="1381932124000" expanded="true" signature="11706:13977" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="12011:12356" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="12127:12299" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="12158:12180" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="12210:12232" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="12264:12293" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="12414:12932" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="12577:12927" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="12966:13671" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="13146:13666" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="13305:13659" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="13376:13650" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="13385:13443" placeholder="/*...*/" />
+            <marker date="1381932124000" expanded="true" signature="13451:13500" placeholder="/*...*/" />
+            <marker date="1381932124000" expanded="true" signature="13706:13803" placeholder="{...}" />
+            <marker date="1381932124000" expanded="true" signature="13835:13900" placeholder="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Configuration/TypoScript/constants.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="88" selection-start="700" selection-end="700" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Configuration/TypoScript/setup.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="58" column="16" selection-start="1659" selection-end="1671" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/vendor/kriswallsmith/assetic/src/Assetic/FilterManager.php">
       <provider selected="true" editor-type-id="text-editor">
         <state line="24" column="20" selection-start="480" selection-end="480" vertical-scroll-proportion="0.0">
@@ -615,6 +598,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Classes/Command/CompileCommandController.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="342" column="0" selection-start="8107" selection-end="8107" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase/Classes/Mvc/Controller/CommandController.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="219" column="4" selection-start="8264" selection-end="8741" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext_localconf.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="2" selection-start="461" selection-end="461" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ext_tables.php">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
@@ -622,85 +626,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/php/lib/php.jar!/com/jetbrains/php/lang/psi/stubs/data/Core_c.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="171" column="6" selection-start="4537" selection-end="4537" vertical-scroll-proportion="0.3427896">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ext_emconf.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="21" selection-start="743" selection-end="743" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Configuration/TypoScript/setup.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="58" column="16" selection-start="1659" selection-end="1671" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Configuration/TypoScript/constants.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="88" selection-start="700" selection-end="700" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Classes/Plugin.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="385" column="64" selection-start="11878" selection-end="11878" vertical-scroll-proportion="-215.375">
-          <folding>
-            <element signature="e#1149#1183#0" expanded="true" />
-            <marker date="1381843369000" expanded="true" signature="11689:12129" placeholder="..." />
-            <marker date="1381843369000" expanded="true" signature="11689:11972" placeholder="..." />
-            <marker date="1381843369000" expanded="true" signature="11689:11972" placeholder="..." />
-            <marker date="1381843369000" expanded="true" signature="11689:13583" placeholder="..." />
-            <marker date="1381843369000" expanded="true" signature="11689:13933" placeholder="..." />
-            <marker date="1381843369000" expanded="true" signature="11706:11972" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12011:12356" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12127:12299" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12158:12180" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12210:12232" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12264:12293" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12414:12932" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12577:12927" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12966:13671" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="12966:13584" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="13146:13666" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="13146:13666" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="13146:13584" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="13305:13659" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="13305:13584" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="13376:13584" placeholder="{...}" />
-            <marker date="1381843369000" expanded="true" signature="13385:13443" placeholder="/*...*/" />
-            <marker date="1381843369000" expanded="true" signature="13385:13443" placeholder="/*...*/" />
-            <marker date="1381843369000" expanded="true" signature="13451:13500" placeholder="/*...*/" />
-            <marker date="1381843369000" expanded="true" signature="13817:13882" placeholder="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase/Classes/Mvc/Controller/CommandController.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="219" column="4" selection-start="8264" selection-end="8741" vertical-scroll-proportion="-0.6666667">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ext_localconf.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="2" selection-start="461" selection-end="461" vertical-scroll-proportion="-8.666667">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Classes/Command/CompileCommandController.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="282" column="0" selection-start="6326" selection-end="6326" vertical-scroll-proportion="-0.3265306">
+        <state line="29" column="21" selection-start="874" selection-end="874" vertical-scroll-proportion="-14.0">
           <folding />
         </state>
       </provider>

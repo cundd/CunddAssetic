@@ -451,14 +451,16 @@ class Plugin {
 				}
 			};
 
-			Assetic.reload();
-			Assetic.asseticIntervalCallback = window.setInterval(Assetic.reload, asseticInterval);
 
-
+			Assetic.start = function () {
+				Assetic.asseticIntervalCallback = window.setInterval(Assetic.reload, asseticInterval);
+			};
 			Assetic.stop = function () {
 				window.clearInterval(Assetic.asseticIntervalCallback);
 			};
 
+			Assetic.start();
+			Assetic.reload();
 
 			window.Assetic = Assetic;
 		})();
