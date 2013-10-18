@@ -15,7 +15,8 @@
     ],
     "require": {
         "php": ">=5.3.1",
-        "kriswallsmith/assetic": "1.1.x-dev"
+        "kriswallsmith/assetic": "1.1.x-dev",
+        "cboden/ratchet": "0.2.8"
     },
     "require-dev": {
         "leafo/lessphp": "*",
@@ -32,4 +33,3 @@
         }
     ]
 }
-
