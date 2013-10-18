@@ -433,12 +433,12 @@ class Plugin {
 		$code = '
 		<script type="text/javascript">
 		(function () {
-			var asseticInterval = window.asseticInterval || 1750,
-				Assetic = window.Assetic || {},
+			var Assetic = window.Assetic || {},
 				Ef = function () {},
 				console = window.console || { log: Ef, info: Ef },
 				length;
 
+			Assetic.reloadInterval = Assetic.reloadInterval || 1750;
 			Assetic.stylesheets = [];
 			Assetic.originalUrls = [];
 			Assetic.lastId = "";
@@ -494,8 +494,11 @@ class Plugin {
 						if (xhr.getResponseHeader("Last-Modified") !== Assetic.lastId) {
 							/* console.log(xhr.getResponseHeader("Last-Modified")); */
 							/* console.log(xhr.getResponseHeader("ETag")); */
+
+							var date = (new Date),
+							 	dateString = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 							Assetic.lastId = xhr.getResponseHeader("Last-Modified");
-							console.log("Reload " + originalUrl);
+							console.log("Reload at " + dateString + " -> " + originalUrl);
 							stylesheet.href = newUrl;
 						}
 
@@ -506,7 +509,7 @@ class Plugin {
 
 
 			Assetic.start = function () {
-				Assetic.asseticIntervalCallback = window.setInterval(Assetic.reload, asseticInterval);
+				Assetic.asseticIntervalCallback = window.setInterval(Assetic.reload, Assetic.reloadInterval);
 			};
 			Assetic.stop = function () {
 				window.clearInterval(Assetic.asseticIntervalCallback);
