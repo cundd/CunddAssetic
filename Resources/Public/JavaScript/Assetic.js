@@ -68,7 +68,10 @@
 			 * Find JavaScript assets
 			 */
 			if (Assetic.monitor.indexOf('js') !== -1) {
-				Assetic.javaScriptAssets = Array.prototype.filter.call(document.querySelectorAll("script[src]"), this.isLocalAsset);
+				Assetic.javaScriptAssets = Array.prototype.filter.call(
+					Array.prototype.slice.call(document.querySelectorAll("script[src]")), 
+					this.isLocalAsset
+					);
 				Assetic.javaScriptAssetsOriginalUrls = Assetic.javaScriptAssets.map(function (element) {
 					return element.src;
 				});
@@ -78,7 +81,10 @@
 			 * Find style assets
 			 */
 			if (Assetic.monitor.indexOf('css') !== -1) {
-				Assetic.stylesheetAssets = Array.prototype.filter.call(document.querySelectorAll("link[rel='stylesheet']:not([href*=cundd_assetic])"), this.isLocalAsset);
+				Assetic.stylesheetAssets = Array.prototype.filter.call(
+					Array.prototype.slice.call(document.querySelectorAll("link[rel='stylesheet']:not([href*=cundd_assetic])")), 
+					this.isLocalAsset
+					);
 				Assetic.stylesheetAssetsOriginalUrls = Assetic.stylesheetAssets.map(function (element) {
 					return element.href;
 				});
