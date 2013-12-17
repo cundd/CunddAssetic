@@ -16,3 +16,7 @@ If you want to use the Assetic auto-refresh script standalone and you have jQuer
 Or the one-liner:
 
 	jQuery.getScript('https://raw.github.com/cundd/CunddAssetic/feature/auto-refresh/Resources/Public/JavaScript/Assetic.js', function() { setTimeout(function() { Assetic.init(); Assetic.start(); }, 700) })
+	
+Or with additional options:
+
+	jQuery.getScript('https://raw.github.com/cundd/CunddAssetic/feature/auto-refresh/Resources/Public/JavaScript/Assetic.js', function() { setTimeout(function() { Assetic.reloadInterval = 2000; Assetic.monitor = ['css']; Assetic.init(); Assetic.start(); }, 700) })
