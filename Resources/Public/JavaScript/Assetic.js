@@ -41,10 +41,10 @@
 		originalUrls: [],
 
 		// All assets
-		stylesheetAssets: [],
-		stylesheetAssetsOriginalUrls: [],
-		javaScriptAssets: [],
-		javaScriptAssetsOriginalUrls: [],
+		stylesheetAssets: tempAssetic.stylesheetAssets || [],
+		stylesheetAssetsOriginalUrls: tempAssetic.stylesheetAssetsOriginalUrls || [],
+		javaScriptAssets: tempAssetic.javaScriptAssets || [],
+		javaScriptAssetsOriginalUrls: tempAssetic.javaScriptAssetsOriginalUrls || [],
 
 		lastIds: {},
 		startTime: (+new Date),
