@@ -42,9 +42,9 @@
 
 		// All assets
 		stylesheetAssets: tempAssetic.stylesheetAssets || [],
-		stylesheetAssetsOriginalUrls: tempAssetic.stylesheetAssetsOriginalUrls || tempAssetic.stylesheetAssets || [],
+		stylesheetAssetsOriginalUrls: tempAssetic.stylesheetAssetsOriginalUrls || [],
 		javaScriptAssets: tempAssetic.javaScriptAssets || [],
-		javaScriptAssetsOriginalUrls: tempAssetic.javaScriptAssetsOriginalUrls || tempAssetic.javaScriptAssets || [],
+		javaScriptAssetsOriginalUrls: tempAssetic.javaScriptAssetsOriginalUrls || [],
 
 		lastIds: {},
 		startTime: (+new Date),
