@@ -1,9 +1,7 @@
 (function () {
 	var Assetic,
-		tempAssetic = window.Assetic || {},
-		Ef = function () {
-		},
-		console = window.console || { log: Ef, info: Ef };
+		addEventListenerForPageVisibilityChange,
+		tempAssetic = window.Assetic || {};
 
 	if (typeof document.querySelectorAll !== "function") {
 		return;
@@ -32,9 +30,33 @@
 		xhr.send("");
 	}
 
+
+	addEventListenerForPageVisibilityChange = function(callback) {
+		var hidden = "hidden";
+		// Standards:
+		if (hidden in document)
+			document.addEventListener("visibilitychange", callback);
+		else if ((hidden = "mozHidden") in document)
+			document.addEventListener("mozvisibilitychange", callback);
+		else if ((hidden = "webkitHidden") in document)
+			document.addEventListener("webkitvisibilitychange", callback);
+		else if ((hidden = "msHidden") in document)
+			document.addEventListener("msvisibilitychange", callback);
+		// IE 9 and lower:
+		else if ('onfocusin' in document)
+			document.onfocusin = document.onfocusout = callback;
+		// All others:
+		else
+			window.onpageshow = window.onpagehide
+				= window.onfocus = window.onblur = callback;
+	};
+
+
 	Assetic = {
 		reloadInterval: tempAssetic.reloadInterval,
 		monitor: tempAssetic.monitor,
+		isWatching: false,
+		isVisible: true,
 
 		// Cundd assetic assets
 		cunddAsseticStylesheets: [],
@@ -46,8 +68,15 @@
 		javaScriptAssets: tempAssetic.javaScriptAssets || [],
 		javaScriptAssetsOriginalUrls: tempAssetic.javaScriptAssetsOriginalUrls || [],
 
+		recentlyChangedStylesheetAsset: null,
+
+		runCounter: 0,
+		reloadJavaScriptEach: 5,
+		reloadStylesheetsEach: 5,
+
 		lastIds: {},
 		startTime: (+new Date),
+		lostFocusTime: null,
 
 		init: function () {
 			var length;
@@ -89,6 +118,17 @@
 					return element.href;
 				});
 			}
+
+			addEventListenerForPageVisibilityChange(Assetic.pageVisibilityChanged);
+			window.addEventListener('blur', Assetic.pageFocusChanged);
+			window.addEventListener('focus', Assetic.pageFocusChanged);
+
+		},
+		
+		log: function(message) {
+			if (window.console) {
+				window.console.log('Assetic:', message);
+			}
 		},
 
 		isLocalAsset: function (asset) {
@@ -105,8 +145,12 @@
 					var date = (new Date),
 						dateString = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 					Assetic.lastIds[originalUrl] = xhr.getResponseHeader(responseHeaderKey);
-					console.log("Reload at " + dateString + " -> " + originalUrl);
+					Assetic.log("Reload at " + dateString + " -> " + originalUrl);
 					asset.href = newUrl;
+
+					if (Assetic.runCounter > 1) {
+						Assetic.recentlyChangedStylesheetAsset = asset;
+					}
 				}
 			});
 		},
@@ -125,6 +169,25 @@
 				originalUrl = originalUrls[i];
 				newUrl = originalUrl + "?reload=" + timestamp;
 				this.reloadStylesheets(newUrl, originalUrl, stylesheet);
+			}
+		},
+
+		reloadRecentlyChangedStylesheetAsset: function () {
+			var _recentlyChangedStylesheetAsset = Assetic.recentlyChangedStylesheetAsset,
+				assets = Assetic.stylesheetAssets,
+				originalUrls = Assetic.stylesheetAssetsOriginalUrls,
+				length = assets.length,
+				timestamp = (+new Date),
+				originalUrl = null,
+				asset, newUrl;
+
+			for (var i = 0; i < length; i++) {
+				asset = assets[i];
+				if (asset == _recentlyChangedStylesheetAsset) {
+					originalUrl = originalUrls[i];
+					newUrl = originalUrl + "?reload=" + timestamp;
+					this.reloadStylesheets(newUrl, originalUrl, asset);
+				}
 			}
 		},
 
@@ -159,26 +222,82 @@
 				load(newUrl, function (xhr) {
 					var responseHeaderKey = "Last-Modified";
 					if (+new Date(xhr.getResponseHeader(responseHeaderKey)) > Assetic.startTime) {
-						/* console.log(xhr.getResponseHeader("Last-Modified")); */
-						/* console.log(xhr.getResponseHeader("ETag")); */
+						/* Assetic.log(xhr.getResponseHeader("Last-Modified")); */
+						/* Assetic.log(xhr.getResponseHeader("ETag")); */
 						location.reload();
 					}
 				})
 			}
 		},
 
+		pageFocusChanged: function() {
+			var date, dateString;
+			if (Assetic.isWatching && Assetic.lostFocusTime) {
+				date = (new Date);
+				dateString = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+				if ((+new Date) - Assetic.lostFocusTime > 60 * 15) {
+					if (Assetic.isVisible) {
+						
+						Assetic.log("Going to sleep at " + dateString);
+						
+						
+						Assetic._stopTimer();
+					} else {
+						Assetic.start();
+					}
+					Assetic.isVisible = !Assetic.isVisible;
+				}
+			} else {
+				Assetic.lostFocusTime = (+new Date);
+			}
+		},
+
+		pageVisibilityChanged: function() {
+			if (Assetic.isWatching) {
+				if (Assetic.isVisible) {
+					Assetic._stopTimer();
+				} else {
+					Assetic.start();
+				}
+				Assetic.isVisible = !Assetic.isVisible;
+			}
+		},
+
+		_stopTimer: function() {
+			window.clearInterval(Assetic.asseticIntervalCallback);
+		},
+
+		run: function() {
+			Assetic.reload();
+		},
+
 		reload: function () {
+			var _runCounter = Assetic.runCounter++;
 			Assetic.reloadCunddAssetic();
-			Assetic.reloadStylesheetAssets();
-			Assetic.reloadJavaScriptAssets();
+
+
+			// Reload the JavaScript assets each X. time
+			if ((_runCounter % Assetic.reloadJavaScriptEach) == 0) {
+				Assetic.reloadJavaScriptAssets();
+			}
+
+			// Reload the Stylesheet assets each X. time or if recentlyChangedStylesheetAsset is not defined
+			if ((_runCounter % Assetic.reloadStylesheetsEach) == 0 || !Assetic.recentlyChangedStylesheetAsset) {
+				Assetic.reloadStylesheetAssets();
+			} else {
+				Assetic.log('reload recent css', Assetic.recentlyChangedStylesheetAsset)
+				Assetic.reloadRecentlyChangedStylesheetAsset();
+			}
 		},
 
 		start: function () {
-			Assetic.asseticIntervalCallback = window.setInterval(Assetic.reload, Assetic.reloadInterval);
+			Assetic.asseticIntervalCallback = window.setInterval(Assetic.run, Assetic.reloadInterval);
+			Assetic.isWatching = true;
 		},
 
 		stop: function () {
-			window.clearInterval(Assetic.asseticIntervalCallback);
+			Assetic._stopTimer();
+			Assetic.isWatching = false;
 		}
 	};
 
@@ -186,8 +305,9 @@
 		Assetic.init();
 		Assetic.start();
 		Assetic.reload();
-
 	});
+
+
 
 	window.Assetic = Assetic;
 })();
