@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="aba74c13-df4c-42f3-b5ac-b290ebb7d0f2" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/assetic.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/.name" afterPath="$PROJECT_DIR$/.idea/.name" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../../web_cundd/neos-base-distribution/Packages/Sites/Cundd.CunddNet/Resources/Public/JavaScripts/Assetic.js" afterPath="$PROJECT_DIR$/../../../../web_cundd/neos-base-distribution/Packages/Sites/Cundd.CunddNet/Resources/Public/JavaScripts/Assetic.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="assetic.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -33,8 +28,13 @@
       <file leaf-file-name="Assetic.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/../../../../web_cundd/neos-base-distribution/Packages/Sites/Cundd.CunddNet/Resources/Public/JavaScripts/Assetic.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="279" column="32" selection-start="8024" selection-end="8024" vertical-scroll-proportion="0.5241117" vertical-offset="3772" max-vertical-offset="4785">
-              <folding />
+            <state line="318" column="32" selection-start="9416" selection-end="9416" vertical-scroll-proportion="0.5241117" vertical-offset="4357" max-vertical-offset="5370">
+              <folding>
+                <marker date="1388787663000" expanded="true" signature="7240:7242" placeholder="{...}" />
+                <marker date="1388787663000" expanded="true" signature="8551:8894" placeholder="{...}" />
+                <marker date="1388787663000" expanded="true" signature="8653:8823" placeholder="{...}" />
+                <marker date="1388787663000" expanded="true" signature="8829:8841" placeholder="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -308,8 +308,13 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/../../../../web_cundd/neos-base-distribution/Packages/Sites/Cundd.CunddNet/Resources/Public/JavaScripts/Assetic.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="279" column="32" selection-start="8024" selection-end="8024" vertical-scroll-proportion="0.5241117" vertical-offset="3772" max-vertical-offset="4785">
-          <folding />
+        <state line="318" column="32" selection-start="9416" selection-end="9416" vertical-scroll-proportion="0.5241117" vertical-offset="4357" max-vertical-offset="5370">
+          <folding>
+            <marker date="1388787663000" expanded="true" signature="7240:7242" placeholder="{...}" />
+            <marker date="1388787663000" expanded="true" signature="8551:8894" placeholder="{...}" />
+            <marker date="1388787663000" expanded="true" signature="8653:8823" placeholder="{...}" />
+            <marker date="1388787663000" expanded="true" signature="8829:8841" placeholder="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>

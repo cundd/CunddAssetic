@@ -9,6 +9,7 @@
 
 	tempAssetic.reloadInterval = tempAssetic.reloadInterval || 1750;
 	tempAssetic.monitor = tempAssetic.monitor || [ 'js', 'css' ];
+	tempAssetic.sleepInterval = tempAssetic.sleepInterval || 10000;
 
 	function load(url, callback) {
 		var xhr = new XMLHttpRequest();
@@ -53,8 +54,9 @@
 
 
 	Assetic = {
-		reloadInterval: tempAssetic.reloadInterval,
 		monitor: tempAssetic.monitor,
+		reloadInterval: tempAssetic.reloadInterval,
+		sleepInterval: tempAssetic.sleepInterval,
 		isWatching: false,
 		isVisible: true,
 
@@ -231,24 +233,15 @@
 		},
 
 		pageFocusChanged: function() {
-			var date, dateString;
-			if (Assetic.isWatching && Assetic.lostFocusTime) {
-				date = (new Date);
-				dateString = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-				if ((+new Date) - Assetic.lostFocusTime > 60 * 15) {
-					if (Assetic.isVisible) {
-						
-						Assetic.log("Going to sleep at " + dateString);
-						
-						
-						Assetic._stopTimer();
-					} else {
-						Assetic.start();
-					}
-					Assetic.isVisible = !Assetic.isVisible;
+			if (Assetic.isWatching) {
+				Assetic.log('MAMAMAMAMAMAMAMMAMAMAMAMAMAMAMMAMAMAMAMAMAMAMMAMAMAMAMAMAMAMMAMAMAMAMAMAMAMpageFocusChanged()')
+				if (!Assetic.lostFocusTime) {
+					Assetic.lostFocusTime = (+new Date);
+					var date = new Date((new Date) + Assetic.sleepInterval);
+					var dateString = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+					Assetic.log("Will go to sleep at " + dateString);
 				}
-			} else {
-				Assetic.lostFocusTime = (+new Date);
+				Assetic._checkSleepStatus();
 			}
 		},
 
@@ -263,12 +256,58 @@
 			}
 		},
 
+		_checkSleepStatus: function() {
+			var date, dateString;
+
+			date = (new Date);
+			dateString = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+
+
+			Assetic.log('_checkSleepStatus()')
+
+			if (Assetic.isWatching) {
+				if (Assetic.isSleeping) {
+					Assetic.log("Waking up at " + dateString);
+					Assetic.start();
+					Assetic.isSleeping = false;
+					Assetic.lostFocusTime = null;
+
+				} else if (Assetic.lostFocusTime && (+date - Assetic.lostFocusTime) > (Assetic.sleepInterval / 1000)) {
+					Assetic.log("Going to sleep at " + dateString);
+					Assetic._stopTimer();
+
+					Assetic.isSleeping = true;
+					Assetic.lostFocusTime = null;
+				} else {
+					Assetic.log("Still awake at " + dateString);
+				}
+			}
+//			if (Assetic.isWatching && Assetic.lostFocusTime) {
+//
+//				if ((+date - Assetic.lostFocusTime) > (Assetic.sleepInterval / 1000) && Assetic.isVisible) {
+//					Assetic.log("Going to sleep at " + dateString);
+//					Assetic._stopTimer();
+//
+//					Assetic.isSleeping = true;
+//
+//					Assetic.lostFocusTime = null;
+//				} else {
+//
+//				}
+//				Assetic.isVisible = !Assetic.isVisible;
+//			} else if (Assetic.isWatching && !Assetic.lostFocusTime && !Assetic.asseticIntervalCallback) {
+//				Assetic.log("Waking up at " + dateString);
+//				Assetic.start();
+//			}
+		},
+
 		_stopTimer: function() {
 			window.clearInterval(Assetic.asseticIntervalCallback);
 		},
 
 		run: function() {
 			Assetic.reload();
+			Assetic._checkSleepStatus();
 		},
 
 		reload: function () {
