@@ -80,6 +80,8 @@
 		startTime: (+new Date),
 		lostFocusTime: null,
 
+		debugMode: tempAssetic.debugMode ? true : false,
+
 		init: function () {
 			var length;
 			Assetic.cunddAsseticStylesheets = document.querySelectorAll("link[href*=cundd_assetic]");
@@ -100,7 +102,7 @@
 			 */
 			if (Assetic.monitor.indexOf('js') !== -1) {
 				Assetic.javaScriptAssets = Array.prototype.filter.call(
-					Array.prototype.slice.call(document.querySelectorAll("script[src]")), 
+					Array.prototype.slice.call(document.querySelectorAll("script[src]")),
 					this.isLocalAsset
 					);
 				Assetic.javaScriptAssetsOriginalUrls = Assetic.javaScriptAssets.map(function (element) {
@@ -113,7 +115,7 @@
 			 */
 			if (Assetic.monitor.indexOf('css') !== -1) {
 				Assetic.stylesheetAssets = Array.prototype.filter.call(
-					Array.prototype.slice.call(document.querySelectorAll("link[rel='stylesheet']:not([href*=cundd_assetic])")), 
+					Array.prototype.slice.call(document.querySelectorAll("link[rel='stylesheet']:not([href*=cundd_assetic])")),
 					this.isLocalAsset
 					);
 				Assetic.stylesheetAssetsOriginalUrls = Assetic.stylesheetAssets.map(function (element) {
@@ -123,10 +125,16 @@
 
 			addEventListenerForPageVisibilityChange(Assetic.pageVisibilityChanged);
 		},
-		
+
 		log: function(message) {
 			if (window.console) {
 				window.console.log('Assetic:', message);
+			}
+		},
+
+		debug: function(message) {
+			if (Assetic.debugMode && window.console) {
+				window.console.debug('Assetic:', message);
 			}
 		},
 
@@ -262,7 +270,7 @@
 			if ((_runCounter % Assetic.reloadStylesheetsEach) == 0 || !Assetic.recentlyChangedStylesheetAsset) {
 				Assetic.reloadStylesheetAssets();
 			} else {
-				Assetic.log('reload recent css', Assetic.recentlyChangedStylesheetAsset)
+				Assetic.debug('reload recent css', Assetic.recentlyChangedStylesheetAsset)
 				Assetic.reloadRecentlyChangedStylesheetAsset();
 			}
 		},
