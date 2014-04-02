@@ -27,6 +27,7 @@ use Assetic\Asset\AssetCollection;
 // use Assetic\Asset\FileAsset;
 // use Assetic\Asset\GlobAsset;
 
+use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
 use Assetic\AssetWriter;
 use Assetic\AssetManager;
@@ -45,7 +46,7 @@ class Plugin {
 	const CACHE_IDENTIFIER_HASH = 'cundd_assetic_cache_identifier_hash';
 
 	/**
-	 * @var tslib_content
+	 * @var \tslib_content
 	 */
 	public $cObj;
 
@@ -57,9 +58,15 @@ class Plugin {
 
 	/**
 	 * Assetic asset manager
-	 * @var Assetic\AssetManager
+	 * @var \Assetic\AssetManager
 	 */
 	protected $assetManager;
+
+	/**
+	 * Assetic filter manager
+	 * @var FilterManager
+	 */
+	protected $filterManager;
 
 	/**
 	 * @var array
@@ -85,6 +92,20 @@ class Plugin {
 	protected $previousHash = '';
 
 	/**
+	 * Indicates if experimental features are enabled
+	 *
+	 * @var bool
+	 */
+	protected $experimental = -1;
+
+	/**
+	 * Previously filtered asset files that will be removed
+	 *
+	 * @var array
+	 */
+	protected $filesToRemove = array();
+
+	/**
 	 * Output configured stylesheets as link tags
 	 *
 	 * Some processing will be done according to the TypoScript setup of the stylesheets.
@@ -107,7 +128,7 @@ class Plugin {
 
 			/*
 			 * Check if the expected output file exists. If it doesn't, set
-			 * willCompile to TRUE and call the main rountine again
+			 * willCompile to TRUE and call the main routine again
 			 */
 			$absolutePathToRenderedFile = $this->getPathToWeb() . $renderedStylesheet;
 			if (!file_exists($absolutePathToRenderedFile)) {
@@ -117,13 +138,17 @@ class Plugin {
 			$this->pd($this->getOutputFileDir() . $this->getCurrentOutputFilename(), $this->getOutputFileDir(), $this->getCurrentOutputFilename());
 		}
 		$content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
+		$content .= $this->getLiveReloadCode();
+
 		$this->profile('Cundd Assetic plugin end');
 		return $content;
 	}
 
 	/**
 	 * Collects all the assets and adds them to the asset manager
-	 * @return Assetic\Asset\AssetCollection
+	 *
+	 * @throws \LogicException if the assetic classes could not be found
+	 * @return \Assetic\Asset\AssetCollection
 	 */
 	public function collectAssets() {
 		$this->profile('Will collect assets');
@@ -203,8 +228,8 @@ class Plugin {
 
 		// Set the output file name
 
-		$this->profile('Set output file ' . $this->getCurrentOutputFilename());
-		$assetCollection->setTargetPath($this->getCurrentOutputFilename());
+		$this->profile('Set output file ' . $this->getCurrentOutputFilenameWithoutHash());
+		$assetCollection->setTargetPath($this->getCurrentOutputFilenameWithoutHash());
 		$assetManager->set('cundd_assetic', $assetCollection);
 		$this->profile('Did collect assets');
 		return $assetCollection;
@@ -212,6 +237,8 @@ class Plugin {
 
 	/**
 	 * Collects the files and tells assetic to compile the files
+	 *
+	 * @throws \Exception if an exception is thrown during rendering
 	 * @return string Returns the path to the compiled file
 	 */
 	public function compile() {
@@ -220,21 +247,24 @@ class Plugin {
 
 		// Write the new file if something changed
 		if ($this->willCompile()) {
-			$this->removePreviousFilteredAssetFile();
+			$this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
 			$this->profile('Will compile asset');
 			#if ($assetCollection->getLastModified() > filemtime($this->getOutputFileDir() . $pluginLevelOptions['output'])) {
 			try {
 				$writer->writeManagerAssets($this->getAssetManager());
+			} catch (FilterException $exception) {
+				return $this->handleFilterException($exception);
 			} catch (\Exception $exception) {
 				if ($this->isDevelopment()) {
 					if (is_a($exception, 'Exception_ScssException')) {
 						$this->pd($exception->getUserInfo());
 					}
+
 					throw $exception;
 
 				} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
 					$output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
-					\t3lib_div::devLog($output);
+					\t3lib_div::devLog($output, 'assetic');
 				}
 			}
 			#}
@@ -245,7 +275,59 @@ class Plugin {
 	}
 
 	/**
-	 * Moves the filtered temporary file to the path with the hash in the name.
+	 * Handles filter exceptions
+	 *
+	 * @param \Assetic\Exception\FilterException $exception
+	 * @throws \Assetic\Exception\FilterException if run in CLI mode
+	 * @return string
+	 */
+	protected function handleFilterException(FilterException $exception) {
+		if ($this->isDevelopment()) {
+			if(php_sapi_name() == 'cli') {
+				throw $exception;
+			}
+
+			$i = 0;
+			$code = '';
+			$backtrace = $exception->getTrace();
+
+			$heading = 'Caught Assetic error #' . $exception->getCode() . ': ' . $exception->getMessage();
+			while ($step = current($backtrace)) {
+				$code .= '#' . $i . ': ' . $step['file'] . '(' . $step['line'] . '): ';
+				if (isset($step['class'])) {
+					$code .= $step['class'] . $step['type'];
+				}
+				$code .= $step['function'] . '(arguments: ' . count($step['args']) . ')' . PHP_EOL;
+				next($backtrace);
+				$i++;
+			}
+			$styles = array(
+				'width' 			=> '100%',
+				'overflow' 			=> 'scroll',
+				'border' 			=> '1px solid #777',
+				'background' 		=> '#ccc',
+				'padding' 			=> '5px',
+				'-moz-box-sizing' 	=> 'border-box',
+				'box-sizing' 		=> 'border-box',
+				'box-shadow'		=> 'inset 0 0 4px rgba(0, 0, 0, 0.3)',
+				'font-family'		=> 'sans-serif',
+			);
+			array_walk($styles, function(&$value, $key) {
+				$value = $key . ':' . $value;
+			});
+			$style = implode(';', $styles);
+
+			echo '<div style="' . $style . '">' . $heading . PHP_EOL . '<pre>' . $code .'</pre></div>';
+		} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
+			$code = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
+			\t3lib_div::devLog($code, 'assetic');
+		}
+		return '';
+	}
+
+	/**
+	 * Moves the filtered temporary file to the path with the hash in the name
+	 *
 	 * @return string Returns the new file name
 	 */
 	protected function moveTempFileToFileWithHash() {
@@ -258,7 +340,7 @@ class Plugin {
 
 		$outputFilenameWithoutHash = $this->getCurrentOutputFilenameWithoutHash();
 		$outputFileDir = $this->getPathToWeb() . $this->getOutputFileDir();
-		$outputFileTempPath = $outputFileDir . $this->getCurrentOutputFilename();
+		$outputFileTempPath = $outputFileDir . $outputFilenameWithoutHash;
 		$outputFileFinalPath = '';
 
 		// Create the file hash and store it in the cache
@@ -272,19 +354,26 @@ class Plugin {
 		$this->_setCurrentOutputFilename($finalFileName);
 		$outputFileFinalPath = $outputFileDir . $finalFileName;
 
+		$this->removePreviousFilteredAssetFiles();
+
 		// Move the temp file to the new file
 		$this->profile('Will move compiled asset');
 		rename($outputFileTempPath, $outputFileFinalPath);
 		$this->profile('Did move compiled asset');
+
+		$this->createSymlinkToFinalPath($outputFileFinalPath);
+
 		return $finalFileName;
 	}
 
 	/**
 	 * Invokes the functions of the filter
-	 * @param  Filter $filter					The filter to apply to
-	 * @param  array $stylesheetConfiguration	The stylesheet configuration
-	 * @param  string $stylesheetType			The stylesheet type
-	 * @return Filter							Returns the filter
+	 *
+	 * @param  Filter\FilterInterface $filter                     The filter to apply to
+	 * @param  array                  $stylesheetConfiguration    The stylesheet configuration
+	 * @param  string                 $stylesheetType             The stylesheet type
+	 * @throws \UnexpectedValueException if the given stylesheet type is invalid
+	 * @return Filter\FilterInterface                            Returns the filter
 	 */
 	protected function applyFunctionsToFilterForType($filter, $stylesheetConfiguration, $stylesheetType) {
 		if (!$stylesheetType) {
@@ -305,10 +394,9 @@ class Plugin {
 
 			$this->pd("Call function $function on filter", $filter, $data);
 			if (is_callable(array($filter, $function))) {
-				$result = call_user_func_array(array($filter, $function), $data);
+				call_user_func_array(array($filter, $function), $data);
 			} else {
 				trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
-				$result = FALSE;
 			}
 		}
 		$this->pd($filter);
@@ -325,7 +413,7 @@ class Plugin {
 	 * @return void
 	 */
 	protected function prepareFunctionParameters(&$parameters) {
-		foreach ($parameters as $key => &$parameter) {
+		foreach ($parameters as &$parameter) {
 			if (strpos($parameter, '.') !== FALSE || strpos($parameter, DIRECTORY_SEPARATOR) !== FALSE) {
 				$parameter = \t3lib_div::getFileAbsFileName($parameter);
 			}
@@ -333,14 +421,17 @@ class Plugin {
 	}
 
 	/**
-	 * Returns if development mode is on
-	 * @return boolean
+	 * Returns the code for "live reload"
+	 *
+	 * @return string
 	 */
-	public function isDevelopment() {
-		if (isset($this->configuration['development'])) {
-			return (bool) intval($this->configuration['development']);
+	protected function getLiveReloadCode() {
+		if (!$this->getExperimental() || !$this->isBackendUser()) {
+			return '';
 		}
-		return FALSE;
+		$resource = 'EXT:assetic/Resources/Public/JavaScript/Assetic.js';
+		$resource = str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
+		return '<script type="text/javascript" src="' . $resource . '"></script>';
 	}
 
 	/**
@@ -358,10 +449,7 @@ class Plugin {
 	public function willCompile() {
 		if ($this->willCompile === -1) {
 			// If no backend user is logged in, check if it is allowed
-			if (!isset($GLOBALS['BE_USER'])
-				|| !isset($GLOBALS['BE_USER']->user)
-				|| !intval($GLOBALS['BE_USER']->user['uid'])) {
-
+			if (!$this->isBackendUser()) {
 				$this->pd('no BE_USER, is dev:', $this->isDevelopment(),
 					(bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login'])));
 
@@ -409,7 +497,7 @@ class Plugin {
 
 	/**
 	 * Returns the shared asset manager
-	 * @return Assetic\AssetManager
+	 * @return \Assetic\AssetManager
 	 */
 	public function getAssetManager() {
 		if (!$this->assetManager) {
@@ -493,7 +581,7 @@ class Plugin {
 
 		// If $entry is null, it hasn't been cached. Calculate the value and store it in the cache:
 		if ($this->willCompile() || !$entry) {
-			$entry = time();
+			$entry = '';#time();
 
 			// Save value in cache
 			$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), $entry);
@@ -509,18 +597,18 @@ class Plugin {
 	protected function getPreviousHash() {
 		if (!$this->previousHash) {
 			$suffix = '.css';
-			$filepath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+			$filePath = $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
 
 			$previousHash = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash());
-			$previousHashFilePath = $filepath . '_' . $previousHash . $suffix;
+			$previousHashFilePath = $filePath . '_' . $previousHash . $suffix;
 
 			if (!$previousHash || !file_exists($previousHashFilePath)) {
-				$matchingFiles = $this->findPreviousFilteredAssetFiles($filepath, $suffix);
+				$matchingFiles = $this->findPreviousFilteredAssetFiles($filePath, $suffix);
 				if (!$matchingFiles) {
 					return '';
 				}
 				$lastMatchingFile = end($matchingFiles);
-				$previousHash = substr($lastMatchingFile, strlen($filepath) + 1, (-1 * strlen($suffix)));
+				$previousHash = substr($lastMatchingFile, strlen($filePath) + 1, (-1 * strlen($suffix)));
 			}
 
 			$this->previousHash = $previousHash;
@@ -528,16 +616,75 @@ class Plugin {
 		return $this->previousHash;
 	}
 
+
+
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+	// CACHING AND SYMLINK
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
 	/**
-	 * Remove the previous filtered Asset file
+	 * Collect the previous filtered Asset files and remove the symlink
+	 */
+	public function collectPreviousFilteredAssetFilesAndRemoveSymlink() {
+		$this->removeSymlink();
+		$this->collectPreviousFilteredAssetFiles();
+	}
+
+	/**
+	 * Collect the previous filtered Asset files
+	 */
+	public function collectPreviousFilteredAssetFiles() {
+		$suffix = '.css';
+		$outputFileDir = $this->getPathToWeb() . $this->getOutputFileDir();
+		$filePath = $outputFileDir . $this->getCurrentOutputFilenameWithoutHash();
+		$this->filesToRemove = $this->findPreviousFilteredAssetFiles($filePath, $suffix);
+	}
+
+	/**
+	 * Create the symlink to the given final path
+	 *
+	 * @param string $fileFinalPath
+	 */
+	public function createSymlinkToFinalPath($fileFinalPath) {
+		if (!$this->getExperimental()) {
+			return;
+		}
+		$symlinkPath = $this->getSymlinkPath();
+		if ($fileFinalPath !== $symlinkPath) {
+			symlink($fileFinalPath, $symlinkPath);
+		}
+	}
+
+	/**
+	 * Remove the symlink
+	 */
+	public function removeSymlink() {
+		if (!$this->getExperimental()) {
+			return;
+		}
+		// Unlink the symlink
+		$symlinkPath = $this->getSymlinkPath();
+		if (file_exists($symlinkPath) && is_link($symlinkPath)) {
+			unlink($symlinkPath);
+		}
+	}
+
+	/**
+	 * Returns the symlink path
+	 *
+	 * @return string
+	 */
+	public function getSymlinkPath() {
+		return $this->getPathToWeb() . $this->getOutputFileDir() . '_debug_' . $this->getCurrentOutputFilenameWithoutHash() . '.css';
+	}
+
+	/**
+	 * Remove the previous filtered Asset files
+	 *
 	 * @return boolean	Returns TRUE if the file was removed, otherwise FALSE
 	 */
-	public function removePreviousFilteredAssetFile() {
+	public function removePreviousFilteredAssetFiles() {
 		$success = TRUE;
-
-		$suffix = '.css';
-		$filepath = $this->getPathToWeb() . $this->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
-		$matchingFiles = $this->findPreviousFilteredAssetFiles($filepath, $suffix);
+		$matchingFiles = $this->filesToRemove;
 		if (!$matchingFiles) {
 			return '';
 		}
@@ -549,13 +696,13 @@ class Plugin {
 
 	/**
 	 * Returns an array of previously filtered Asset files
-	 * @param string $filepath
+	 * @param string $filePath
 	 * @param string $suffix
 	 * @return array
 	 */
-	protected function findPreviousFilteredAssetFiles($filepath, $suffix = '.css') {
+	protected function findPreviousFilteredAssetFiles($filePath, $suffix = '.css') {
 		$this->profile('Will call glob');
-		$matchingFiles = glob($filepath . '_' . '*' . $suffix);
+		$matchingFiles = glob($filePath . '_' . '*' . $suffix);
 		$this->profile('Did call glob');
 
 		if (!$matchingFiles) {
@@ -567,6 +714,11 @@ class Plugin {
 		return $matchingFiles;
 	}
 
+
+
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+	// HELPERS
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
 	/**
 	 * Returns the "options" configuration from the TypoScript of the current
 	 * page.
@@ -595,9 +747,52 @@ class Plugin {
 	}
 
 	/**
+	 * Returns if development mode is on
+	 * @return boolean
+	 */
+	public function isDevelopment() {
+		if (isset($this->configuration['development'])) {
+			return (bool) intval($this->configuration['development']);
+		}
+		return FALSE;
+	}
+
+	/**
+	 * Returns if a backend user is logged in
+	 *
+	 * @return bool
+	 */
+	public function isBackendUser() {
+		if (!isset($GLOBALS['BE_USER'])
+			|| !isset($GLOBALS['BE_USER']->user)
+			|| !intval($GLOBALS['BE_USER']->user['uid'])) {
+			return FALSE;
+		}
+		return TRUE;
+	}
+
+	/**
+	 * Returns if experimental features are enabled
+	 *
+	 * @return boolean
+	 */
+	public function getExperimental() {
+		if ($this->experimental === -1) {
+			$this->experimental = (bool) $this->configuration['experimental'];
+		}
+		return $this->experimental;
+	}
+
+
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+	// FILTERS
+	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+	/**
 	 * Returns the right filter for the given file type
+	 *
 	 * @param  string $type The file type
-	 * @return Filter       The filter
+	 * @throws \LogicException if the required filter class does not exist
+	 * @return Filter\FilterInterface       The filter
 	 */
 	protected function getFilterForType($type) {
 		// If the filter manager has an according filter return it
@@ -681,7 +876,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function clearHashCache() {
-		$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $outputFilenameWithoutHash, '');
+		$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), '');
 	}
 
 
