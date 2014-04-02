@@ -11,5 +11,8 @@ module.tx_assetic {
 	settings {
 		# cat=module.tx_assetic/enable; type=boolean; label=Compile if no backend user is logged in
 		allow_compile_without_login = 0
+
+		# cat=module.tx_assetic/enable; type=boolean; label=Enable experimental features
+		experimental = 0
 	}
 }
