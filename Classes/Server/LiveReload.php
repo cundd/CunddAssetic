@@ -38,6 +38,8 @@ use Ratchet\ConnectionInterface;
 
 
 class LiveReload implements MessageComponentInterface {
+	const MESSAGE_END = "\r\n";
+
 	/**
 	 * All connected clients
 	 *
@@ -45,38 +47,81 @@ class LiveReload implements MessageComponentInterface {
 	 */
 	protected $clients;
 
+	/**
+	 * Handshake message
+	 * @var array
+	 */
+	protected $handshakeMessage = array(
+		'command' 		=> 'hello',
+		'protocols' 	=> array(
+			'http://livereload.com/protocols/official-7',
+			'http://livereload.com/protocols/official-8',
+			'http://livereload.com/protocols/official-9',
+			'http://livereload.com/protocols/2.x-origin-version-negotiation',
+			'http://livereload.com/protocols/2.x-remote-control',
+		),
+		'serverName' 	=> 'CunddAssetic',
+	);
+
+	/**
+	 * Reload message
+	 * @var array
+	 */
+	protected $reloadMessage = array(
+		'command' 	=> 'reload',
+		'path' 		=> 'path/to/file.ext',
+		'liveCss' 	=> TRUE,
+	);
+
+
 	public function __construct() {
 		$this->clients = new \SplObjectStorage;
 	}
 
 	/**
 	 * Triggered when a client sends data through the socket
+	 *
 	 * @param  \Ratchet\ConnectionInterface $from The socket/connection that sent the message to your application
 	 * @param  string                       $msg  The message received
 	 * @throws \Exception
 	 */
-	function onMessage(ConnectionInterface $from, $msg) {
-		$numRecv = count($this->clients) - 1;
-		echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
-			, $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
+	public function onMessage(ConnectionInterface $from, $msg) {
+		$numberOfReceivers = count($this->clients) - 1;
 
-		foreach ($this->clients as $client) {
-			if ($from !== $client) {
-				// The sender is not the receiver, send to each client connected
-				$client->send($msg);
+		$this->debug(
+			sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n",
+				$from->resourceId,
+				$msg,
+				$numberOfReceivers,
+				$numberOfReceivers == 1 ? '' : 's'
+			)
+		);
+
+		$from->send(json_encode($this->handshakeMessage) . self::MESSAGE_END);
+
+
+		// If the sender is the current host, pass the message to the clients
+		if ($from->remoteAddress === '127.0.0.1') {
+			/** @var \Ratchet\Server\IoConnection $client */
+			foreach ($this->clients as $client) {
+				if ($from !== $client) {
+					// The sender is not the receiver, send to each client connected
+					$client->send($msg);
+				}
 			}
 		}
 	}
+
 	/**
 	 * When a new connection is opened it will be passed to this method
 	 * @param  ConnectionInterface $conn The socket/connection that just connected to your application
 	 * @throws \Exception
 	 */
-	function onOpen(ConnectionInterface $conn) {
+	public function onOpen(ConnectionInterface $conn) {
 		// Store the new connection to send messages to later
 		$this->clients->attach($conn);
 
-		echo "New connection! ({$conn->resourceId})\n";
+		$this->debug("New connection! ({$conn->resourceId})\n");
 	}
 
 	/**
@@ -84,11 +129,10 @@ class LiveReload implements MessageComponentInterface {
 	 * @param  ConnectionInterface $conn The socket/connection that is closing/closed
 	 * @throws \Exception
 	 */
-	function onClose(ConnectionInterface $conn) {
+	public function onClose(ConnectionInterface $conn) {
 		// The connection is closed, remove it, as we can no longer send it messages
 		$this->clients->detach($conn);
-
-		echo "Connection {$conn->resourceId} has disconnected\n";
+		$this->debug("Connection {$conn->resourceId} has disconnected\n");
 	}
 
 	/**
@@ -98,10 +142,36 @@ class LiveReload implements MessageComponentInterface {
 	 * @param  \Exception          $e
 	 * @throws \Exception
 	 */
-	function onError(ConnectionInterface $conn, \Exception $e) {
-		echo "An error has occurred: {$e->getMessage()}\n";
-
+	public function onError(ConnectionInterface $conn, \Exception $e) {
+		$this->debug("An error has occurred: {$e->getMessage()}\n");
 		$conn->close();
+	}
+
+	/**
+	 * Invoked when a file changed
+	 *
+	 * @param string $changedFile
+	 */
+	public function fileDidChange($changedFile){
+		$this->debug("File $changedFile did change" . PHP_EOL);
+
+		$message = $this->reloadMessage;
+		$message['path'] = $changedFile;
+
+		/** @var \Ratchet\Server\IoConnection $client */
+		foreach ($this->clients as $client) {
+			$this->debug($client->remoteAddress . PHP_EOL);
+			$client->send(json_encode($message) . self::MESSAGE_END);
+		}
+	}
+
+	/**
+	 * Prints the given message to the console
+	 *
+	 * @param string $message
+	 */
+	protected function debug($message){
+		fwrite(STDOUT, $message);
 	}
 
 

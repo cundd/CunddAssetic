@@ -32,6 +32,9 @@ namespace Cundd\Assetic\Command;
 
 use Cundd\Assetic\Server\LiveReload;
 use Ratchet\Server\IoServer;
+use React\EventLoop\Factory as LoopFactory;
+use React\Socket\Server as ReactServer;
+
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\CommandController;
 
@@ -194,6 +197,11 @@ class CompileCommandController extends CommandController {
 	 */
 	protected $configurationManager;
 
+	/**
+	 * @var LiveReload
+	 */
+	protected $liveReloadServer;
+
 
 
 	/**
@@ -223,18 +231,32 @@ class CompileCommandController extends CommandController {
 	 * @param integer $interval Interval between checks
 	 */
 	public function liveReloadCommand($interval = 1) {
+		$port = 35729;
+		$address = '0.0.0.0';
+		$loop   = LoopFactory::create();
 
-		$server = IoServer::factory(
-			new LiveReload(),
-			35729
+		// Websocket server
+		$this->liveReloadServer = new LiveReload();
+		$socket = new ReactServer($loop);
+		$socket->listen($port, $address);
+		$server = new IoServer(
+			$this->liveReloadServer,
+			$socket,
+			$loop
 		);
 
-		$server->run();
+		$loop->addPeriodicTimer($interval, array($this, 'recompileIfNeededAndInformLiveReloadServer'));
 
+		$loop->run();
+	}
 
-		while (TRUE) {
-			$this->recompileIfNeeded();
-			sleep($interval);
+	/**
+	 * Re-compiles the sources if needed and additionally informs the LiveReload server about the changes
+	 */
+	public function recompileIfNeededAndInformLiveReloadServer(){
+		if ($this->needsRecompile()) {
+			$changedFile = $this->compile();
+			$this->liveReloadServer->fileDidChange($changedFile);
 		}
 	}
 
@@ -249,6 +271,8 @@ class CompileCommandController extends CommandController {
 
 	/**
 	 * Compile the assets
+	 *
+	 * @return string
 	 */
 	protected function compile() {
 		$outputFileLink = '';
@@ -269,6 +293,7 @@ class CompileCommandController extends CommandController {
 		$this->pd($compiler);
 
 		$this->outputLine($outputFileLink);
+		return $outputFileLink;
 	}
 
 	/**
