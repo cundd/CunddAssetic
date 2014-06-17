@@ -429,9 +429,105 @@ class Plugin {
 		if (!$this->getExperimental() || !$this->isBackendUser()) {
 			return '';
 		}
+<<<<<<< HEAD
+
+		$code = '
+		<script type="text/javascript">
+		(function () {
+			var Assetic = window.Assetic || {},
+				Ef = function () {},
+				console = window.console || { log: Ef, info: Ef },
+				length;
+
+			Assetic.reloadInterval = Assetic.reloadInterval || 1750;
+			Assetic.stylesheets = [];
+			Assetic.originalUrls = [];
+			Assetic.lastId = "";
+
+
+			function load(url, callback) {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = ensureReadiness;
+
+				function ensureReadiness() {
+					if (xhr.readyState < 4) {
+						return;
+					}
+					if (xhr.status !== 200) {
+						return;
+					}
+					if (xhr.readyState === 4) {
+						callback(xhr);
+					}
+				}
+
+				xhr.open("HEAD", url, true);
+				xhr.send("");
+			}
+
+			if (typeof document.querySelectorAll === "function") {
+				Assetic.stylesheets = document.querySelectorAll("link[href*=cundd_assetic]");
+				length = Assetic.stylesheets.length;
+
+				for (var i = 0; i < length; i++) {
+					var originalUrl = "", lastSlashPosition,
+						stylesheet = Assetic.stylesheets[i];
+					originalUrl = stylesheet.href.replace(/__\w*\.css/, "_.css");
+
+
+					lastSlashPosition = originalUrl.lastIndexOf("/");
+					Assetic.originalUrls[i] = originalUrl.substr(0, lastSlashPosition) + "/_debug_" + originalUrl.substr(lastSlashPosition + 1);
+				}
+			}
+
+			Assetic.reload = function () {
+				var stylesheets = Assetic.stylesheets,
+					originalUrls = Assetic.originalUrls,
+					stylesheet = null,
+					originalUrl,
+					newUrl;
+
+				for (var i = 0; i < length; i++) {
+					stylesheet = stylesheets[i];
+					originalUrl = originalUrls[i];
+					newUrl = originalUrl + "?reload=" + (+new Date);
+					load(newUrl, function (xhr) {
+						if (xhr.getResponseHeader("Last-Modified") !== Assetic.lastId) {
+							/* console.log(xhr.getResponseHeader("Last-Modified")); */
+							/* console.log(xhr.getResponseHeader("ETag")); */
+
+							var date = (new Date),
+							 	dateString = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+							Assetic.lastId = xhr.getResponseHeader("Last-Modified");
+							console.log("Reload at " + dateString + " -> " + originalUrl);
+							stylesheet.href = newUrl;
+						}
+
+
+					})
+				}
+			};
+
+
+			Assetic.start = function () {
+				Assetic.asseticIntervalCallback = window.setInterval(Assetic.reload, Assetic.reloadInterval);
+			};
+			Assetic.stop = function () {
+				window.clearInterval(Assetic.asseticIntervalCallback);
+			};
+
+			Assetic.start();
+			Assetic.reload();
+
+			window.Assetic = Assetic;
+		})();
+		</script>';
+		return str_replace(array('  ', "\t", PHP_EOL), ' ', $code);
+=======
 		$resource = 'EXT:assetic/Resources/Public/JavaScript/Assetic.js';
 		$resource = str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
 		return '<script type="text/javascript" src="' . $resource . '"></script>';
+>>>>>>> develop
 	}
 
 	/**

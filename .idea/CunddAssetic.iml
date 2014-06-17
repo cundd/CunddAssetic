@@ -19,7 +19,6 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/event-dispatcher" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/http-foundation" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/process" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/routing" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -27,15 +26,49 @@
       <library name="PHP">
         <CLASSES>
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/fluid" />
+          <root url="file://$MODULE_DIR$/vendor/react/stream" />
+          <root url="file://$MODULE_DIR$/vendor/symfony/process" />
+          <root url="file://$MODULE_DIR$/vendor/symfony/http-foundation" />
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase" />
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/core" />
+          <root url="file://$MODULE_DIR$/vendor/guzzle/http" />
+          <root url="file://$MODULE_DIR$/vendor/react/event-loop" />
+          <root url="file://$MODULE_DIR$/vendor/evenement/evenement" />
+          <root url="file://$MODULE_DIR$/vendor/guzzle/parser" />
+          <root url="file://$MODULE_DIR$/vendor/leafo/scssphp" />
+          <root url="file://$MODULE_DIR$/vendor/leafo/lessphp" />
           <root url="file://$MODULE_DIR$/../PHPUnit" />
+          <root url="file://$MODULE_DIR$/vendor/kriswallsmith/assetic" />
+          <root url="file://$MODULE_DIR$/vendor/guzzle/stream" />
+          <root url="file://$MODULE_DIR$/vendor/guzzle/common" />
+          <root url="file://$MODULE_DIR$/vendor/cboden/ratchet" />
+          <root url="file://$MODULE_DIR$/vendor/symfony/event-dispatcher" />
+          <root url="file://$MODULE_DIR$/vendor/composer" />
+          <root url="file://$MODULE_DIR$/vendor/cundd/assetic_additions" />
+          <root url="file://$MODULE_DIR$/vendor/react/socket" />
+          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/core" />
         </CLASSES>
         <SOURCES>
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/fluid" />
+          <root url="file://$MODULE_DIR$/vendor/react/stream" />
+          <root url="file://$MODULE_DIR$/vendor/symfony/process" />
+          <root url="file://$MODULE_DIR$/vendor/symfony/http-foundation" />
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase" />
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/core" />
+          <root url="file://$MODULE_DIR$/vendor/guzzle/http" />
+          <root url="file://$MODULE_DIR$/vendor/react/event-loop" />
+          <root url="file://$MODULE_DIR$/vendor/evenement/evenement" />
+          <root url="file://$MODULE_DIR$/vendor/guzzle/parser" />
+          <root url="file://$MODULE_DIR$/vendor/leafo/scssphp" />
+          <root url="file://$MODULE_DIR$/vendor/leafo/lessphp" />
           <root url="file://$MODULE_DIR$/../PHPUnit" />
+          <root url="file://$MODULE_DIR$/vendor/kriswallsmith/assetic" />
+          <root url="file://$MODULE_DIR$/vendor/guzzle/stream" />
+          <root url="file://$MODULE_DIR$/vendor/guzzle/common" />
+          <root url="file://$MODULE_DIR$/vendor/cboden/ratchet" />
+          <root url="file://$MODULE_DIR$/vendor/symfony/event-dispatcher" />
+          <root url="file://$MODULE_DIR$/vendor/composer" />
+          <root url="file://$MODULE_DIR$/vendor/cundd/assetic_additions" />
+          <root url="file://$MODULE_DIR$/vendor/react/socket" />
+          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/core" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -46,48 +79,6 @@
         </CLASSES>
         <SOURCES>
           <root url="phar://$MODULE_DIR$/../PHPUnit/phpunit.phar" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Composer Vendors">
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/vendor/cundd/assetic_additions" />
-          <root url="file://$MODULE_DIR$/vendor/leafo/lessphp" />
-          <root url="file://$MODULE_DIR$/vendor/leafo/scssphp" />
-          <root url="file://$MODULE_DIR$/vendor/react/socket" />
-          <root url="file://$MODULE_DIR$/vendor/react/stream" />
-          <root url="file://$MODULE_DIR$/vendor/react/event-loop" />
-          <root url="file://$MODULE_DIR$/vendor/cboden/ratchet" />
-          <root url="file://$MODULE_DIR$/vendor/guzzle/http" />
-          <root url="file://$MODULE_DIR$/vendor/guzzle/common" />
-          <root url="file://$MODULE_DIR$/vendor/guzzle/parser" />
-          <root url="file://$MODULE_DIR$/vendor/guzzle/stream" />
-          <root url="file://$MODULE_DIR$/vendor/symfony/process" />
-          <root url="file://$MODULE_DIR$/vendor/symfony/http-foundation" />
-          <root url="file://$MODULE_DIR$/vendor/symfony/event-dispatcher" />
-          <root url="file://$MODULE_DIR$/vendor/composer" />
-          <root url="file://$MODULE_DIR$/vendor/evenement/evenement" />
-          <root url="file://$MODULE_DIR$/vendor/kriswallsmith/assetic" />
-        </CLASSES>
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/vendor/cundd/assetic_additions" />
-          <root url="file://$MODULE_DIR$/vendor/leafo/lessphp" />
-          <root url="file://$MODULE_DIR$/vendor/leafo/scssphp" />
-          <root url="file://$MODULE_DIR$/vendor/react/socket" />
-          <root url="file://$MODULE_DIR$/vendor/react/stream" />
-          <root url="file://$MODULE_DIR$/vendor/react/event-loop" />
-          <root url="file://$MODULE_DIR$/vendor/cboden/ratchet" />
-          <root url="file://$MODULE_DIR$/vendor/guzzle/http" />
-          <root url="file://$MODULE_DIR$/vendor/guzzle/common" />
-          <root url="file://$MODULE_DIR$/vendor/guzzle/parser" />
-          <root url="file://$MODULE_DIR$/vendor/guzzle/stream" />
-          <root url="file://$MODULE_DIR$/vendor/symfony/process" />
-          <root url="file://$MODULE_DIR$/vendor/symfony/http-foundation" />
-          <root url="file://$MODULE_DIR$/vendor/symfony/event-dispatcher" />
-          <root url="file://$MODULE_DIR$/vendor/composer" />
-          <root url="file://$MODULE_DIR$/vendor/evenement/evenement" />
-          <root url="file://$MODULE_DIR$/vendor/kriswallsmith/assetic" />
         </SOURCES>
       </library>
     </orderEntry>
