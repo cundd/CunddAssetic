@@ -32,6 +32,7 @@ namespace Cundd\Assetic\Command;
 
 use Cundd\Assetic\Server\LiveReload;
 use Ratchet\Server\IoServer;
+use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Factory as LoopFactory;
 use React\Socket\Server as ReactServer;
 
@@ -240,7 +241,7 @@ class CompileCommandController extends CommandController {
 		$socket = new ReactServer($loop);
 		$socket->listen($port, $address);
 		$server = new IoServer(
-			$this->liveReloadServer,
+			new WsServer($this->liveReloadServer),
 			$socket,
 			$loop
 		);
