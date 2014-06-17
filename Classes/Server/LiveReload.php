@@ -36,8 +36,15 @@ namespace Cundd\Assetic\Server;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 
-
+/**
+ * Class LiveReload
+ *
+ * @package Cundd\Assetic\Server
+ */
 class LiveReload implements MessageComponentInterface {
+	/**
+	 * End of a message
+	 */
 	const MESSAGE_END = "\r\n";
 
 	/**
@@ -56,9 +63,9 @@ class LiveReload implements MessageComponentInterface {
 		'protocols' 	=> array(
 			'http://livereload.com/protocols/official-7',
 			'http://livereload.com/protocols/official-8',
-			'http://livereload.com/protocols/official-9',
-			'http://livereload.com/protocols/2.x-origin-version-negotiation',
-			'http://livereload.com/protocols/2.x-remote-control',
+//			'http://livereload.com/protocols/official-9',
+//			'http://livereload.com/protocols/2.x-origin-version-negotiation',
+//			'http://livereload.com/protocols/2.x-remote-control',
 		),
 		'serverName' 	=> 'CunddAssetic',
 	);
@@ -71,6 +78,15 @@ class LiveReload implements MessageComponentInterface {
 		'command' 	=> 'reload',
 		'path' 		=> 'path/to/file.ext',
 		'liveCss' 	=> TRUE,
+	);
+
+	/**
+	 * Alert message
+	 * @var array
+	 */
+	protected $alertMessage = array(
+		'command' 	=> 'alert',
+		'message' 	=> 'Hy',
 	);
 
 
@@ -88,6 +104,8 @@ class LiveReload implements MessageComponentInterface {
 	public function onMessage(ConnectionInterface $from, $msg) {
 		$numberOfReceivers = count($this->clients) - 1;
 
+//		$this->send($from, $this->handshakeMessage);
+
 		$this->debug(
 			sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n",
 				$from->resourceId,
@@ -97,16 +115,23 @@ class LiveReload implements MessageComponentInterface {
 			)
 		);
 
-		$from->send(json_encode($this->handshakeMessage) . self::MESSAGE_END);
-
-
 		// If the sender is the current host, pass the message to the clients
 		if ($from->remoteAddress === '127.0.0.1') {
+
+
+
+//		$from->send(json_encode($this->handshakeMessage) . self::MESSAGE_END);
+//		$from->send(json_encode($this->alertMessage) . self::MESSAGE_END);
+
+
+
+
 			/** @var \Ratchet\Server\IoConnection $client */
 			foreach ($this->clients as $client) {
 				if ($from !== $client) {
 					// The sender is not the receiver, send to each client connected
-					$client->send($msg);
+					$this->send($client, $this->alertMessage);
+//					$client->send($msg);
 				}
 			}
 		}
@@ -121,7 +146,43 @@ class LiveReload implements MessageComponentInterface {
 		// Store the new connection to send messages to later
 		$this->clients->attach($conn);
 
+//		$conn->send(
+//			''
+//			. str_replace('\\/', '/', json_encode($this->handshakeMessage))
+//			. self::MESSAGE_END
+//		);
+//		$conn->send(json_encode($this->handshakeMessage, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . self::MESSAGE_END);
+		$this->send($conn, $this->handshakeMessage);
+
+
+		$this->debug(PHP_VERSION);
+		$this->debug(var_export(json_encode($this->handshakeMessage), TRUE));
+		$this->debug(var_export(str_replace('\\/', '/', json_encode($this->handshakeMessage)), TRUE));
+		$this->debug(var_export(json_encode($this->handshakeMessage, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), TRUE));
+		$this->debug(var_export(json_encode($this->handshakeMessage, JSON_UNESCAPED_SLASHES), TRUE));
+		$this->debug(json_last_error() . PHP_EOL);
 		$this->debug("New connection! ({$conn->resourceId})\n");
+	}
+
+	/**
+	 * @param ConnectionInterface $connection
+	 * @param mixed $message
+	 */
+	protected function send($connection, $message) {
+		if (is_string($message)) {
+			if (substr($message, -strlen(self::MESSAGE_END)) !== self::MESSAGE_END) {
+				$message .= self::MESSAGE_END;
+			}
+		} else {
+			if (defined('JSON_UNESCAPED_SLASHES')) {
+				$message = json_encode($message, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+			} else {
+				$message =  str_replace('\\/', '/', json_encode($this->handshakeMessage));
+			}
+			$message .= self::MESSAGE_END;
+		}
+
+		$connection->send($message);
 	}
 
 	/**
@@ -157,11 +218,12 @@ class LiveReload implements MessageComponentInterface {
 
 		$message = $this->reloadMessage;
 		$message['path'] = $changedFile;
+		$message['path'] = dirname($changedFile) . '/_debug_pagescss_.css';
 
 		/** @var \Ratchet\Server\IoConnection $client */
 		foreach ($this->clients as $client) {
 			$this->debug($client->remoteAddress . PHP_EOL);
-			$client->send(json_encode($message) . self::MESSAGE_END);
+			$this->send($client, $message);
 		}
 	}
 
