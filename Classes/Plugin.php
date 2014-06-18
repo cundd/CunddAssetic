@@ -434,9 +434,16 @@ class Plugin {
 		if (!$this->getExperimental() || !$this->isBackendUser()) {
 			return '';
 		}
-		$resource = 'EXT:assetic/Resources/Public/Library/livereload.js?host=ahv.li.5-34-252-1.devweb.li';
+		$resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
 		$resource = str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
-		return '<script type="text/javascript" src="' . $resource . '"></script>';
+		return '<script type="text/javascript">
+	(function () {
+		var scriptElement = document.createElement(\'script\');
+		scriptElement.src = \'' . $resource . '\' + \'?host=\' + location.host;
+		document.getElementsByTagName(\'head\')[0].appendChild(scriptElement);
+	})();
+</script>';
+//		return '<script type="text/javascript" src="' . $resource . '"></script>';
 
 //		$resource = 'EXT:assetic/Resources/Public/JavaScript/Assetic.js';
 //		$resource = str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
