@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d7985e8e-bfb4-4841-9235-6c9dd882393a" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Resources/Public/Library/livereload.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Classes/Command/CompileCommandController.php" afterPath="$PROJECT_DIR$/Classes/Command/CompileCommandController.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Classes/Server/LiveReload.php" afterPath="$PROJECT_DIR$/Classes/Server/LiveReload.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Classes/Plugin.php" afterPath="$PROJECT_DIR$/Classes/Plugin.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -33,10 +30,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Plugin.php" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Plugin.php" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Classes/Plugin.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="442" column="8" selection-start="13750" selection-end="13907" vertical-scroll-proportion="-5.9615383" vertical-offset="7484" max-vertical-offset="17618">
+            <state line="438" column="0" selection-start="13635" selection-end="13635" vertical-scroll-proportion="0.5506446" vertical-offset="7423" max-vertical-offset="17463">
+              <folding>
+                <marker date="1403095763000" expanded="true" signature="13675:13913" placeholder="..." />
+                <marker date="1403095763000" expanded="true" signature="13675:13774" placeholder="..." />
+                <marker date="1403095763000" expanded="true" signature="13691:13900" placeholder="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="livereload.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Resources/Public/Library/livereload.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="116" column="43" selection-start="3794" selection-end="3798" vertical-scroll-proportion="-80.30769" vertical-offset="0" max-vertical-offset="21186">
               <folding />
             </state>
           </provider>
@@ -45,10 +55,8 @@
       <file leaf-file-name="LiveReload.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Classes/Server/LiveReload.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="220" column="73" selection-start="6469" selection-end="6469" vertical-scroll-proportion="-14.346154" vertical-offset="3173" max-vertical-offset="4738">
-              <folding>
-                <element signature="e#987#1025#0" expanded="true" />
-              </folding>
+            <state line="220" column="73" selection-start="6469" selection-end="6469" vertical-scroll-proportion="-6.6923075" vertical-offset="3354" max-vertical-offset="4698">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -56,7 +64,7 @@
       <file leaf-file-name="Factory.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/Factory.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="34" selection-start="236" selection-end="236" vertical-scroll-proportion="-7.6153846" vertical-offset="0" max-vertical-offset="1189">
+            <state line="12" column="34" selection-start="236" selection-end="236" vertical-scroll-proportion="0.0" vertical-offset="216" max-vertical-offset="396">
               <folding />
             </state>
           </provider>
@@ -65,7 +73,7 @@
       <file leaf-file-name="LibEventLoop.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/LibEventLoop.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="156" column="24" selection-start="4557" selection-end="4557" vertical-scroll-proportion="-6.230769" vertical-offset="2610" max-vertical-offset="4807">
+            <state line="156" column="24" selection-start="4557" selection-end="4557" vertical-scroll-proportion="0.0" vertical-offset="2808" max-vertical-offset="4032">
               <folding />
             </state>
           </provider>
@@ -74,7 +82,7 @@
       <file leaf-file-name="Timer.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/Timer/Timer.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="30" selection-start="647" selection-end="647" vertical-scroll-proportion="4.1538463" vertical-offset="504" max-vertical-offset="2053">
+            <state line="23" column="30" selection-start="647" selection-end="647" vertical-scroll-proportion="0.0" vertical-offset="414" max-vertical-offset="1260">
               <folding />
             </state>
           </provider>
@@ -83,16 +91,16 @@
       <file leaf-file-name="Server.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/react/socket/React/Socket/Server.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="27" selection-start="918" selection-end="918" vertical-scroll-proportion="-21.461538" vertical-offset="36" max-vertical-offset="2143">
+            <state line="34" column="27" selection-start="918" selection-end="918" vertical-scroll-proportion="0.0" vertical-offset="612" max-vertical-offset="1350">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CompileCommandController.php" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="CompileCommandController.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Classes/Command/CompileCommandController.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="235" column="29" selection-start="4875" selection-end="4913" vertical-scroll-proportion="0.10428737" vertical-offset="3744" max-vertical-offset="7739">
+            <state line="280" column="24" selection-start="5932" selection-end="5932" vertical-scroll-proportion="-9.0" vertical-offset="4410" max-vertical-offset="7704">
               <folding>
                 <element signature="e#926#962#0" expanded="true" />
               </folding>
@@ -103,10 +111,8 @@
       <file leaf-file-name="IoServer.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/Server/IoServer.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="73" column="35" selection-start="2583" selection-end="2583" vertical-scroll-proportion="-18.653847" vertical-offset="829" max-vertical-offset="3185">
-              <folding>
-                <element signature="e#32#70#0" expanded="true" />
-              </folding>
+            <state line="73" column="35" selection-start="2583" selection-end="2583" vertical-scroll-proportion="0.0" vertical-offset="1314" max-vertical-offset="2376">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -114,7 +120,7 @@
       <file leaf-file-name="WsServer.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/WebSocket/WsServer.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="6" selection-start="502" selection-end="502" vertical-scroll-proportion="28.384615" vertical-offset="918" max-vertical-offset="5039">
+            <state line="14" column="6" selection-start="502" selection-end="502" vertical-scroll-proportion="0.0" vertical-offset="252" max-vertical-offset="4302">
               <folding />
             </state>
           </provider>
@@ -123,7 +129,7 @@
       <file leaf-file-name="LoopInterface.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/LoopInterface.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="20" selection-start="124" selection-end="124" vertical-scroll-proportion="-5.5384617" vertical-offset="0" max-vertical-offset="1279">
+            <state line="8" column="20" selection-start="124" selection-end="124" vertical-scroll-proportion="0.0" vertical-offset="144" max-vertical-offset="468">
               <folding />
             </state>
           </provider>
@@ -132,7 +138,7 @@
       <file leaf-file-name="ConnectionInterface.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/ConnectionInterface.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="13" selection-start="434" selection-end="434" vertical-scroll-proportion="-11.038462" vertical-offset="55" max-vertical-offset="1295">
+            <state line="19" column="13" selection-start="434" selection-end="434" vertical-scroll-proportion="0.0" vertical-offset="342" max-vertical-offset="486">
               <folding />
             </state>
           </provider>
@@ -141,7 +147,7 @@
       <file leaf-file-name="Connection.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/WebSocket/Version/RFC6455/Connection.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="42" selection-start="239" selection-end="239" vertical-scroll-proportion="-5.5384617" vertical-offset="0" max-vertical-offset="1405">
+            <state line="9" column="42" selection-start="239" selection-end="239" vertical-scroll-proportion="0.0" vertical-offset="162" max-vertical-offset="612">
               <folding />
             </state>
           </provider>
@@ -150,7 +156,7 @@
       <file leaf-file-name="AbstractConnectionDecorator.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/AbstractConnectionDecorator.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="30" column="33" selection-start="774" selection-end="785" vertical-scroll-proportion="-20.76923" vertical-offset="0" max-vertical-offset="1567">
+            <state line="30" column="33" selection-start="774" selection-end="785" vertical-scroll-proportion="0.0" vertical-offset="540" max-vertical-offset="756">
               <folding />
             </state>
           </provider>
@@ -159,7 +165,7 @@
       <file leaf-file-name="IoConnection.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/Server/IoConnection.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="6" selection-start="148" selection-end="148" vertical-scroll-proportion="-4.8461537" vertical-offset="0" max-vertical-offset="1495">
+            <state line="8" column="6" selection-start="148" selection-end="148" vertical-scroll-proportion="0.0" vertical-offset="144" max-vertical-offset="702">
               <folding />
             </state>
           </provider>
@@ -168,7 +174,7 @@
       <file leaf-file-name="StreamSelectLoop.php" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/StreamSelectLoop.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="169" column="20" selection-start="4261" selection-end="4261" vertical-scroll-proportion="-11.423077" vertical-offset="2709" max-vertical-offset="4105">
+            <state line="169" column="20" selection-start="4261" selection-end="4261" vertical-scroll-proportion="0.0" vertical-offset="3042" max-vertical-offset="3330">
               <folding />
             </state>
           </provider>
@@ -201,6 +207,7 @@
         <option value="$PROJECT_DIR$/composer.json" />
         <option value="$PROJECT_DIR$/Classes/Command/CompileCommandController.php" />
         <option value="$PROJECT_DIR$/Classes/Server/LiveReload.php" />
+        <option value="/HTML Fragment (Plugin.php:13702).html" />
         <option value="$PROJECT_DIR$/Classes/Plugin.php" />
       </list>
     </option>
@@ -215,10 +222,10 @@
     </include_path>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="2559" />
-    <option name="y" value="22" />
-    <option name="width" value="2095" />
-    <option name="height" value="1418" />
+    <option name="x" value="83" />
+    <option name="y" value="195" />
+    <option name="width" value="1536" />
+    <option name="height" value="960" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -631,6 +638,7 @@
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
     <property name="SearchEverywhereHistory" value="WsServer&#10;react" />
+    <property name="LayoutCode.rearrangeEntriesHTML" value="false" />
   </component>
   <component name="RunManager">
     <configuration default="true" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
@@ -667,34 +675,38 @@
       <created>1403008202490</created>
       <updated>1403008202490</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Basic working version">
+      <created>1403018110170</created>
+      <updated>1403018110170</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="2559" y="22" width="2095" height="1418" extended-state="0" />
+    <frame x="83" y="195" width="1536" height="960" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="File Transfer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32880846" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="File Transfer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.328341" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32961586" sideWeight="0.6707692" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33050847" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23477837" sideWeight="0.67103237" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23761714" sideWeight="0.67103237" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33050847" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -712,24 +724,62 @@
     <MESSAGE value="Enhanced the Assetic JavaScript API" />
     <MESSAGE value="Added better exception handling" />
     <MESSAGE value="Added basic socket functionality and notification for changed files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added basic socket functionality and notification for changed files" />
+    <MESSAGE value="Basic working version" />
+    <option name="LAST_COMMIT_MESSAGE" value="Basic working version" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/ConnectionInterface.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="13" selection-start="434" selection-end="434" vertical-scroll-proportion="0.0" vertical-offset="342" max-vertical-offset="486">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/WebSocket/Version/RFC6455/Connection.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="42" selection-start="239" selection-end="239" vertical-scroll-proportion="0.0" vertical-offset="162" max-vertical-offset="612">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/AbstractConnectionDecorator.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="30" column="33" selection-start="774" selection-end="785" vertical-scroll-proportion="0.0" vertical-offset="540" max-vertical-offset="756">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/Server/IoConnection.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="8" column="6" selection-start="148" selection-end="148" vertical-scroll-proportion="0.0" vertical-offset="144" max-vertical-offset="702">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/StreamSelectLoop.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="169" column="20" selection-start="4261" selection-end="4261" vertical-scroll-proportion="0.0" vertical-offset="3042" max-vertical-offset="3330">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Classes/Plugin.php">
       <provider selected="true" editor-type-id="text-editor">
         <state line="508" column="0" selection-start="15335" selection-end="15335" vertical-scroll-proportion="0.0" vertical-offset="9144" max-vertical-offset="16686">
-          <folding />
+          <folding>
+            <marker date="1403095763000" expanded="true" signature="13675:13913" placeholder="..." />
+            <marker date="1403095763000" expanded="true" signature="13675:13774" placeholder="..." />
+            <marker date="1403095763000" expanded="true" signature="13691:13900" placeholder="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cundd/assetic_additions/Classes/AsseticAdditions/Filter/SasscFilter.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="7" selection-start="1794" selection-end="1794" vertical-scroll-proportion="0.0" vertical-offset="846" max-vertical-offset="3996">
-          <folding />
-        </state>
+        <state line="47" column="7" selection-start="1794" selection-end="1794" vertical-scroll-proportion="0.0" vertical-offset="846" max-vertical-offset="3996" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Classes/Command/CompileCommandController.php">
@@ -744,9 +794,7 @@
     <entry file="file://$PROJECT_DIR$/Classes/Server/LiveReload.php">
       <provider selected="true" editor-type-id="text-editor">
         <state line="67" column="9" selection-start="1972" selection-end="1972" vertical-scroll-proportion="0.0" vertical-offset="1206" max-vertical-offset="1980">
-          <folding>
-            <element signature="e#987#1025#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -780,9 +828,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/kriswallsmith/assetic/src/Assetic/Filter/Sass/SassFilter.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="251" column="5" selection-start="709" selection-end="6554" vertical-scroll-proportion="0.0" vertical-offset="4518" max-vertical-offset="4590">
-          <folding />
-        </state>
+        <state line="251" column="5" selection-start="709" selection-end="6554" vertical-scroll-proportion="0.0" vertical-offset="4518" max-vertical-offset="4590" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/kriswallsmith/assetic/src/Assetic/Exception/FilterException.php">
@@ -794,16 +840,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Configuration/TypoScript/constants.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="88" selection-start="700" selection-end="700" vertical-scroll-proportion="0.0" vertical-offset="252" max-vertical-offset="342">
-          <folding />
-        </state>
+        <state line="14" column="88" selection-start="700" selection-end="700" vertical-scroll-proportion="0.0" vertical-offset="252" max-vertical-offset="342" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Configuration/TypoScript/setup.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="58" column="16" selection-start="1659" selection-end="1671" vertical-scroll-proportion="0.0" vertical-offset="1044" max-vertical-offset="1368">
-          <folding />
-        </state>
+        <state line="58" column="16" selection-start="1659" selection-end="1671" vertical-scroll-proportion="0.0" vertical-offset="1044" max-vertical-offset="1368" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/kriswallsmith/assetic/src/Assetic/FilterManager.php">
@@ -815,9 +857,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Classes/Controller/AssetController.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="41" selection-start="989" selection-end="989" vertical-scroll-proportion="0.0" vertical-offset="540" max-vertical-offset="2880">
-          <folding />
-        </state>
+        <state line="30" column="41" selection-start="989" selection-end="989" vertical-scroll-proportion="0.0" vertical-offset="540" max-vertical-offset="2880" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase/Classes/Mvc/Controller/CommandController.php">
@@ -829,30 +869,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ext_localconf.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="2" selection-start="461" selection-end="461" vertical-scroll-proportion="0.0" vertical-offset="234" max-vertical-offset="270">
-          <folding />
-        </state>
+        <state line="13" column="2" selection-start="461" selection-end="461" vertical-scroll-proportion="0.0" vertical-offset="234" max-vertical-offset="270" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ext_tables.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1188">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1188" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ext_emconf.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="21" selection-start="874" selection-end="874" vertical-scroll-proportion="0.0" vertical-offset="522" max-vertical-offset="846">
-          <folding />
-        </state>
+        <state line="29" column="21" selection-start="874" selection-end="874" vertical-scroll-proportion="0.0" vertical-offset="522" max-vertical-offset="846" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Classes/Controller/AssetController.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="41" selection-start="989" selection-end="989" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0">
-          <folding />
-        </state>
+        <state line="30" column="41" selection-start="989" selection-end="989" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase/Classes/Mvc/Controller/CommandController.php">
@@ -864,23 +896,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ext_localconf.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="2" selection-start="461" selection-end="461" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0">
-          <folding />
-        </state>
+        <state line="13" column="2" selection-start="461" selection-end="461" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ext_tables.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ext_emconf.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="21" selection-start="874" selection-end="874" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0">
-          <folding />
-        </state>
+        <state line="29" column="21" selection-start="874" selection-end="874" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/kriswallsmith/assetic/src/Assetic/Exception/FilterException.php">
@@ -892,16 +918,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/kriswallsmith/assetic/src/Assetic/Filter/Sass/SassFilter.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="251" column="5" selection-start="709" selection-end="6554" vertical-scroll-proportion="0.0" vertical-offset="4518" max-vertical-offset="4590">
-          <folding />
-        </state>
+        <state line="251" column="5" selection-start="709" selection-end="6554" vertical-scroll-proportion="0.0" vertical-offset="4518" max-vertical-offset="4590" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cundd/assetic_additions/Classes/AsseticAdditions/Filter/SasscFilter.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="7" selection-start="1794" selection-end="1794" vertical-scroll-proportion="0.0" vertical-offset="846" max-vertical-offset="3996">
-          <folding />
-        </state>
+        <state line="47" column="7" selection-start="1794" selection-end="1794" vertical-scroll-proportion="0.0" vertical-offset="846" max-vertical-offset="3996" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/MessageInterface.php">
@@ -925,65 +947,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/StreamSelectLoop.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="169" column="20" selection-start="4261" selection-end="4261" vertical-scroll-proportion="-11.423077" vertical-offset="2709" max-vertical-offset="4105">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/Server/IoConnection.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="6" selection-start="148" selection-end="148" vertical-scroll-proportion="-4.8461537" vertical-offset="0" max-vertical-offset="1495">
+        <state line="8" column="6" selection-start="148" selection-end="148" vertical-scroll-proportion="0.0" vertical-offset="144" max-vertical-offset="702">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/WebSocket/Version/RFC6455/Connection.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="42" selection-start="239" selection-end="239" vertical-scroll-proportion="-5.5384617" vertical-offset="0" max-vertical-offset="1405">
+        <state line="9" column="42" selection-start="239" selection-end="239" vertical-scroll-proportion="0.0" vertical-offset="162" max-vertical-offset="612">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/AbstractConnectionDecorator.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="33" selection-start="774" selection-end="785" vertical-scroll-proportion="-20.76923" vertical-offset="0" max-vertical-offset="1567">
+        <state line="30" column="33" selection-start="774" selection-end="785" vertical-scroll-proportion="0.0" vertical-offset="540" max-vertical-offset="756">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/react/socket/React/Socket/Server.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="27" selection-start="918" selection-end="918" vertical-scroll-proportion="-21.461538" vertical-offset="36" max-vertical-offset="2143">
+        <state line="34" column="27" selection-start="918" selection-end="918" vertical-scroll-proportion="0.0" vertical-offset="612" max-vertical-offset="1350">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/LoopInterface.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="20" selection-start="124" selection-end="124" vertical-scroll-proportion="-5.5384617" vertical-offset="0" max-vertical-offset="1279">
+        <state line="8" column="20" selection-start="124" selection-end="124" vertical-scroll-proportion="0.0" vertical-offset="144" max-vertical-offset="468">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/Timer/Timer.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="30" selection-start="647" selection-end="647" vertical-scroll-proportion="4.1538463" vertical-offset="504" max-vertical-offset="2053">
+        <state line="23" column="30" selection-start="647" selection-end="647" vertical-scroll-proportion="0.0" vertical-offset="414" max-vertical-offset="1260">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/Factory.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="34" selection-start="236" selection-end="236" vertical-scroll-proportion="-7.6153846" vertical-offset="0" max-vertical-offset="1189">
+        <state line="12" column="34" selection-start="236" selection-end="236" vertical-scroll-proportion="0.0" vertical-offset="216" max-vertical-offset="396">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/LibEventLoop.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="156" column="24" selection-start="4557" selection-end="4557" vertical-scroll-proportion="-6.230769" vertical-offset="2610" max-vertical-offset="4807">
+        <state line="156" column="24" selection-start="4557" selection-end="4557" vertical-scroll-proportion="0.0" vertical-offset="2808" max-vertical-offset="4032">
           <folding />
         </state>
       </provider>
@@ -997,48 +1012,62 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/ConnectionInterface.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="13" selection-start="434" selection-end="434" vertical-scroll-proportion="-11.038462" vertical-offset="55" max-vertical-offset="1295">
+        <state line="19" column="13" selection-start="434" selection-end="434" vertical-scroll-proportion="0.0" vertical-offset="342" max-vertical-offset="486">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/Server/IoServer.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="73" column="35" selection-start="2583" selection-end="2583" vertical-scroll-proportion="-18.653847" vertical-offset="829" max-vertical-offset="3185">
-          <folding>
-            <element signature="e#32#70#0" expanded="true" />
-          </folding>
+        <state line="73" column="35" selection-start="2583" selection-end="2583" vertical-scroll-proportion="0.0" vertical-offset="1314" max-vertical-offset="2376">
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/cboden/ratchet/src/Ratchet/WebSocket/WsServer.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="6" selection-start="502" selection-end="502" vertical-scroll-proportion="28.384615" vertical-offset="918" max-vertical-offset="5039">
+        <state line="14" column="6" selection-start="502" selection-end="502" vertical-scroll-proportion="0.0" vertical-offset="252" max-vertical-offset="4302">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Classes/Server/LiveReload.php">
+    <entry file="file://$PROJECT_DIR$/vendor/react/event-loop/React/EventLoop/StreamSelectLoop.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="220" column="73" selection-start="6469" selection-end="6469" vertical-scroll-proportion="-14.346154" vertical-offset="3173" max-vertical-offset="4738">
-          <folding>
-            <element signature="e#987#1025#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Classes/Plugin.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="442" column="8" selection-start="13750" selection-end="13907" vertical-scroll-proportion="-5.9615383" vertical-offset="7484" max-vertical-offset="17618">
+        <state line="169" column="20" selection-start="4261" selection-end="4261" vertical-scroll-proportion="0.0" vertical-offset="3042" max-vertical-offset="3330">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Classes/Command/CompileCommandController.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="235" column="29" selection-start="4875" selection-end="4913" vertical-scroll-proportion="0.10428737" vertical-offset="3744" max-vertical-offset="7739">
+        <state line="280" column="24" selection-start="5932" selection-end="5932" vertical-scroll-proportion="-9.0" vertical-offset="4410" max-vertical-offset="7704">
           <folding>
             <element signature="e#926#962#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Resources/Public/Library/livereload.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="116" column="43" selection-start="3794" selection-end="3798" vertical-scroll-proportion="-80.30769" vertical-offset="0" max-vertical-offset="21186">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Classes/Server/LiveReload.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="220" column="73" selection-start="6469" selection-end="6469" vertical-scroll-proportion="-6.6923075" vertical-offset="3354" max-vertical-offset="4698">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Classes/Plugin.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="438" column="0" selection-start="13635" selection-end="13635" vertical-scroll-proportion="0.5506446" vertical-offset="7423" max-vertical-offset="17463">
+          <folding>
+            <marker date="1403095763000" expanded="true" signature="13675:13913" placeholder="..." />
+            <marker date="1403095763000" expanded="true" signature="13675:13774" placeholder="..." />
+            <marker date="1403095763000" expanded="true" signature="13691:13900" placeholder="{...}" />
           </folding>
         </state>
       </provider>
