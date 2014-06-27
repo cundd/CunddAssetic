@@ -102,36 +102,21 @@ class LiveReload implements MessageComponentInterface {
 	 * @throws \Exception
 	 */
 	public function onMessage(ConnectionInterface $from, $msg) {
-		$numberOfReceivers = count($this->clients) - 1;
-
-//		$this->send($from, $this->handshakeMessage);
-
 		$this->debug(
-			sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n",
-				$from->resourceId,
+			sprintf('Received message "%s" from connection %d address %s' . PHP_EOL,
 				$msg,
-				$numberOfReceivers,
-				$numberOfReceivers == 1 ? '' : 's'
+				$from->resourceId,
+				$from->remoteAddress
 			)
 		);
 
 		// If the sender is the current host, pass the message to the clients
 		if ($from->remoteAddress === '127.0.0.1') {
-
-
-
-//		$from->send(json_encode($this->handshakeMessage) . self::MESSAGE_END);
-//		$from->send(json_encode($this->alertMessage) . self::MESSAGE_END);
-
-
-
-
 			/** @var \Ratchet\Server\IoConnection $client */
 			foreach ($this->clients as $client) {
 				if ($from !== $client) {
 					// The sender is not the receiver, send to each client connected
 					$this->send($client, $this->alertMessage);
-//					$client->send($msg);
 				}
 			}
 		}
@@ -145,23 +130,9 @@ class LiveReload implements MessageComponentInterface {
 	public function onOpen(ConnectionInterface $conn) {
 		// Store the new connection to send messages to later
 		$this->clients->attach($conn);
-
-//		$conn->send(
-//			''
-//			. str_replace('\\/', '/', json_encode($this->handshakeMessage))
-//			. self::MESSAGE_END
-//		);
-//		$conn->send(json_encode($this->handshakeMessage, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . self::MESSAGE_END);
 		$this->send($conn, $this->handshakeMessage);
 
-
-		$this->debug(PHP_VERSION);
-		$this->debug(var_export(json_encode($this->handshakeMessage), TRUE));
-		$this->debug(var_export(str_replace('\\/', '/', json_encode($this->handshakeMessage)), TRUE));
-		$this->debug(var_export(json_encode($this->handshakeMessage, JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), TRUE));
-		$this->debug(var_export(json_encode($this->handshakeMessage, JSON_UNESCAPED_SLASHES), TRUE));
-		$this->debug(json_last_error() . PHP_EOL);
-		$this->debug("New connection! ({$conn->resourceId})\n");
+		$this->debug("New connection ({$conn->resourceId})\n");
 	}
 
 	/**
@@ -225,9 +196,10 @@ class LiveReload implements MessageComponentInterface {
 			unset($message['liveCss']);
 		}
 
+		$this->debug('Notify ' . count($this->clients) . ' clients' . PHP_EOL);
+
 		/** @var \Ratchet\Server\IoConnection $client */
 		foreach ($this->clients as $client) {
-			$this->debug($client->remoteAddress . PHP_EOL);
 			$this->send($client, $message);
 		}
 	}

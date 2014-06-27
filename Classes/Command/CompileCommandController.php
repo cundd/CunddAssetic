@@ -242,11 +242,11 @@ class CompileCommandController extends CommandController {
 	 * Start the LiveReload server and automatically re-compiles the files if
 	 * files in fileadmin/ changed
 	 *
+	 * @param string  $address  IP to listen
+	 * @param int     $port     Port to listen
 	 * @param integer $interval Interval between checks
 	 */
-	public function liveReloadCommand($interval = 1) {
-		$port = 35729;
-		$address = '0.0.0.0';
+	public function liveReloadCommand($address = '0.0.0.0', $port = 35729, $interval = 1) {
 		$loop = LoopFactory::create();
 
 		// Websocket server
@@ -260,6 +260,16 @@ class CompileCommandController extends CommandController {
 		);
 
 		$loop->addPeriodicTimer($interval, array($this, 'recompileIfNeededAndInformLiveReloadServer'));
+
+
+		$this->outputLine(''
+			. self::ESCAPE
+			. self::GREEN
+			. 'Websocket server listening on ' . $address . ':' . $port . ' running under PHP version ' . PHP_VERSION
+			. self::ESCAPE
+			. self::NORMAL
+		);
+
 
 		$loop->run();
 	}
@@ -313,8 +323,6 @@ class CompileCommandController extends CommandController {
 			}
 		}
 		$this->pd($compiler);
-
-		$this->outputLine($outputFileLink);
 		return $outputFileLink;
 	}
 
