@@ -190,7 +190,6 @@ class LiveReload implements MessageComponentInterface {
 
 		$message = $this->reloadMessage;
 		$message['path'] = $changedFile;
-		$message['path'] = dirname($changedFile) . '/_debug_pagescss_.css';
 
 		if (!$liveCss) {
 			unset($message['liveCss']);
