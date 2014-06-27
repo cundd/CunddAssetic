@@ -212,13 +212,18 @@ class LiveReload implements MessageComponentInterface {
 	 * Invoked when a file changed
 	 *
 	 * @param string $changedFile
+	 * @param bool   $liveCss
 	 */
-	public function fileDidChange($changedFile){
+	public function fileDidChange($changedFile, $liveCss = TRUE){
 		$this->debug("File $changedFile did change" . PHP_EOL);
 
 		$message = $this->reloadMessage;
 		$message['path'] = $changedFile;
 		$message['path'] = dirname($changedFile) . '/_debug_pagescss_.css';
+
+		if (!$liveCss) {
+			unset($message['liveCss']);
+		}
 
 		/** @var \Ratchet\Server\IoConnection $client */
 		foreach ($this->clients as $client) {

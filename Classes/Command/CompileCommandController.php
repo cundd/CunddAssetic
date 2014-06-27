@@ -203,6 +203,19 @@ class CompileCommandController extends CommandController {
 	 */
 	protected $liveReloadServer;
 
+	/**
+	 * List of script file suffixes
+	 *
+	 * @var array
+	 */
+	protected $styleAssetSuffixes = array('less', 'scss', 'sass', 'css');
+
+	/**
+	 * List of style file suffixes
+	 *
+	 * @var array
+	 */
+	protected $scriptAssetSuffixes = array('js', 'coffee');
 
 
 	/**
@@ -234,7 +247,7 @@ class CompileCommandController extends CommandController {
 	public function liveReloadCommand($interval = 1) {
 		$port = 35729;
 		$address = '0.0.0.0';
-		$loop   = LoopFactory::create();
+		$loop = LoopFactory::create();
 
 		// Websocket server
 		$this->liveReloadServer = new LiveReload();
@@ -254,8 +267,16 @@ class CompileCommandController extends CommandController {
 	/**
 	 * Re-compiles the sources if needed and additionally informs the LiveReload server about the changes
 	 */
-	public function recompileIfNeededAndInformLiveReloadServer(){
-		if ($this->needsRecompile()) {
+	public function recompileIfNeededAndInformLiveReloadServer() {
+		$fileNeedsRecompile = $this->needsRecompile();
+		if (!$fileNeedsRecompile) {
+			return;
+		}
+
+		$isScript = in_array(pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION), $this->scriptAssetSuffixes);
+		if ($isScript) {
+			$this->liveReloadServer->fileDidChange($fileNeedsRecompile, FALSE);
+		} else {
 			$changedFile = $this->compile();
 			$this->liveReloadServer->fileDidChange($changedFile);
 		}
@@ -302,8 +323,8 @@ class CompileCommandController extends CommandController {
 	 * You can specify arguments that will be passed to the text via sprintf
 	 *
 	 * @see http://www.php.net/sprintf
-	 * @param string $text Text to output
-	 * @param array $arguments Optional arguments to use for sprintf
+	 * @param string $text      Text to output
+	 * @param array  $arguments Optional arguments to use for sprintf
 	 * @return void
 	 */
 	protected function output($text, array $arguments = array()) {
@@ -320,7 +341,7 @@ class CompileCommandController extends CommandController {
 	 * @param \Exception $exception
 	 */
 	protected function handleException($exception) {
-		$heading = 'Exception: #' . $exception->getCode() . ':' .  $exception->getMessage();
+		$heading = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
 		$exceptionPosition = 'in ' . $exception->getFile() . ' at line ' . $exception->getLine();
 
 		$coloredText = self::SIGNAL . self::REVERSE . self::SIGNAL . self::BOLD_RED . $heading . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
@@ -351,7 +372,7 @@ class CompileCommandController extends CommandController {
 	 * Returns all files with the given suffix under the given start directory
 	 *
 	 * @param string|array $suffix
-	 * @param string $startDirectory
+	 * @param string       $startDirectory
 	 * @return array<string>
 	 */
 	protected function findFilesBySuffix($suffix, $startDirectory) {
@@ -373,19 +394,19 @@ class CompileCommandController extends CommandController {
 	}
 
 	/**
-	 * Returns if the assets should be recompiled
+	 * If a file changed it's path will be returned, otherwise FALSE
 	 *
-	 * @return bool
+	 * @return string|bool
 	 */
 	protected function needsRecompile() {
 		$lastCompileTime = $this->lastCompileTime;
-		$assetSuffix = array('less', 'scss', 'sass', 'js', 'coffee');
+		$assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes);
 		$foundFiles = $this->findFilesBySuffix($assetSuffix, 'fileadmin/');
 
 		foreach ($foundFiles as $currentFile) {
 			if (filemtime($currentFile) > $lastCompileTime) {
 				$this->lastCompileTime = time();
-				return TRUE;
+				return $currentFile;
 			}
 		}
 		return FALSE;
@@ -394,8 +415,8 @@ class CompileCommandController extends CommandController {
 	/**
 	 * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
 	 *
-	 * @param	mixed	$var1
-	 * @return	string The printed content
+	 * @param    mixed $var1
+	 * @return    string The printed content
 	 */
 	public function pd($var1 = '__iresults_pd_noValue') {
 		if (class_exists('Tx_Iresults')) {
