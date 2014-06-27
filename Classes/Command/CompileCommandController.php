@@ -321,6 +321,10 @@ class CompileCommandController extends CommandController {
 				$this->handleException($exception);
 //				$this->sendAndExit(1);
 			}
+
+			if ($compiler->getExperimental()) {
+				$outputFileLink = $compiler->getSymlinkUri();
+			}
 		}
 		$this->pd($compiler);
 		return $outputFileLink;
