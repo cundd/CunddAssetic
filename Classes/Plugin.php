@@ -435,7 +435,7 @@ class Plugin {
 			return '';
 		}
 		$resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
-		$resource = str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
+		$resource = '/' . str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
 		return '<script type="text/javascript">
 	(function () {
 		var scriptElement = document.createElement(\'script\');
