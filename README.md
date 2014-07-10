@@ -118,3 +118,46 @@ In some cases you may have to specify the path to a CSS preprocessor to match yo
 	    }
     }
 
+
+Command line
+------------
+
+Assetic provides three different CLI commands:
+
+
+### compile:run
+
+Compiles the assets and exit.
+
+```bash
+typo3/cli_dispatch.phpsh extbase compile:run
+```
+
+
+### compile:watch
+
+Watches for file changes in fileadmin/ and re-compiles the assets if needed.
+
+```bash
+typo3/cli_dispatch.phpsh extbase compile:watch
+```
+
+**Options:**
+
+- `--interval`: Interval between file scans
+
+
+### compile:livereload
+
+Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed.
+
+```bash
+typo3/cli_dispatch.phpsh extbase compile:livereload
+```
+
+**Options:**
+
+- `--address`: IP address to listen
+- `--port`: Port to listen
+- `--interval`: Interval between file scans
+
