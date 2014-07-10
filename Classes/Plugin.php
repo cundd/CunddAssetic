@@ -137,6 +137,11 @@ class Plugin {
 			}
 			$this->pd($this->getOutputFileDir() . $this->getCurrentOutputFilename(), $this->getOutputFileDir(), $this->getCurrentOutputFilename());
 		}
+
+		if ($this->getExperimental()) {
+			$renderedStylesheet = $this->getSymlinkUri();
+		}
+
 		$content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
 		$content .= $this->getLiveReloadCode();
 
@@ -429,9 +434,20 @@ class Plugin {
 		if (!$this->getExperimental() || !$this->isBackendUser()) {
 			return '';
 		}
-		$resource = 'EXT:assetic/Resources/Public/JavaScript/Assetic.js';
-		$resource = str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
-		return '<script type="text/javascript" src="' . $resource . '"></script>';
+		$resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
+		$resource = '/' . str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
+		return '<script type="text/javascript">
+	(function () {
+		var scriptElement = document.createElement(\'script\');
+		scriptElement.src = \'' . $resource . '\' + \'?host=\' + location.host;
+		document.getElementsByTagName(\'head\')[0].appendChild(scriptElement);
+	})();
+</script>';
+//		return '<script type="text/javascript" src="' . $resource . '"></script>';
+
+//		$resource = 'EXT:assetic/Resources/Public/JavaScript/Assetic.js';
+//		$resource = str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
+//		return '<script type="text/javascript" src="' . $resource . '"></script>';
 	}
 
 	/**
@@ -669,12 +685,21 @@ class Plugin {
 	}
 
 	/**
+	 * Returns the symlink URI
+	 *
+	 * @return string
+	 */
+	public function getSymlinkUri() {
+		return $this->getOutputFileDir() . '_debug_' . $this->getCurrentOutputFilenameWithoutHash() . '.css';
+	}
+
+	/**
 	 * Returns the symlink path
 	 *
 	 * @return string
 	 */
 	public function getSymlinkPath() {
-		return $this->getPathToWeb() . $this->getOutputFileDir() . '_debug_' . $this->getCurrentOutputFilenameWithoutHash() . '.css';
+		return $this->getPathToWeb() . $this->getSymlinkUri();
 	}
 
 	/**
