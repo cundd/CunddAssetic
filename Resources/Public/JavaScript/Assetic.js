@@ -1,15 +1,17 @@
 (function () {
 	var Assetic,
 		addEventListenerForPageVisibilityChange,
-		tempAssetic = window.Assetic || {};
+		tempAssetic = window.Assetic || {},
+		asseticConfiguration = {};
 
 	if (typeof document.querySelectorAll !== "function") {
 		return;
 	}
 
-	tempAssetic.reloadInterval = tempAssetic.reloadInterval || 1750;
-	tempAssetic.monitor = tempAssetic.monitor || [ 'js', 'css' ];
-	tempAssetic.sleepInterval = tempAssetic.sleepInterval || 10000;
+	asseticConfiguration.reloadInterval 	= tempAssetic.reloadInterval || 1750;
+	asseticConfiguration.monitor 			= tempAssetic.monitor || [ 'cundd_assetic', 'js', 'css' ];
+	asseticConfiguration.sleepInterval 		= tempAssetic.sleepInterval || 10000;
+	asseticConfiguration.autostart 			= tempAssetic.autostart || true;
 
 	function load(url, callback) {
 		var xhr = new XMLHttpRequest();
@@ -32,7 +34,7 @@
 	}
 
 
-	addEventListenerForPageVisibilityChange = function(callback) {
+	addEventListenerForPageVisibilityChange = function (callback) {
 		var hidden = "hidden";
 		// Standards:
 		if (hidden in document)
@@ -54,9 +56,9 @@
 
 
 	Assetic = {
-		monitor: tempAssetic.monitor,
-		reloadInterval: tempAssetic.reloadInterval,
-		sleepInterval: tempAssetic.sleepInterval,
+		monitor: asseticConfiguration.monitor,
+		reloadInterval: asseticConfiguration.reloadInterval,
+		sleepInterval: asseticConfiguration.sleepInterval,
 		isWatching: false,
 		isVisible: true,
 
@@ -65,10 +67,10 @@
 		originalUrls: [],
 
 		// All assets
-		stylesheetAssets: tempAssetic.stylesheetAssets || [],
-		stylesheetAssetsOriginalUrls: tempAssetic.stylesheetAssetsOriginalUrls || [],
-		javaScriptAssets: tempAssetic.javaScriptAssets || [],
-		javaScriptAssetsOriginalUrls: tempAssetic.javaScriptAssetsOriginalUrls || [],
+		stylesheetAssets: asseticConfiguration.stylesheetAssets || [],
+		stylesheetAssetsOriginalUrls: asseticConfiguration.stylesheetAssetsOriginalUrls || [],
+		javaScriptAssets: asseticConfiguration.javaScriptAssets || [],
+		javaScriptAssetsOriginalUrls: asseticConfiguration.javaScriptAssetsOriginalUrls || [],
 
 		recentlyChangedStylesheetAsset: null,
 
@@ -80,21 +82,27 @@
 		startTime: (+new Date),
 		lostFocusTime: null,
 
-		debugMode: tempAssetic.debugMode ? true : false,
+		debugMode: asseticConfiguration.debugMode ? true : false,
 
 		init: function () {
 			var length;
-			Assetic.cunddAsseticStylesheets = document.querySelectorAll("link[href*=cundd_assetic]");
 
-			length = Assetic.cunddAsseticStylesheets.length;
-			for (var i = 0; i < length; i++) {
-				var originalUrl = "", lastSlashPosition,
-					stylesheet = Assetic.cunddAsseticStylesheets[i];
-				originalUrl = stylesheet.href.replace(/__\w*\.css/, "_.css");
+			/*
+			 * Find style assets with cundd_assetic in their URL
+			 */
+			if (Assetic.monitor.indexOf('cundd_assetic') !== -1 || Assetic.monitor.indexOf('css') !== -1) {
+				Assetic.cunddAsseticStylesheets = document.querySelectorAll("link[href*=cundd_assetic]");
+
+				length = Assetic.cunddAsseticStylesheets.length;
+				for (var i = 0; i < length; i++) {
+					var originalUrl = "", lastSlashPosition,
+						stylesheet = Assetic.cunddAsseticStylesheets[i];
+					originalUrl = stylesheet.href.replace(/__\w*\.css/, "_.css");
 
 
-				lastSlashPosition = originalUrl.lastIndexOf("/");
-				Assetic.originalUrls[i] = originalUrl.substr(0, lastSlashPosition) + "/_debug_" + originalUrl.substr(lastSlashPosition + 1);
+					lastSlashPosition = originalUrl.lastIndexOf("/");
+					Assetic.originalUrls[i] = originalUrl.substr(0, lastSlashPosition) + "/_debug_" + originalUrl.substr(lastSlashPosition + 1);
+				}
 			}
 
 			/*
@@ -104,7 +112,7 @@
 				Assetic.javaScriptAssets = Array.prototype.filter.call(
 					Array.prototype.slice.call(document.querySelectorAll("script[src]")),
 					this.isLocalAsset
-					);
+				);
 				Assetic.javaScriptAssetsOriginalUrls = Assetic.javaScriptAssets.map(function (element) {
 					return element.src;
 				});
@@ -117,7 +125,7 @@
 				Assetic.stylesheetAssets = Array.prototype.filter.call(
 					Array.prototype.slice.call(document.querySelectorAll("link[rel='stylesheet']:not([href*=cundd_assetic])")),
 					this.isLocalAsset
-					);
+				);
 				Assetic.stylesheetAssetsOriginalUrls = Assetic.stylesheetAssets.map(function (element) {
 					return element.href;
 				});
@@ -126,13 +134,13 @@
 			addEventListenerForPageVisibilityChange(Assetic.pageVisibilityChanged);
 		},
 
-		log: function(message) {
+		log: function (message) {
 			if (window.console) {
 				window.console.log('Assetic:', message);
 			}
 		},
 
-		debug: function(message) {
+		debug: function (message) {
 			if (Assetic.debugMode && window.console) {
 				window.console.debug('Assetic:', message);
 			}
@@ -237,7 +245,7 @@
 			}
 		},
 
-		pageVisibilityChanged: function() {
+		pageVisibilityChanged: function () {
 			if (Assetic.isWatching) {
 				if (Assetic.isVisible) {
 					Assetic._stopTimer();
@@ -248,11 +256,11 @@
 			}
 		},
 
-		_stopTimer: function() {
+		_stopTimer: function () {
 			window.clearInterval(Assetic.asseticIntervalCallback);
 		},
 
-		run: function() {
+		run: function () {
 			Assetic.reload();
 		},
 
@@ -270,7 +278,7 @@
 			if ((_runCounter % Assetic.reloadStylesheetsEach) == 0 || !Assetic.recentlyChangedStylesheetAsset) {
 				Assetic.reloadStylesheetAssets();
 			} else {
-				Assetic.debug('reload recent css', Assetic.recentlyChangedStylesheetAsset)
+				Assetic.debug('reload recent css', Assetic.recentlyChangedStylesheetAsset);
 				Assetic.reloadRecentlyChangedStylesheetAsset();
 			}
 		},
@@ -286,13 +294,11 @@
 		}
 	};
 
-	document.addEventListener('DOMContentLoaded', function() {
+	if (asseticConfiguration.autostart) {
 		Assetic.init();
 		Assetic.start();
 		Assetic.reload();
-	});
-
-
+	}
 
 	window.Assetic = Assetic;
 })();
