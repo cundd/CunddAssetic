@@ -30,6 +30,12 @@
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\Server\LiveReload;
+use Ratchet\Server\IoServer;
+use Ratchet\WebSocket\WsServer;
+use React\EventLoop\Factory as LoopFactory;
+use React\Socket\Server as ReactServer;
+
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\CommandController;
 
@@ -192,6 +198,24 @@ class CompileCommandController extends CommandController {
 	 */
 	protected $configurationManager;
 
+	/**
+	 * @var LiveReload
+	 */
+	protected $liveReloadServer;
+
+	/**
+	 * List of script file suffixes
+	 *
+	 * @var array
+	 */
+	protected $styleAssetSuffixes = array('less', 'scss', 'sass', 'css');
+
+	/**
+	 * List of style file suffixes
+	 *
+	 * @var array
+	 */
+	protected $scriptAssetSuffixes = array('js', 'coffee');
 
 
 	/**
@@ -215,6 +239,60 @@ class CompileCommandController extends CommandController {
 	}
 
 	/**
+	 * Start the LiveReload server and automatically re-compiles the files if
+	 * files in fileadmin/ changed
+	 *
+	 * @param string  $address  IP to listen
+	 * @param int     $port     Port to listen
+	 * @param integer $interval Interval between checks
+	 */
+	public function liveReloadCommand($address = '0.0.0.0', $port = 35729, $interval = 1) {
+		$loop = LoopFactory::create();
+
+		// Websocket server
+		$this->liveReloadServer = new LiveReload();
+		$socket = new ReactServer($loop);
+		$socket->listen($port, $address);
+		$server = new IoServer(
+			new WsServer($this->liveReloadServer),
+			$socket,
+			$loop
+		);
+
+		$loop->addPeriodicTimer($interval, array($this, 'recompileIfNeededAndInformLiveReloadServer'));
+
+
+		$this->outputLine(''
+			. self::ESCAPE
+			. self::GREEN
+			. 'Websocket server listening on ' . $address . ':' . $port . ' running under PHP version ' . PHP_VERSION
+			. self::ESCAPE
+			. self::NORMAL
+		);
+
+
+		$loop->run();
+	}
+
+	/**
+	 * Re-compiles the sources if needed and additionally informs the LiveReload server about the changes
+	 */
+	public function recompileIfNeededAndInformLiveReloadServer() {
+		$fileNeedsRecompile = $this->needsRecompile();
+		if (!$fileNeedsRecompile) {
+			return;
+		}
+
+		$isScript = in_array(pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION), $this->scriptAssetSuffixes);
+		if ($isScript) {
+			$this->liveReloadServer->fileDidChange($fileNeedsRecompile, FALSE);
+		} else {
+			$changedFile = $this->compile();
+			$this->liveReloadServer->fileDidChange($changedFile);
+		}
+	}
+
+	/**
 	 * Re-compiles the sources if needed
 	 */
 	protected function recompileIfNeeded() {
@@ -225,6 +303,8 @@ class CompileCommandController extends CommandController {
 
 	/**
 	 * Compile the assets
+	 *
+	 * @return string
 	 */
 	protected function compile() {
 		$outputFileLink = '';
@@ -241,10 +321,13 @@ class CompileCommandController extends CommandController {
 				$this->handleException($exception);
 //				$this->sendAndExit(1);
 			}
+
+			if ($compiler->getExperimental()) {
+				$outputFileLink = $compiler->getSymlinkUri();
+			}
 		}
 		$this->pd($compiler);
-
-		$this->outputLine($outputFileLink);
+		return $outputFileLink;
 	}
 
 	/**
@@ -252,8 +335,8 @@ class CompileCommandController extends CommandController {
 	 * You can specify arguments that will be passed to the text via sprintf
 	 *
 	 * @see http://www.php.net/sprintf
-	 * @param string $text Text to output
-	 * @param array $arguments Optional arguments to use for sprintf
+	 * @param string $text      Text to output
+	 * @param array  $arguments Optional arguments to use for sprintf
 	 * @return void
 	 */
 	protected function output($text, array $arguments = array()) {
@@ -270,7 +353,7 @@ class CompileCommandController extends CommandController {
 	 * @param \Exception $exception
 	 */
 	protected function handleException($exception) {
-		$heading = 'Exception: #' . $exception->getCode() . ':' .  $exception->getMessage();
+		$heading = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
 		$exceptionPosition = 'in ' . $exception->getFile() . ' at line ' . $exception->getLine();
 
 		$coloredText = self::SIGNAL . self::REVERSE . self::SIGNAL . self::BOLD_RED . $heading . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
@@ -301,7 +384,7 @@ class CompileCommandController extends CommandController {
 	 * Returns all files with the given suffix under the given start directory
 	 *
 	 * @param string|array $suffix
-	 * @param string $startDirectory
+	 * @param string       $startDirectory
 	 * @return array<string>
 	 */
 	protected function findFilesBySuffix($suffix, $startDirectory) {
@@ -323,19 +406,19 @@ class CompileCommandController extends CommandController {
 	}
 
 	/**
-	 * Returns if the assets should be recompiled
+	 * If a file changed it's path will be returned, otherwise FALSE
 	 *
-	 * @return bool
+	 * @return string|bool
 	 */
 	protected function needsRecompile() {
 		$lastCompileTime = $this->lastCompileTime;
-		$assetSuffix = array('less', 'scss', 'sass', 'js', 'coffee');
+		$assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes);
 		$foundFiles = $this->findFilesBySuffix($assetSuffix, 'fileadmin/');
 
 		foreach ($foundFiles as $currentFile) {
 			if (filemtime($currentFile) > $lastCompileTime) {
 				$this->lastCompileTime = time();
-				return TRUE;
+				return $currentFile;
 			}
 		}
 		return FALSE;
@@ -344,8 +427,8 @@ class CompileCommandController extends CommandController {
 	/**
 	 * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
 	 *
-	 * @param	mixed	$var1
-	 * @return	string The printed content
+	 * @param    mixed $var1
+	 * @return    string The printed content
 	 */
 	public function pd($var1 = '__iresults_pd_noValue') {
 		if (class_exists('Tx_Iresults')) {
