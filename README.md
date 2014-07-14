@@ -149,7 +149,7 @@ typo3/cli_dispatch.phpsh extbase compile:watch
 
 ### compile:livereload
 
-Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed.
+Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed. The TypoScript constant `module.tx_assetic.settings.experimental` should be set to 1.
 
 ```bash
 typo3/cli_dispatch.phpsh extbase compile:livereload
@@ -161,3 +161,11 @@ typo3/cli_dispatch.phpsh extbase compile:livereload
 - `--port`: Port to listen
 - `--interval`: Interval between file scans
 
+
+
+Additional tools
+----------------
+
+### Standalone auto-refresh tool
+
+Cundd Assetic provides a JavaScript that observes the CSS and JavaScript assets on the page for changes and automatically reloads them. For more information and usage visit [https://github.com/cundd/CunddAssetic/tree/master/Resources/Public/JavaScript](https://github.com/cundd/CunddAssetic/tree/master/Resources/Public/JavaScript).
