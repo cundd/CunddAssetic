@@ -168,4 +168,4 @@ Additional tools
 
 ### Standalone auto-refresh tool
 
-Cundd Assetic provides a JavaScript that observes the CSS and JavaScript assets on the page for changes and automatically reloads them. For more information and usage visit [https://github.com/cundd/CunddAssetic/tree/master/Resources/Public/JavaScript](https://github.com/cundd/CunddAssetic/tree/master/Resources/Public/JavaScript).
+Cundd Assetic provides a JavaScript that observes the CSS and JavaScript assets on the page for changes and automatically reloads them. For more information and usage visit [/Resources/Public/JavaScript](/Resources/Public/JavaScript).
