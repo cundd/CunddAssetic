@@ -1,0 +1,2 @@
+# cat=basic/configuration; type=boolean; label=Multidomain installation: Enable this if different websites are run from the same installation
+multidomain = 0
