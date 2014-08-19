@@ -31,6 +31,7 @@
 namespace Cundd\Assetic\Command;
 
 use Cundd\Assetic\Server\LiveReload;
+use Cundd\Assetic\Utility\ConfigurationUtility;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Factory as LoopFactory;
@@ -220,8 +221,12 @@ class CompileCommandController extends CommandController {
 
 	/**
 	 * Run command
+	 *
+	 * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
 	 */
-	public function runCommand() {
+	public function runCommand($domainContext = NULL) {
+		$this->validateMultiDomainInstallation($domainContext);
+
 		$this->compile();
 		$this->sendAndExit();
 	}
@@ -230,8 +235,10 @@ class CompileCommandController extends CommandController {
 	 * Automatically re-compiles the files if files in fileadmin/ changed
 	 *
 	 * @param integer $interval Interval between checks
+	 * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
 	 */
-	public function watchCommand($interval = 1) {
+	public function watchCommand($interval = 1, $domainContext = NULL) {
+		$this->validateMultiDomainInstallation($domainContext);
 		while (TRUE) {
 			$this->recompileIfNeeded();
 			sleep($interval);
@@ -245,8 +252,11 @@ class CompileCommandController extends CommandController {
 	 * @param string  $address  IP to listen
 	 * @param int     $port     Port to listen
 	 * @param integer $interval Interval between checks
+	 * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
 	 */
-	public function liveReloadCommand($address = '0.0.0.0', $port = 35729, $interval = 1) {
+	public function liveReloadCommand($address = '0.0.0.0', $port = 35729, $interval = 1, $domainContext = NULL) {
+		$this->validateMultiDomainInstallation($domainContext);
+
 		$loop = LoopFactory::create();
 
 		// Websocket server
@@ -328,6 +338,33 @@ class CompileCommandController extends CommandController {
 		}
 		$this->pd($compiler);
 		return $outputFileLink;
+	}
+
+	/**
+	 * Prints an error message if the installation is configured as multidomain, but no domainContext is specified
+	 *
+	 * @param mixed $domainContext
+	 */
+	protected function validateMultiDomainInstallation($domainContext) {
+		if (ConfigurationUtility::isMultiDomain()) {
+
+			$this->outputLine(self::SIGNAL . self::BOLD_RED . 'Multidomain installations are currently not supported' . self::SIGNAL_ATTRIBUTES_OFF);
+			$this->sendAndExit(1);
+
+
+			if (!$domainContext) {
+				$this->handleException(new \UnexpectedValueException('This installation is configured as multidomain. Please specify the domainContext', 1408364616));
+				$this->sendAndExit(1);
+			}
+			ConfigurationUtility::setDomainContext($domainContext);
+			$this->outputLine(''
+				. self::ESCAPE
+				. self::GREEN
+				. 'Switched to domain context ' . ConfigurationUtility::getDomainContext()
+				. self::ESCAPE
+				. self::NORMAL
+			);
+		}
 	}
 
 	/**
