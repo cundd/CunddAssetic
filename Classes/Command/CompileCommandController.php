@@ -217,6 +217,13 @@ class CompileCommandController extends CommandController {
 	 */
 	protected $scriptAssetSuffixes = array('js', 'coffee');
 
+	/**
+	 * Path to watch for changes
+	 *
+	 * @var string
+	 */
+	protected $watchPath = '';
+
 
 	/**
 	 * Run command
@@ -227,11 +234,13 @@ class CompileCommandController extends CommandController {
 	}
 
 	/**
-	 * Automatically re-compiles the files if files in fileadmin/ changed
+	 * Automatically re-compiles the files if files in the directory path (or 'fileadmin/') changed
 	 *
 	 * @param integer $interval Interval between checks
+	 * @param string $path Directory path that should be watched
 	 */
-	public function watchCommand($interval = 1) {
+	public function watchCommand($interval = 1, $path = 'fileadmin') {
+		$this->watchPath = $path;
 		while (TRUE) {
 			$this->recompileIfNeeded();
 			sleep($interval);
@@ -240,13 +249,15 @@ class CompileCommandController extends CommandController {
 
 	/**
 	 * Start the LiveReload server and automatically re-compiles the files if
-	 * files in fileadmin/ changed
+	 * files in the directory path (or 'fileadmin/') changed
 	 *
 	 * @param string  $address  IP to listen
 	 * @param int     $port     Port to listen
 	 * @param integer $interval Interval between checks
+	 * @param string $path Directory path that should be watched
 	 */
-	public function liveReloadCommand($address = '0.0.0.0', $port = 35729, $interval = 1) {
+	public function liveReloadCommand($address = '0.0.0.0', $port = 35729, $interval = 1, $path = 'fileadmin') {
+		$this->watchPath = $path;
 		$loop = LoopFactory::create();
 
 		// Websocket server
@@ -413,7 +424,7 @@ class CompileCommandController extends CommandController {
 	protected function needsRecompile() {
 		$lastCompileTime = $this->lastCompileTime;
 		$assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes);
-		$foundFiles = $this->findFilesBySuffix($assetSuffix, 'fileadmin/');
+		$foundFiles = $this->findFilesBySuffix($assetSuffix, $this->watchPath);
 
 		foreach ($foundFiles as $currentFile) {
 			if (filemtime($currentFile) > $lastCompileTime) {
