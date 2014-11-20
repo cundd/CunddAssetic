@@ -9,6 +9,7 @@
     <orderEntry type="module-library">
       <library name="PHP">
         <CLASSES>
+          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/backend" />
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/fluid" />
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/core" />
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase" />
@@ -16,6 +17,7 @@
           <root url="file://$MODULE_DIR$/../PHPUnit" />
         </CLASSES>
         <SOURCES>
+          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/backend" />
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/fluid" />
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/core" />
           <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase" />
@@ -34,6 +36,7 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" name="sass-stdlib" level="application" />
   </component>
 </module>
 

@@ -196,6 +196,7 @@ class LiveReload implements MessageComponentInterface {
 		}
 
 		$this->debug('Notify ' . count($this->clients) . ' clients' . PHP_EOL);
+		$this->debug('Sending ' . (json_encode($message)) . ' ' . PHP_EOL);
 
 		/** @var \Ratchet\Server\IoConnection $client */
 		foreach ($this->clients as $client) {
