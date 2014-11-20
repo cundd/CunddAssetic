@@ -33,6 +33,7 @@ use Assetic\AssetWriter;
 use Assetic\AssetManager;
 use Assetic\FilterManager;
 use Assetic\Filter;
+use Cundd\Assetic\Utility\ConfigurationUtility;
 
 /**
  * Assetic Plugin
@@ -106,6 +107,13 @@ class Plugin {
 	protected $filesToRemove = array();
 
 	/**
+	 * Defines if debugging is enabled
+	 *
+	 * @var bool
+	 */
+	static protected $willDebug = -1;
+
+	/**
 	 * Output configured stylesheets as link tags
 	 *
 	 * Some processing will be done according to the TypoScript setup of the stylesheets.
@@ -117,7 +125,8 @@ class Plugin {
 	 */
 	public function main($content, $conf) {
 		$this->profile('Cundd Assetic plugin begin');
-		$this->configuration = $conf;
+		$this->setConfiguration($conf);
+
 
 		// Check if the assets should be compiled
 		if ($this->willCompile()) {
@@ -138,7 +147,7 @@ class Plugin {
 			$this->pd($this->getOutputFileDir() . $this->getCurrentOutputFilename(), $this->getOutputFileDir(), $this->getCurrentOutputFilename());
 		}
 
-		if ($this->getExperimental()) {
+		if ($this->getExperimental() && $this->isBackendUser()) {
 			$renderedStylesheet = $this->getSymlinkUri();
 		}
 
@@ -466,14 +475,15 @@ class Plugin {
 		if ($this->willCompile === -1) {
 			// If no backend user is logged in, check if it is allowed
 			if (!$this->isBackendUser()) {
-				$this->pd('no BE_USER, is dev:', $this->isDevelopment(),
-					(bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login'])));
-
 				$this->willCompile = (bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login']));
 			} else {
-				$this->pd('has BE_USER, is dev:', $this->isDevelopment());
 				$this->willCompile = $this->isDevelopment();
 			}
+
+			$this->say('Backend user detected: ' . ($this->isBackendUser() ? 'yes' : 'no'));
+			$this->say('Development mode: ' . ($this->isDevelopment() ? 'on' : 'off'));
+			$this->say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));
+
 		}
 		return $this->willCompile;
 	}
@@ -555,7 +565,7 @@ class Plugin {
 				}
 			}
 		}
-		return $outputFileName;
+		return $this->getDomainIdentifier() . $outputFileName;
 	}
 
 	/**
@@ -730,6 +740,8 @@ class Plugin {
 		$matchingFiles = glob($filePath . '_' . '*' . $suffix);
 		$this->profile('Did call glob');
 
+		$this->pd('GLOB', $filePath);
+
 		if (!$matchingFiles) {
 			return array();
 		}
@@ -870,6 +882,9 @@ class Plugin {
 	 * @return mixed
 	 */
 	protected function getCache($identifier) {
+		$identifier = sha1($this->getDomainIdentifier() . '-' . $identifier);
+		$this->pd($this->getDomainIdentifier() . '-' . $identifier);
+
 		// $this->pd('getCache', $identifier);
 		if (is_callable('apc_fetch')) {
 			return apc_fetch($identifier);
@@ -884,6 +899,9 @@ class Plugin {
 	 * @param mixed $value      Value to store
 	 */
 	protected function setCache($identifier, $value) {
+		$identifier = sha1($this->getDomainIdentifier() . '-' . $identifier);
+		$this->pd($this->getDomainIdentifier() . '-' . $identifier);
+
 		// $this->pd('setCache', $identifier, $value);
 		if (is_callable('apc_store')) {
 			apc_store($identifier, $value);
@@ -904,6 +922,28 @@ class Plugin {
 		$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), '');
 	}
 
+	/**
+	 * Returns the relevant domain to be attached to the cache identifier to distinguish the websites in a multi-domain
+	 * installation
+	 *
+	 * @return string
+	 */
+	protected function getDomainIdentifier() {
+		if (!ConfigurationUtility::isMultiDomain()) {
+			return '';
+		}
+
+		$domain = ConfigurationUtility::getDomainContext();
+		if (substr($domain, 0, 7) === 'http://') {
+			$domain = substr($domain, 7);
+		} else if (substr($domain, 0, 8) === 'https://') {
+			$domain = substr($domain, 8);
+		}
+
+		$domain = str_replace('.', '', $domain);
+		return $domain . '-';
+	}
+
 
 
 
@@ -914,23 +954,39 @@ class Plugin {
 	 * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
 	 *
 	 * @param	mixed	$var1
-	 * @return	string The printed content
 	 */
 	public function pd($var1 = '__iresults_pd_noValue') {
-		static $willDebug = -1;
-		if ($willDebug === -1) {
-			$willDebug = FALSE;
-			if (
-				(isset($_GET['cundd_assetic_debug']) && $_GET['cundd_assetic_debug'])
-				|| (isset($_POST['cundd_assetic_debug']) && $_POST['cundd_assetic_debug'])
-				) {
-				$willDebug = TRUE;
-			}
+		if (!self::willDebug()) {
+			return;
 		}
 
-		if (class_exists('Tx_Iresults') && $willDebug) {
-			$arguments = func_get_args();
+		$arguments = func_get_args();
+		if (class_exists('Tx_Iresults')) {
 			call_user_func_array(array('Tx_Iresults', 'pd'), $arguments);
+		}
+
+		if (php_sapi_name() !== 'cli') {
+			echo '<pre>';
+			foreach ($arguments as $argument) {
+				var_dump($argument);
+			}
+			echo '</pre>';
+		}
+	}
+
+	/**
+	 * Prints the given message if debugging is enabled
+	 *
+	 * @param string $message
+	 */
+	public function say($message) {
+		if (!self::willDebug()) {
+			return;
+		}
+		if (php_sapi_name() === 'cli') {
+			fwrite(STDOUT, $message . PHP_EOL);
+		} else {
+			echo "<pre>$message</pre>";
 		}
 	}
 
@@ -944,6 +1000,28 @@ class Plugin {
 		if (class_exists('Tx_Iresults_Profiler')) {
 			\Tx_Iresults_Profiler::profile($msg);
 		}
+	}
+
+	/**
+	 * Returns if debugging is enabled
+	 *
+	 * @return bool
+	 */
+	protected function willDebug() {
+		if (self::$willDebug === -1) {
+			self::$willDebug = FALSE;
+			if (
+				(isset($_GET['cundd_assetic_debug']) && $_GET['cundd_assetic_debug'])
+				|| (isset($_POST['cundd_assetic_debug']) && $_POST['cundd_assetic_debug'])
+			) {
+				self::$willDebug = TRUE;
+			}
+
+			if (!$this->isBackendUser()) {
+				self::$willDebug = FALSE;
+			}
+		}
+		return self::$willDebug;
 	}
 }
 
