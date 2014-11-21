@@ -229,12 +229,16 @@ class CompileCommandController extends CommandController {
 	/**
 	 * Run command
 	 *
+	 * @param string $destination Specify a relative path where the file should be copied to
 	 * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
 	 */
-	public function runCommand($domainContext = NULL) {
+	public function runCommand($destination = '', $domainContext = NULL) {
 		$this->validateMultiDomainInstallation($domainContext);
 
-		$this->compile();
+		$sourcePath = $this->compile();
+		if ($destination) {
+			$this->copyToDestination($sourcePath, $destination);
+		}
 		$this->sendAndExit();
 	}
 
@@ -376,6 +380,36 @@ class CompileCommandController extends CommandController {
 				. self::NORMAL
 			);
 		}
+	}
+
+	/**
+	 * Copies the source to the destination
+	 *
+	 * @param string $source
+	 * @param string $destination
+	 * @return string Returns the used path
+	 */
+	protected function copyToDestination($source, $destination) {
+		if (!$destination) {
+			return $source;
+		}
+
+		// Check if the filename has to be appended
+		if (substr($destination, -1) === '/' || intval(strrpos($destination, '.')) < intval(strrpos($destination, '/'))) {
+			if (substr($destination, -1) !== '/') {
+				$destination .= '/';
+			}
+			$destination .= basename($source);
+		}
+
+		$destination = PATH_site . $destination;
+		if (!file_exists(dirname($destination))) {
+			mkdir(dirname($destination), 0775, TRUE);
+		}
+		if (copy($source, $destination)) {
+			return $destination;
+		}
+		return $source;
 	}
 
 	/**
