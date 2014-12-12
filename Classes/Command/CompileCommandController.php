@@ -205,18 +205,25 @@ class CompileCommandController extends CommandController {
 	protected $liveReloadServer;
 
 	/**
-	 * List of script file suffixes
+	 * List of style file suffixes
 	 *
 	 * @var array
 	 */
 	protected $styleAssetSuffixes = array('less', 'scss', 'sass', 'css');
 
 	/**
-	 * List of style file suffixes
+	 * List of script file suffixes
 	 *
 	 * @var array
 	 */
 	protected $scriptAssetSuffixes = array('js', 'coffee');
+
+	/**
+	 * List of other file suffixes that should trigger a full page reload
+	 *
+	 * @var array
+	 */
+	protected $otherAssetSuffixes = array('php', 'ts');
 
 	/**
 	 * Path to watch for changes
@@ -308,8 +315,8 @@ class CompileCommandController extends CommandController {
 			return;
 		}
 
-		$isScript = in_array(pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION), $this->scriptAssetSuffixes);
-		if ($isScript) {
+		$needFullPageReload = in_array(pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION), array_merge($this->scriptAssetSuffixes, $this->otherAssetSuffixes));
+		if ($needFullPageReload) {
 			$this->liveReloadServer->fileDidChange($fileNeedsRecompile, FALSE);
 		} else {
 			$changedFile = $this->compile();
@@ -494,7 +501,7 @@ class CompileCommandController extends CommandController {
 	 */
 	protected function needsRecompile() {
 		$lastCompileTime = $this->lastCompileTime;
-		$assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes);
+		$assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes, $this->otherAssetSuffixes);
 		$foundFiles = $this->findFilesBySuffix($assetSuffix, $this->watchPath);
 
 		foreach ($foundFiles as $currentFile) {
