@@ -43,6 +43,96 @@ use Ratchet\ConnectionInterface;
  */
 class LiveReload implements MessageComponentInterface {
 	/**
+	 * Emergency: system is unusable
+	 *
+	 * You'd likely not be able to reach the system. You better have an SLA in
+	 * place when this happens.
+	 *
+	 * @var integer
+	 */
+	const LOG_LEVEL_EMERGENCY = 0;
+
+	/**
+	 * Alert: action must be taken immediately
+	 *
+	 * Example: Entire website down, database unavailable, etc.
+	 *
+	 * @var integer
+	 */
+	const LOG_LEVEL_ALERT = 1;
+
+	/**
+	 * Critical: critical conditions
+	 *
+	 * Example: unexpected exception.
+	 *
+	 * @var integer
+	 */
+	const LOG_LEVEL_CRITICAL = 2;
+
+	/**
+	 * Error: error conditions
+	 *
+	 * Example: Runtime error.
+	 *
+	 * @var integer
+	 */
+	const LOG_LEVEL_ERROR = 3;
+
+	/**
+	 * Warning: warning conditions
+	 *
+	 * Examples: Use of deprecated APIs, undesirable things that are not
+	 * necessarily wrong.
+	 *
+	 * @var integer
+	 */
+	const LOG_LEVEL_WARNING = 4;
+
+	/**
+	 * Notice: normal but significant condition
+	 *
+	 * Example: things you should have a look at, nothing to worry about though.
+	 *
+	 * @var integer
+	 */
+	const LOG_LEVEL_NOTICE = 5;
+
+	/**
+	 * Informational: informational messages
+	 *
+	 * Examples: User logs in, SQL logs.
+	 *
+	 * @var integer
+	 */
+	const LOG_LEVEL_INFO = 6;
+
+	/**
+	 * Debug: debug-level messages
+	 *
+	 * Example: Detailed status information.
+	 *
+	 * @var integer
+	 */
+	const LOG_LEVEL_DEBUG = 7;
+
+	/**
+	 * Reverse look up of log level to level name.
+	 *
+	 * @var array
+	 */
+	static protected $logLevelPrefix = array(
+		self::LOG_LEVEL_EMERGENCY => '!!!',
+		self::LOG_LEVEL_ALERT     => '!!',
+		self::LOG_LEVEL_CRITICAL  => '!',
+		self::LOG_LEVEL_ERROR     => '!',
+		self::LOG_LEVEL_WARNING   => '(w)',
+		self::LOG_LEVEL_NOTICE    => '(n)',
+		self::LOG_LEVEL_INFO      => '(i)',
+		self::LOG_LEVEL_DEBUG     => '(d)'
+	);
+
+	/**
 	 * End of a message
 	 */
 	const MESSAGE_END = "\r\n";
@@ -56,37 +146,40 @@ class LiveReload implements MessageComponentInterface {
 
 	/**
 	 * Handshake message
+	 *
 	 * @var array
 	 */
 	protected $handshakeMessage = array(
-		'command' 		=> 'hello',
-		'protocols' 	=> array(
+		'command'    => 'hello',
+		'protocols'  => array(
 			'http://livereload.com/protocols/official-7',
 			'http://livereload.com/protocols/official-8',
 //			'http://livereload.com/protocols/official-9',
 //			'http://livereload.com/protocols/2.x-origin-version-negotiation',
 //			'http://livereload.com/protocols/2.x-remote-control',
 		),
-		'serverName' 	=> 'CunddAssetic',
+		'serverName' => 'CunddAssetic',
 	);
 
 	/**
 	 * Reload message
+	 *
 	 * @var array
 	 */
 	protected $reloadMessage = array(
-		'command' 	=> 'reload',
-		'path' 		=> 'path/to/file.ext',
-		'liveCss' 	=> TRUE,
+		'command' => 'reload',
+		'path'    => 'path/to/file.ext',
+		'liveCss' => TRUE,
 	);
 
 	/**
 	 * Alert message
+	 *
 	 * @var array
 	 */
 	protected $alertMessage = array(
-		'command' 	=> 'alert',
-		'message' 	=> 'Hy',
+		'command' => 'alert',
+		'message' => 'Hy',
 	);
 
 
@@ -107,7 +200,8 @@ class LiveReload implements MessageComponentInterface {
 				$msg,
 				$from->resourceId,
 				$from->remoteAddress
-			)
+			),
+			self::LOG_LEVEL_DEBUG
 		);
 
 		// If the sender is the current host, pass the message to the clients
@@ -124,6 +218,7 @@ class LiveReload implements MessageComponentInterface {
 
 	/**
 	 * When a new connection is opened it will be passed to this method
+	 *
 	 * @param  ConnectionInterface $conn The socket/connection that just connected to your application
 	 * @throws \Exception
 	 */
@@ -132,12 +227,12 @@ class LiveReload implements MessageComponentInterface {
 		$this->clients->attach($conn);
 		$this->send($conn, $this->handshakeMessage);
 
-		$this->debug("New connection ({$conn->resourceId})\n");
+		$this->debug("New connection ({$conn->resourceId})\n", '+');
 	}
 
 	/**
 	 * @param ConnectionInterface $connection
-	 * @param mixed $message
+	 * @param mixed               $message
 	 */
 	protected function send($connection, $message) {
 		if (is_string($message)) {
@@ -148,7 +243,7 @@ class LiveReload implements MessageComponentInterface {
 			if (defined('JSON_UNESCAPED_SLASHES')) {
 				$message = json_encode($message, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 			} else {
-				$message =  str_replace('\\/', '/', json_encode($this->handshakeMessage));
+				$message = str_replace('\\/', '/', json_encode($this->handshakeMessage));
 			}
 			$message .= self::MESSAGE_END;
 		}
@@ -158,24 +253,26 @@ class LiveReload implements MessageComponentInterface {
 
 	/**
 	 * This is called before or after a socket is closed (depends on how it's closed).  SendMessage to $conn will not result in an error if it has already been closed.
+	 *
 	 * @param  ConnectionInterface $conn The socket/connection that is closing/closed
 	 * @throws \Exception
 	 */
 	public function onClose(ConnectionInterface $conn) {
 		// The connection is closed, remove it, as we can no longer send it messages
 		$this->clients->detach($conn);
-		$this->debug("Connection {$conn->resourceId} has disconnected\n");
+		$this->debug("Connection {$conn->resourceId} has disconnected\n", '-');
 	}
 
 	/**
 	 * If there is an error with one of the sockets, or somewhere in the application where an Exception is thrown,
 	 * the Exception is sent back down the stack, handled by the Server and bubbled back up the application through this method
+	 *
 	 * @param  ConnectionInterface $conn
 	 * @param  \Exception          $e
 	 * @throws \Exception
 	 */
 	public function onError(ConnectionInterface $conn, \Exception $e) {
-		$this->debug("An error has occurred: {$e->getMessage()}\n");
+		$this->debug("An error has occurred: {$e->getMessage()}\n", self::LOG_LEVEL_ERROR);
 		$conn->close();
 	}
 
@@ -185,8 +282,8 @@ class LiveReload implements MessageComponentInterface {
 	 * @param string $changedFile
 	 * @param bool   $liveCss
 	 */
-	public function fileDidChange($changedFile, $liveCss = TRUE){
-		$this->debug("File $changedFile did change" . PHP_EOL);
+	public function fileDidChange($changedFile, $liveCss = TRUE) {
+		$this->debug("File $changedFile did change" . PHP_EOL, self::LOG_LEVEL_INFO);
 
 		$message = $this->reloadMessage;
 		$message['path'] = $changedFile;
@@ -195,8 +292,8 @@ class LiveReload implements MessageComponentInterface {
 			unset($message['liveCss']);
 		}
 
-		$this->debug('Notify ' . count($this->clients) . ' clients' . PHP_EOL);
-		$this->debug('Sending ' . (json_encode($message)) . ' ' . PHP_EOL);
+		$this->debug('Notify ' . count($this->clients) . ' clients' . PHP_EOL, self::LOG_LEVEL_DEBUG);
+		$this->debug('Sending ' . (json_encode($message)) . ' ' . PHP_EOL, self::LOG_LEVEL_DEBUG);
 
 		/** @var \Ratchet\Server\IoConnection $client */
 		foreach ($this->clients as $client) {
@@ -208,11 +305,22 @@ class LiveReload implements MessageComponentInterface {
 	 * Prints the given message to the console
 	 *
 	 * @param string $message
+	 * @param int    $logLevel
 	 */
-	protected function debug($message){
+	protected function debug($message, $logLevel = NULL) {
+		if ($logLevel !== NULL) {
+			$messagePrefix = NULL;
+			if (is_int($logLevel)) {
+				$messagePrefix = isset(self::$logLevelPrefix[$logLevel]) ? self::$logLevelPrefix[$logLevel] : '';
+			} elseif (is_string($logLevel)) {
+				$messagePrefix = "($logLevel)";
+			}
+			if ($messagePrefix) {
+				$message = $messagePrefix . ' ' . $message;
+			}
+		}
 		fwrite(STDOUT, $message);
 	}
-
 
 
 }
