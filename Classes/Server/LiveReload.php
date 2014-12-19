@@ -243,7 +243,7 @@ class LiveReload implements MessageComponentInterface {
 			if (defined('JSON_UNESCAPED_SLASHES')) {
 				$message = json_encode($message, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 			} else {
-				$message = str_replace('\\/', '/', json_encode($this->handshakeMessage));
+				$message = str_replace('\\/', '/', json_encode($message));
 			}
 			$message .= self::MESSAGE_END;
 		}
