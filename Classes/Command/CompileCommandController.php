@@ -223,7 +223,7 @@ class CompileCommandController extends CommandController {
 	 *
 	 * @var array
 	 */
-	protected $otherAssetSuffixes = array('php', 'ts');
+	protected $otherAssetSuffixes = array('php', 'ts', 'html');
 
 	/**
 	 * Path to watch for changes

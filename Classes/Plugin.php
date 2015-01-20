@@ -372,6 +372,7 @@ class Plugin {
 
 		// Move the temp file to the new file
 		$this->profile('Will move compiled asset');
+		//printf('Rename "%s" to "%s"', $outputFileTempPath, $outputFileFinalPath);
 		rename($outputFileTempPath, $outputFileFinalPath);
 		$this->profile('Did move compiled asset');
 
