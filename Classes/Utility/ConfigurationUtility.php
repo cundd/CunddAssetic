@@ -59,7 +59,7 @@ class ConfigurationUtility {
 	 * @param string $key
 	 * @return mixed
 	 */
-	static public function getExtensionConfiguration($key) {
+	public static function getExtensionConfiguration($key) {
 		// Read the configuration from the globals
 		static $configuration;
 		if (!$configuration) {
@@ -83,7 +83,7 @@ class ConfigurationUtility {
 	 *
 	 * @return boolean
 	 */
-	static public function isMultiDomain() {
+	public static function isMultiDomain() {
 		return !!intval(self::getExtensionConfiguration('multidomain'));
 	}
 
@@ -93,7 +93,7 @@ class ConfigurationUtility {
 	 * @param string|int $domainContext Domain as string or the page UID to read the domain from
 	 * @throws \UnexpectedValueException if the Backend Utility class was not found or can not be used
 	 */
-	static public function setDomainContext($domainContext) {
+	public static function setDomainContext($domainContext) {
 		if (is_numeric($domainContext)) {
 			if (!class_exists('t3lib_befunc')) throw new \UnexpectedValueException('Backend Utility class not found', 1408363869);
 			$domainContext = \t3lib_befunc::getViewDomain($domainContext);
@@ -109,7 +109,7 @@ class ConfigurationUtility {
 	 *
 	 * @return string
 	 */
-	static public function getDomainContext() {
+	public static function getDomainContext() {
 		if (!self::$domainContext) {
 			$domainContextTemp = '';
 			if (TYPO3_MODE == 'BE') {
