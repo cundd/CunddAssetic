@@ -226,11 +226,39 @@ class CompileCommandController extends CommandController {
 	protected $otherAssetSuffixes = array('php', 'ts', 'html');
 
 	/**
-	 * Path to watch for changes
+	 * Array of paths to watch for changes
 	 *
-	 * @var string
+	 * @var string[]
 	 */
-	protected $watchPath = '';
+	protected $watchPaths = array();
+
+	/**
+	 * Max depth to collect files for
+	 *
+	 * @var int
+	 */
+	protected $findFilesMaxDepth = 6;
+
+	/**
+	 * Array of watched files
+	 *
+	 * @var string[]
+	 */
+	protected $watchedFilesCache = array();
+
+	/**
+	 * Timestamp of the last directory scan
+	 *
+	 * @var int
+	 */
+	protected $watchedFilesCacheTime = 0;
+
+	/**
+	 * Lifetime of the directory scan cache
+	 *
+	 * @var int
+	 */
+	protected $watchedFilesCacheLifetime = 5;
 
 
 	/**
@@ -253,11 +281,12 @@ class CompileCommandController extends CommandController {
 	 * Automatically re-compiles the files if files in the directory path (or 'fileadmin/') changed
 	 *
 	 * @param integer $interval Interval between checks
-	 * @param string $path Directory path that should be watched
+	 * @param string $path Directory path(s) that should be watched (Multiple paths separated by colon ":")
 	 * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
 	 */
 	public function watchCommand($interval = 1, $path = 'fileadmin', $domainContext = NULL) {
-		$this->watchPath = $path;
+		$this->watchPaths = explode(':', $path);
+		$this->printWatchedPaths();
 		$this->validateMultiDomainInstallation($domainContext);
 		while (TRUE) {
 			$this->recompileIfNeeded();
@@ -272,11 +301,12 @@ class CompileCommandController extends CommandController {
 	 * @param string  $address  IP to listen
 	 * @param int     $port     Port to listen
 	 * @param integer $interval Interval between checks
-	 * @param string $path Directory path that should be watched
+	 * @param string $path path(s) that should be watched (Multiple paths separated by colon ":")
 	 * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
 	 */
 	public function liveReloadCommand($address = '0.0.0.0', $port = 35729, $interval = 1, $path = 'fileadmin', $domainContext = NULL) {
-		$this->watchPath = $path;
+		$this->watchPaths = explode(':', $path);
+		$this->printWatchedPaths();
 		$this->validateMultiDomainInstallation($domainContext);
 
 		$loop = LoopFactory::create();
@@ -453,6 +483,19 @@ class CompileCommandController extends CommandController {
 	}
 
 	/**
+	 * Prints the watched paths
+	 */
+	protected function printWatchedPaths() {
+		$this->outputLine(''
+			. self::ESCAPE
+			. self::GREEN
+			. 'Watching path(s): ' . implode(', ', $this->watchPaths)
+			. self::ESCAPE
+			. self::NORMAL
+		);
+	}
+
+	/**
 	 * Returns a compiler instance with the configuration
 	 *
 	 * @return \Cundd\Assetic\Plugin
@@ -477,6 +520,7 @@ class CompileCommandController extends CommandController {
 	 * @return array<string>
 	 */
 	protected function findFilesBySuffix($suffix, $startDirectory) {
+		$maxDepth = $this->findFilesMaxDepth;
 		$suffixPattern = '.{' . implode(',', (array)$suffix) . '}';
 		if (substr($startDirectory, -1) !== '/') {
 			$startDirectory .= '/';
@@ -486,7 +530,7 @@ class CompileCommandController extends CommandController {
 		$foundFiles = glob($startDirectory . $suffixPattern, GLOB_BRACE);
 
 		$i = 1;
-		while ($i < 4) {
+		while ($i < $maxDepth) {
 			$pattern = $startDirectory . str_repeat('*/*', $i) . $suffixPattern;
 			$foundFiles = array_merge($foundFiles, glob($pattern, GLOB_BRACE));
 			$i++;
@@ -501,8 +545,9 @@ class CompileCommandController extends CommandController {
 	 */
 	protected function needsRecompile() {
 		$lastCompileTime = $this->lastCompileTime;
-		$assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes, $this->otherAssetSuffixes);
-		$foundFiles = $this->findFilesBySuffix($assetSuffix, $this->watchPath);
+		$foundFiles = $this->collectFilesToWatch();
+
+		//printf('Check following files (%d): %s%s', count($foundFiles), PHP_EOL, implode(PHP_EOL, $foundFiles));
 
 		foreach ($foundFiles as $currentFile) {
 			if (filemtime($currentFile) > $lastCompileTime) {
@@ -511,6 +556,34 @@ class CompileCommandController extends CommandController {
 			}
 		}
 		return FALSE;
+	}
+
+	/**
+	 * Returns the files that are watched
+	 *
+	 * string[]
+	 */
+	protected function collectFilesToWatch() {
+		$currentTime = time();
+		if (($currentTime - $this->watchedFilesCacheTime) > $this->watchedFilesCacheLifetime) {
+			//$this->outputLine(self::ESCAPE . self::RED . 'Scan files' . self::ESCAPE . self::NORMAL);
+
+			$assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes, $this->otherAssetSuffixes);
+			$foundFiles = array();
+
+			foreach ($this->watchPaths as $currentWatchPath) {
+				$foundFilesForCurrentPath = $this->findFilesBySuffix($assetSuffix, $currentWatchPath);
+				if ($foundFilesForCurrentPath) {
+					$foundFiles = array_merge($foundFiles, $foundFilesForCurrentPath);
+				}
+			}
+
+			$this->watchedFilesCacheTime = $currentTime;
+			$this->watchedFilesCache = $foundFiles;
+		} else {
+			//$this->outputLine(self::ESCAPE . self::GREEN . 'Use files from cache' . self::ESCAPE . self::NORMAL);
+		}
+		return $this->watchedFilesCache;
 	}
 
 	/**
