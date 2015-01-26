@@ -1,3 +1,4 @@
+# customsubcategory=livereload=LiveReload
 module.tx_assetic {
 	view {
 		# cat=module.tx_assetic/file; type=string; label=Path to template root (BE)
@@ -14,5 +15,10 @@ module.tx_assetic {
 
 		# cat=module.tx_assetic/enable; type=boolean; label=Enable experimental features
 		experimental = 0
+
+		livereload {
+			# cat=module.tx_assetic/livereload/a; type=int+; label=LiveReload port
+			port = 35729
+		}
 	}
 }
