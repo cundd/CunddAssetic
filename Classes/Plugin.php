@@ -444,15 +444,22 @@ class Plugin {
 		if (!$this->getExperimental() || !$this->isBackendUser()) {
 			return '';
 		}
+
+		$port = 35729;
+		if (isset($this->configuration['livereload.']) && isset($this->configuration['livereload.']['port'])) {
+			$port = intval($this->configuration['livereload.']['port']);
+		}
+
 		$resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
 		$resource = '/' . str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
-		return '<script type="text/javascript">
+		$javaScriptCodeTemplate = "<script type=\"text/javascript\">
 	(function () {
-		var scriptElement = document.createElement(\'script\');
-		scriptElement.src = \'' . $resource . '\' + \'?host=\' + location.host;
-		document.getElementsByTagName(\'head\')[0].appendChild(scriptElement);
+		var scriptElement = document.createElement('script');
+		scriptElement.src = '%s' + '?host=' + location.host + '&port=%d';
+		document.getElementsByTagName('head')[0].appendChild(scriptElement);
 	})();
-</script>';
+</script>";
+		return sprintf($javaScriptCodeTemplate, $resource, $port);
 //		return '<script type="text/javascript" src="' . $resource . '"></script>';
 
 //		$resource = 'EXT:assetic/Resources/Public/JavaScript/Assetic.js';
