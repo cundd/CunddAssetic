@@ -237,7 +237,7 @@ class CompileCommandController extends CommandController {
 	 *
 	 * @var int
 	 */
-	protected $findFilesMaxDepth = 6;
+	protected $findFilesMaxDepth = 7;
 
 	/**
 	 * Array of watched files
