@@ -146,6 +146,28 @@ class ConfigurationUtility
     }
 
     /**
+     * Returns the relevant domain to be attached to the cache identifier to distinguish the websites in a multi-domain
+     * installation
+     *
+     * @return string
+     */
+    public static function getDomainIdentifier() {
+        if (!ConfigurationUtility::isMultiDomain()) {
+            return '';
+        }
+
+        $domain = ConfigurationUtility::getDomainContext();
+        if (substr($domain, 0, 7) === 'http://') {
+            $domain = substr($domain, 7);
+        } else if (substr($domain, 0, 8) === 'https://') {
+            $domain = substr($domain, 8);
+        }
+
+        $domain = str_replace('.', '', $domain);
+        return $domain . '-';
+    }
+
+    /**
      * Returns if the given host is valid
      *
      * @param string $host

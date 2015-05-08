@@ -31,6 +31,7 @@ use Assetic\AssetManager;
 use Assetic\FilterManager;
 use Assetic\Filter;
 use Cundd\Assetic\Utility\ConfigurationUtility;
+use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
 
@@ -114,13 +115,6 @@ class Plugin {
 	protected $filesToRemove = array();
 
 	/**
-	 * Defines if debugging is enabled
-	 *
-	 * @var bool
-	 */
-	static protected $willDebug = -1;
-
-	/**
 	 * Output configured stylesheets as link tags
 	 *
 	 * Some processing will be done according to the TypoScript setup of the stylesheets.
@@ -131,7 +125,7 @@ class Plugin {
 	 * @author Daniel Corn <info@cundd.net>
 	 */
 	public function main($content, $conf) {
-		$this->profile('Cundd Assetic plugin begin');
+		AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
 		$this->setConfiguration($conf);
 
 		// Check if the assets should be compiled
@@ -150,17 +144,17 @@ class Plugin {
 				$this->forceCompile();
 				return $this->main($content, $conf);
 			}
-			$this->pd($this->getOutputFileDir() . $this->getCurrentOutputFilename(), $this->getOutputFileDir(), $this->getCurrentOutputFilename());
+			AsseticGeneralUtility::pd($this->getOutputFileDir() . $this->getCurrentOutputFilename(), $this->getOutputFileDir(), $this->getCurrentOutputFilename());
 		}
 
-		if ($this->getExperimental() && $this->isBackendUser()) {
+		if ($this->getExperimental() && AsseticGeneralUtility::isBackendUser()) {
 			$renderedStylesheet = $this->getSymlinkUri();
 		}
 
 		$content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
 		$content .= $this->getLiveReloadCode();
 
-		$this->profile('Cundd Assetic plugin end');
+		AsseticGeneralUtility::profile('Cundd Assetic plugin end');
 		return $content;
 	}
 
@@ -171,7 +165,7 @@ class Plugin {
 	 * @return \Assetic\Asset\AssetCollection
 	 */
 	public function collectAssets() {
-		$this->profile('Will collect assets');
+		AsseticGeneralUtility::profile('Will collect assets');
 		$pathToWeb = $this->getPathToWeb();
 		$pluginLevelOptions = $this->getPluginLevelOptions();
 
@@ -188,7 +182,7 @@ class Plugin {
 		$factory->setFilterManager($this->filterManager);
 
 		// Loop through all configured stylesheets
-		$stylesheets = $this->configuration['stylesheets.'];
+		$stylesheets = isset($this->configuration['stylesheets.']) ? $this->configuration['stylesheets.'] : array();
 		foreach ($stylesheets as $assetKey => $stylesheet) {
 			if (!is_array($stylesheet)) {
 				$asset = NULL;
@@ -204,11 +198,11 @@ class Plugin {
 				}
 
 
-				$this->pd($stylesheet);
+				AsseticGeneralUtility::pd($stylesheet);
 				$stylesheet = GeneralUtility::getFileAbsFileName($stylesheet);
-				$this->pd($stylesheet);
+				AsseticGeneralUtility::pd($stylesheet);
 
-				// Make sure the filter manager nows the filter
+				// Make sure the filter manager knows the filter
 				if (!$this->filterManager->has($stylesheetType)) {
 					$filter = $this->getFilterForType($stylesheetType);
 					if ($filter) {
@@ -233,7 +227,7 @@ class Plugin {
 				} else {
 					$currentOptions = $pluginLevelOptions;
 				}
-				$this->pd($currentOptions);
+				AsseticGeneralUtility::pd($currentOptions);
 
 				$asset = $factory->createAsset(
 					array($stylesheet),
@@ -246,10 +240,10 @@ class Plugin {
 
 		// Set the output file name
 
-		$this->profile('Set output file ' . $this->getCurrentOutputFilenameWithoutHash());
+		AsseticGeneralUtility::profile('Set output file ' . $this->getCurrentOutputFilenameWithoutHash());
 		$assetCollection->setTargetPath($this->getCurrentOutputFilenameWithoutHash());
 		$assetManager->set('cundd_assetic', $assetCollection);
-		$this->profile('Did collect assets');
+		AsseticGeneralUtility::profile('Did collect assets');
 		return $assetCollection;
 	}
 
@@ -266,7 +260,7 @@ class Plugin {
 		// Write the new file if something changed
 		if ($this->willCompile()) {
 			$this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
-			$this->profile('Will compile asset');
+			AsseticGeneralUtility::profile('Will compile asset');
 			#if ($assetCollection->getLastModified() > filemtime($this->getOutputFileDir() . $pluginLevelOptions['output'])) {
 			try {
 				$writer->writeManagerAssets($this->getAssetManager());
@@ -276,7 +270,7 @@ class Plugin {
 				if ($this->isDevelopment()) {
 					if (is_a($exception, 'Exception_ScssException')) {
                         /** @var \Exception_ScssException $exception */
-						$this->pd($exception->getUserInfo());
+						AsseticGeneralUtility::pd($exception->getUserInfo());
 					}
 
 					throw $exception;
@@ -287,7 +281,7 @@ class Plugin {
 				}
 			}
 			#}
-			$this->profile('Did compile asset');
+			AsseticGeneralUtility::profile('Did compile asset');
 			return $this->getOutputFileDir() . $this->moveTempFileToFileWithHash();
 		}
 		return '';
@@ -359,10 +353,10 @@ class Plugin {
 		$outputFileTempPath = $outputFileDir . $outputFilenameWithoutHash;
 
 		// Create the file hash and store it in the cache
-		$this->profile('Will create file hash');
+		AsseticGeneralUtility::profile('Will create file hash');
 
 		$fileHash = hash_file($hashAlgorithm, $outputFileTempPath);
-		$this->profile('Did create file hash');
+		AsseticGeneralUtility::profile('Did create file hash');
 		$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $outputFilenameWithoutHash, $fileHash);
 		$finalFileName = $outputFilenameWithoutHash . '_' . $fileHash . '.css';
 
@@ -372,9 +366,9 @@ class Plugin {
 		$this->removePreviousFilteredAssetFiles();
 
 		// Move the temp file to the new file
-		$this->profile('Will move compiled asset');
+		AsseticGeneralUtility::profile('Will move compiled asset');
 		rename($outputFileTempPath, $outputFileFinalPath);
-		$this->profile('Did move compiled asset');
+		AsseticGeneralUtility::profile('Did move compiled asset');
 
 		$this->createSymlinkToFinalPath($outputFileFinalPath);
 
@@ -407,14 +401,14 @@ class Plugin {
 				$function = substr($function, 2);
 			}
 
-			$this->pd("Call function $function on filter", $filter, $data);
+			AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
 			if (is_callable(array($filter, $function))) {
 				call_user_func_array(array($filter, $function), $data);
 			} else {
 				trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
 			}
 		}
-		$this->pd($filter);
+		AsseticGeneralUtility::pd($filter);
 		$this->filterManager->set($stylesheetType, $filter);
 		return $filter;
 	}
@@ -441,7 +435,7 @@ class Plugin {
 	 * @return string
 	 */
 	protected function getLiveReloadCode() {
-		if (!$this->getExperimental() || !$this->isBackendUser()) {
+		if (!$this->getExperimental() || !AsseticGeneralUtility::isBackendUser()) {
 			return '';
 		}
 
@@ -477,15 +471,15 @@ class Plugin {
 	public function willCompile() {
 		if ($this->willCompile === -1) {
 			// If no backend user is logged in, check if it is allowed
-			if (!$this->isBackendUser()) {
+			if (!AsseticGeneralUtility::isBackendUser()) {
 				$this->willCompile = (bool) ($this->isDevelopment() * intval($this->configuration['allow_compile_without_login']));
 			} else {
 				$this->willCompile = $this->isDevelopment();
 			}
 
-			$this->say('Backend user detected: ' . ($this->isBackendUser() ? 'yes' : 'no'));
-			$this->say('Development mode: ' . ($this->isDevelopment() ? 'on' : 'off'));
-			$this->say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));
+			AsseticGeneralUtility::say('Backend user detected: ' . (AsseticGeneralUtility::isBackendUser() ? 'yes' : 'no'));
+			AsseticGeneralUtility::say('Development mode: ' . ($this->isDevelopment() ? 'on' : 'off'));
+			AsseticGeneralUtility::say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));
 
 		}
 		return $this->willCompile;
@@ -568,7 +562,7 @@ class Plugin {
 				}
 			}
 		}
-		return $this->getDomainIdentifier() . $outputFileName;
+		return ConfigurationUtility::getDomainIdentifier() . $outputFileName;
 	}
 
 	/**
@@ -585,9 +579,9 @@ class Plugin {
 			$this->outputFileName = $this->getCurrentOutputFilenameWithoutHash();
 			$this->outputFileName .= '_' . $newHash;
 			$this->outputFileName .= '.css';
-			$this->pd($this->outputFileName);
+			AsseticGeneralUtility::pd($this->outputFileName);
 		}
-		$this->pd($this->outputFileName);
+		AsseticGeneralUtility::pd($this->outputFileName);
 		return $this->outputFileName;
 	}
 
@@ -615,7 +609,7 @@ class Plugin {
 			// Save value in cache
 			$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), $entry);
 		}
-		$this->pd($entry);
+		AsseticGeneralUtility::pd($entry);
 		return $entry;
 	}
 
@@ -739,11 +733,11 @@ class Plugin {
 	 * @return array
 	 */
 	protected function findPreviousFilteredAssetFiles($filePath, $suffix = '.css') {
-		$this->profile('Will call glob');
+		AsseticGeneralUtility::profile('Will call glob');
 		$matchingFiles = glob($filePath . '_' . '*' . $suffix);
-		$this->profile('Did call glob');
+		AsseticGeneralUtility::profile('Did call glob');
 
-		$this->pd('GLOB', $filePath);
+		AsseticGeneralUtility::pd('GLOB', $filePath);
 
 		if (!$matchingFiles) {
 			return array();
@@ -795,20 +789,6 @@ class Plugin {
 			return (bool) intval($this->configuration['development']);
 		}
 		return FALSE;
-	}
-
-	/**
-	 * Returns if a backend user is logged in
-	 *
-	 * @return bool
-	 */
-	public function isBackendUser() {
-		if (!isset($GLOBALS['BE_USER'])
-			|| !isset($GLOBALS['BE_USER']->user)
-			|| !intval($GLOBALS['BE_USER']->user['uid'])) {
-			return FALSE;
-		}
-		return TRUE;
 	}
 
 	/**
@@ -890,8 +870,8 @@ class Plugin {
 	 * @return mixed
 	 */
 	protected function getCache($identifier) {
-		$identifier = sha1($this->getDomainIdentifier() . '-' . $identifier);
-		$this->pd($this->getDomainIdentifier() . '-' . $identifier);
+		$identifier = sha1(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
+		AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
 
 		if (is_callable('apc_fetch')) {
 			return apc_fetch($identifier);
@@ -910,10 +890,10 @@ class Plugin {
 	 * @param mixed $value      Value to store
 	 */
 	protected function setCache($identifier, $value) {
-		$identifier = sha1($this->getDomainIdentifier() . '-' . $identifier);
-		$this->pd($this->getDomainIdentifier() . '-' . $identifier);
+		$identifier = sha1(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
+		AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
 
-		// $this->pd('setCache', $identifier, $value);
+		// AsseticGeneralUtility::pd('setCache', $identifier, $value);
 		if (is_callable('apc_store')) {
 			apc_store($identifier, $value);
 		} else {
@@ -949,105 +929,12 @@ class Plugin {
 		$this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), '');
 	}
 
-	/**
-	 * Returns the relevant domain to be attached to the cache identifier to distinguish the websites in a multi-domain
-	 * installation
-	 *
-	 * @return string
-	 */
-	protected function getDomainIdentifier() {
-		if (!ConfigurationUtility::isMultiDomain()) {
-			return '';
-		}
-
-		$domain = ConfigurationUtility::getDomainContext();
-		if (substr($domain, 0, 7) === 'http://') {
-			$domain = substr($domain, 7);
-		} else if (substr($domain, 0, 8) === 'https://') {
-			$domain = substr($domain, 8);
-		}
-
-		$domain = str_replace('.', '', $domain);
-		return $domain . '-';
-	}
-
-
 
 
 	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
 	// DEBUGGING AND PROFILING
 	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-	/**
-	 * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
-	 *
-	 * @param	mixed	$var1
-	 */
-	public function pd($var1 = '__iresults_pd_noValue') {
-		if (!self::willDebug()) {
-			return;
-		}
 
-		$arguments = func_get_args();
-		if (class_exists('Tx_Iresults')) {
-			call_user_func_array(array('Tx_Iresults', 'pd'), $arguments);
-		}
 
-		if (php_sapi_name() !== 'cli') {
-			echo '<pre>';
-			foreach ($arguments as $argument) {
-				var_dump($argument);
-			}
-			echo '</pre>';
-		}
-	}
 
-	/**
-	 * Prints the given message if debugging is enabled
-	 *
-	 * @param string $message
-	 */
-	public function say($message) {
-		if (!self::willDebug()) {
-			return;
-		}
-		if (php_sapi_name() === 'cli') {
-			fwrite(STDOUT, $message . PHP_EOL);
-		} else {
-			echo "<pre>$message</pre>";
-		}
-	}
-
-	/**
-	 * Print a profiling message.
-	 *
-	 * @param	string $msg
-	 * @return	string The printed content
-	 */
-	public function profile($msg = '') {
-		if (class_exists('Tx_Iresults_Profiler')) {
-			\Tx_Iresults_Profiler::profile($msg);
-		}
-	}
-
-	/**
-	 * Returns if debugging is enabled
-	 *
-	 * @return bool
-	 */
-	protected function willDebug() {
-		if (self::$willDebug === -1) {
-			self::$willDebug = FALSE;
-			if (
-				(isset($_GET['cundd_assetic_debug']) && $_GET['cundd_assetic_debug'])
-				|| (isset($_POST['cundd_assetic_debug']) && $_POST['cundd_assetic_debug'])
-			) {
-				self::$willDebug = TRUE;
-			}
-
-			if (!$this->isBackendUser()) {
-				self::$willDebug = FALSE;
-			}
-		}
-		return self::$willDebug;
-	}
 }
