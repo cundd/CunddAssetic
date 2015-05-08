@@ -272,7 +272,7 @@ class AsseticCommandController extends CommandController
     /**
      * Compiles the assets
      *
-     * @param string $destination   Specify a relative path where the file should be copied to
+     * @param string $destination   Specify a relative path where the compiled file should be copied to
      * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
      */
     public function runCommand($destination = '', $domainContext = null)
@@ -396,17 +396,14 @@ class AsseticCommandController extends CommandController
 
             try {
                 $outputFileLink = $compiler->compile();
-                // $outputFileLink = $compiler->getOutputFilePath();
             } catch (\Exception $exception) {
                 $this->handleException($exception);
-//				$this->sendAndExit(1);
             }
 
             if ($compiler->getExperimental()) {
                 $outputFileLink = $compiler->getSymlinkUri();
             }
         }
-        $this->pd($compiler);
         return $outputFileLink;
     }
 
@@ -609,19 +606,5 @@ class AsseticCommandController extends CommandController
             $this->watchedFilesCache = $foundFiles;
         }
         return $this->watchedFilesCache;
-    }
-
-    /**
-     * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
-     *
-     * @param    mixed $var1
-     * @return    string The printed content
-     */
-    public function pd($var1 = '__iresults_pd_noValue')
-    {
-        if (class_exists('Tx_Iresults')) {
-            $arguments = func_get_args();
-            call_user_func_array(array('Tx_Iresults', 'pd'), $arguments);
-        }
     }
 }
