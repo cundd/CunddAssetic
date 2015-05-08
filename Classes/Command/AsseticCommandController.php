@@ -49,7 +49,7 @@ Autoloader::register();
  *
  * @package Cundd\Assetic\Command
  */
-class CompileCommandController extends CommandController
+class AsseticCommandController extends CommandController
 {
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
     // ESCAPE CHARACTER
@@ -270,7 +270,7 @@ class CompileCommandController extends CommandController
 
 
     /**
-     * Run command
+     * Compiles the assets
      *
      * @param string $destination   Specify a relative path where the file should be copied to
      * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
@@ -287,7 +287,7 @@ class CompileCommandController extends CommandController
     }
 
     /**
-     * Automatically re-compiles the files if files in the directory path (or 'fileadmin/') changed
+     * Automatically re-compiles the assets if files in path (or 'fileadmin/') changed
      *
      * @param integer $interval      Interval between checks
      * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by colon ":")
@@ -305,8 +305,7 @@ class CompileCommandController extends CommandController
     }
 
     /**
-     * Start the LiveReload server and automatically re-compiles the files if
-     * files in the directory path (or 'fileadmin/') changed
+     * Start the LiveReload server and watch for changes
      *
      * @param string  $address       IP to listen
      * @param int     $port          Port to listen
@@ -338,7 +337,6 @@ class CompileCommandController extends CommandController
         );
 
         $loop->addPeriodicTimer($interval, array($this, 'recompileIfNeededAndInformLiveReloadServer'));
-
 
         $this->outputLine(''
             . self::ESCAPE
