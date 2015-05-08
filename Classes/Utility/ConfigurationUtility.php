@@ -55,7 +55,13 @@ class ConfigurationUtility
      *
      * @var string
      */
-    static protected $domainContext;
+    protected static $domainContext;
+
+    /**
+     * Path to the output file directory
+     * @var string
+     */
+    protected static $outputFileDir = 'typo3temp/cundd_assetic/';
 
     /**
      * Returns the extension configuration for the given key
@@ -173,9 +179,36 @@ class ConfigurationUtility
      * @param string $host
      * @return boolean
      */
-    static protected function _validateHost($host)
+    protected static function _validateHost($host)
     {
         // Remove any dash ('-'), dot ('.') and colon (':', allowed because of the port)
         return ctype_alnum(str_replace(array('-', '.', ':'), '', $host));
+    }
+
+    /**
+     * Returns the path to the web directory
+     *
+     * @return string
+     */
+    public static function getPathToWeb()
+    {
+        return defined('PATH_site') ? PATH_site : '';
+    }
+
+    /**
+     * Returns the path to the output file directory
+     *
+     * @return string $outputFileDir
+     */
+    public static function getOutputFileDir() {
+        return self::$outputFileDir;
+    }
+
+    /**
+     * Sets the path to the output file directory
+     * @param string $outputFileDir
+     */
+    public static function setOutputFileDir($outputFileDir) {
+        self::$outputFileDir = $outputFileDir;
     }
 }

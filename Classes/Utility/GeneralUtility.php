@@ -39,6 +39,7 @@ namespace Cundd\Assetic\Utility;
  */
 abstract class GeneralUtility
 {
+
     /**
      * Defines if debugging is enabled
      *
@@ -51,13 +52,15 @@ abstract class GeneralUtility
      *
      * @return bool
      */
-    public static function isBackendUser() {
+    public static function isBackendUser()
+    {
         if (!isset($GLOBALS['BE_USER'])
             || !isset($GLOBALS['BE_USER']->user)
-            || !intval($GLOBALS['BE_USER']->user['uid'])) {
-            return FALSE;
+            || !intval($GLOBALS['BE_USER']->user['uid'])
+        ) {
+            return false;
         }
-        return TRUE;
+        return true;
     }
 
     /**

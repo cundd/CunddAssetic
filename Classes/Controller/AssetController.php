@@ -25,7 +25,8 @@ namespace Cundd\Assetic\Controller;
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
 
-use Cundd\Assetic\Plugin;
+use Cundd\Assetic\Manager;
+use Cundd\Assetic\ManagerInterface;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
@@ -41,11 +42,11 @@ use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 class AssetController extends ActionController
 {
     /**
-     * Compiler instance
+     * Asset manager instance
      *
-     * @var Plugin
+     * @var ManagerInterface
      */
-    protected $compiler;
+    protected $manager;
 
     /**
      * The property mapper
@@ -71,14 +72,14 @@ class AssetController extends ActionController
     public function listAction()
     {
         $assetCollection = array();
-        $compiler = $this->getCompiler();
+        $manager = $this->getManager();
 
-        $this->pd($compiler);
+        $this->pd($manager);
 
-        if ($compiler) {
-            $compiler->collectAssets();
-            if ($compiler->getAssetManager()->has('cundd_assetic')) {
-                $assetCollection = $compiler->getAssetManager()->get('cundd_assetic');
+        if ($manager) {
+            $manager->collectAssets();
+            if ($manager->getCompiler()->getAssetManager()->has('cundd_assetic')) {
+                $assetCollection = $manager->getCompiler()->getAssetManager()->get('cundd_assetic');
             }
             if (!empty($assetCollection)) {
                 $this->pd($assetCollection);
@@ -96,47 +97,46 @@ class AssetController extends ActionController
      */
     public function compileAction()
     {
-        $compiler = $this->getCompiler();
-        if ($compiler) {
-            $compiler->forceCompile();
-            $compiler->collectAssets();
-            $compiler->clearHashCache();
+        $manager = $this->getManager();
+        if ($manager) {
+            $manager->forceCompile();
+            $manager->collectAssets();
+            $manager->clearHashCache();
 
             try {
-                $outputFileLink = $compiler->compile();
+                $outputFileLink = $manager->compile();
                 if (defined('TYPO3_MODE') && TYPO3_MODE === 'BE') {
                     $outputFileLink = '../' . $outputFileLink;
                 }
-                $outputFileLink = '<a href="' . $outputFileLink . '" target="_blank">' . $compiler->getOutputFilePath() . '</a>';
+                $outputFileLink = '<a href="' . $outputFileLink . '" target="_blank">' . $manager->getOutputFilePath() . '</a>';
                 $this->addFlashMessage('Stylesheets have been compiled to ' . $outputFileLink);
             } catch (\Exception $exception) {
                 $this->addFlashMessage('Could not compile files: #' . $exception->getCode() . ': ' . $exception->getMessage(), '', FlashMessage::ERROR);
             }
         }
-        $this->pd($compiler);
+        $this->pd($manager);
         $this->redirect('list');
     }
 
     /**
      * Returns a compiler instance with the configuration
      *
-     * @return Plugin
+     * @return ManagerInterface
      */
-    public function getCompiler()
+    public function getManager()
     {
-        if (!$this->compiler) {
+        if (!$this->manager) {
             $allConfiguration = $this->configurationManager->getConfiguration(
                 ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
             );
             if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
                 $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
-                $this->compiler = new Plugin();
-                $this->compiler->setConfiguration($configuration);
+                $this->manager = new Manager($configuration);
             } else {
                 $this->addFlashMessage('Make sure the static template is included', 'No configuration found', FlashMessage::WARNING);
             }
         }
-        return $this->compiler;
+        return $this->manager;
     }
 
     /**
