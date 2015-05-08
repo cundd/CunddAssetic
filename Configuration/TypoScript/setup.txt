@@ -1,18 +1,18 @@
 # Module configuration
-module.tx_assetic {
-	view {
-		templateRootPath = {$module.tx_assetic.view.templateRootPath}
-		partialRootPath = {$module.tx_assetic.view.partialRootPath}
-		layoutRootPath = {$module.tx_assetic.view.layoutRootPath}
-	}
-}
+#module.tx_assetic {
+#	view {
+#		templateRootPath = {$module.tx_assetic.view.templateRootPath}
+#		partialRootPath = {$module.tx_assetic.view.partialRootPath}
+#		layoutRootPath = {$module.tx_assetic.view.layoutRootPath}
+#	}
+#}
 
 includeLibs.CunddAssetic = EXT:assetic/Classes/Plugin.php
 
 plugin.CunddAssetic = USER
 plugin.CunddAssetic {
-	userFunc = Tx_Cundd_Assetic_Plugin->main
-	#userFunc = Cundd\Assetic\Plugin->main
+#	userFunc = Tx_Cundd_Assetic_Plugin->main
+	userFunc = Cundd\Assetic\Plugin->main
 
 	# Enable development mode to always compile files
 	development = 0

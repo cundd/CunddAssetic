@@ -32,117 +32,128 @@
 
 namespace Cundd\Assetic\Utility;
 
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Helper class to read configuration
  *
  * @package Cundd\Assetic\Utility
  */
-class ConfigurationUtility {
-	/**
-	 * Extension key to use
-	 */
-	const EXTENSION_KEY = 'assetic';
+class ConfigurationUtility
+{
+    /**
+     * Extension key to use
+     */
+    const EXTENSION_KEY = 'assetic';
 
-	/**
-	 * Domain in the current context
-	 *
-	 * This may be read through the Backend Utility using the GET parameter "id", the SERVER_NAME or HTTP_HOST server
-	 * variables or may be set using setDomainContext()
-	 *
-	 * @var string
-	 */
-	static protected $domainContext;
+    /**
+     * Domain in the current context
+     *
+     * This may be read through the Backend Utility using the GET parameter "id", the SERVER_NAME or HTTP_HOST server
+     * variables or may be set using setDomainContext()
+     *
+     * @var string
+     */
+    static protected $domainContext;
 
-	/**
-	 * Returns the extension configuration for the given key
-	 *
-	 * @param string $key
-	 * @return mixed
-	 */
-	public static function getExtensionConfiguration($key) {
-		// Read the configuration from the globals
-		static $configuration;
-		if (!$configuration) {
-			if (isset($GLOBALS['TYPO3_CONF_VARS'])
-				&& isset($GLOBALS['TYPO3_CONF_VARS']['EXT'])
-				&& isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'])
-				&& isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::EXTENSION_KEY])
-			) {
-				$configuration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::EXTENSION_KEY]);
-			}
-		}
+    /**
+     * Returns the extension configuration for the given key
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public static function getExtensionConfiguration($key)
+    {
+        // Read the configuration from the globals
+        static $configuration;
+        if (!$configuration) {
+            if (isset($GLOBALS['TYPO3_CONF_VARS'])
+                && isset($GLOBALS['TYPO3_CONF_VARS']['EXT'])
+                && isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'])
+                && isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::EXTENSION_KEY])
+            ) {
+                $configuration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::EXTENSION_KEY]);
+            }
+        }
 
-		if (isset($configuration[$key])) {
-			return $configuration[$key];
-		}
-		return NULL;
-	}
+        if (isset($configuration[$key])) {
+            return $configuration[$key];
+        }
+        return null;
+    }
 
-	/**
-	 * Returns if the current installation is a multidomain installation
-	 *
-	 * @return boolean
-	 */
-	public static function isMultiDomain() {
-		return !!intval(self::getExtensionConfiguration('multidomain'));
-	}
+    /**
+     * Returns if the current installation is a multidomain installation
+     *
+     * @return boolean
+     */
+    public static function isMultiDomain()
+    {
+        return !!intval(self::getExtensionConfiguration('multidomain'));
+    }
 
-	/**
-	 * Sets the domain for the current context
-	 *
-	 * @param string|int $domainContext Domain as string or the page UID to read the domain from
-	 * @throws \UnexpectedValueException if the Backend Utility class was not found or can not be used
-	 */
-	public static function setDomainContext($domainContext) {
-		if (is_numeric($domainContext)) {
-			if (!class_exists('t3lib_befunc')) throw new \UnexpectedValueException('Backend Utility class not found', 1408363869);
-			$domainContext = \t3lib_befunc::getViewDomain($domainContext);
-		}
-		self::$domainContext = $domainContext;
-	}
+    /**
+     * Sets the domain for the current context
+     *
+     * @param string|int $domainContext Domain as string or the page UID to read the domain from
+     * @throws \UnexpectedValueException if the Backend Utility class was not found or can not be used
+     */
+    public static function setDomainContext($domainContext)
+    {
+        if (is_numeric($domainContext)) {
+            if (!class_exists('TYPO3\\CMS\\Backend\\Utility\\BackendUtility')) {
+                throw new \UnexpectedValueException('Backend Utility class not found', 1408363869);
+            }
+            $domainContext = BackendUtility::getViewDomain($domainContext);
+        }
+        self::$domainContext = $domainContext;
+    }
 
-	/**
-	 * Returns the domain in the current context
-	 *
-	 * This may be read through the Backend Utility using the GET parameter "id", the SERVER_NAME or HTTP_HOST server
-	 * variables or may be set using setDomainContext()
-	 *
-	 * @return string
-	 */
-	public static function getDomainContext() {
-		if (!self::$domainContext) {
-			$domainContextTemp = '';
-			if (TYPO3_MODE == 'BE') {
-				$domainContextTemp = \t3lib_div::_GP('id');
-			}
+    /**
+     * Returns the domain in the current context
+     *
+     * This may be read through the Backend Utility using the GET parameter "id", the SERVER_NAME or HTTP_HOST server
+     * variables or may be set using setDomainContext()
+     *
+     * @return string
+     */
+    public static function getDomainContext()
+    {
+        if (!self::$domainContext) {
+            $domainContextTemp = '';
+            if (TYPO3_MODE == 'BE') {
+                $domainContextTemp = GeneralUtility::_GP('id');
+            }
 
-			if (TYPO3_MODE != 'BE' || !$domainContextTemp) {
-				if (isset($_SERVER['SERVER_NAME'])) {
-					$domainContextTemp = $_SERVER['SERVER_NAME'];
-					if (!self::_validateHost($domainContextTemp)) {
-						$domainContextTemp = '';
-					}
-				}
-				if (!$domainContextTemp && isset($_SERVER['HTTP_HOST'])) {
-					$domainContextTemp = $_SERVER['HTTP_HOST'];
-					if (!self::_validateHost($domainContextTemp)) {
-						$domainContextTemp = '';
-					}
-				}
-			}
-			self::setDomainContext($domainContextTemp);
-		}
-		return self::$domainContext;
-	}
+            if (TYPO3_MODE != 'BE' || !$domainContextTemp) {
+                if (isset($_SERVER['SERVER_NAME'])) {
+                    $domainContextTemp = $_SERVER['SERVER_NAME'];
+                    if (!self::_validateHost($domainContextTemp)) {
+                        $domainContextTemp = '';
+                    }
+                }
+                if (!$domainContextTemp && isset($_SERVER['HTTP_HOST'])) {
+                    $domainContextTemp = $_SERVER['HTTP_HOST'];
+                    if (!self::_validateHost($domainContextTemp)) {
+                        $domainContextTemp = '';
+                    }
+                }
+            }
+            self::setDomainContext($domainContextTemp);
+        }
+        return self::$domainContext;
+    }
 
-	/**
-	 * Returns if the given host is valid
-	 *
-	 * @param string $host
-	 * @return boolean
-	 */
-	static protected function _validateHost($host) {
-		// Remove any dash ('-'), dot ('.') and colon (':', allowed because of the port)
-		return ctype_alnum(str_replace(array('-', '.', ':'), '', $host));
-	}
+    /**
+     * Returns if the given host is valid
+     *
+     * @param string $host
+     * @return boolean
+     */
+    static protected function _validateHost($host)
+    {
+        // Remove any dash ('-'), dot ('.') and colon (':', allowed because of the port)
+        return ctype_alnum(str_replace(array('-', '.', ':'), '', $host));
+    }
 }
