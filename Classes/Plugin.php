@@ -134,8 +134,6 @@ class Plugin {
 		$this->profile('Cundd Assetic plugin begin');
 		$this->setConfiguration($conf);
 
-        echo 'Hallo';
-
 		// Check if the assets should be compiled
 		if ($this->willCompile()) {
 			$this->collectAssets();
@@ -820,7 +818,12 @@ class Plugin {
 	 */
 	public function getExperimental() {
 		if ($this->experimental === -1) {
-			$this->experimental = (bool) $this->configuration['experimental'];
+            if (isset($this->configuration['livereload.']) && isset($this->configuration['livereload.']['add_javascript'])) {
+                $this->experimental = (bool) $this->configuration['livereload.']['add_javascript'];
+            }
+            if (isset($this->configuration['experimental']) && (bool)$this->configuration['experimental']) {
+                $this->experimental = true;
+            }
 		}
 		return $this->experimental;
 	}
