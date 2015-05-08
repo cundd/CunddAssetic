@@ -277,7 +277,7 @@ class AsseticCommandController extends CommandController
      * @param string $destination   Specify a relative path where the compiled file should be copied to
      * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
      */
-    public function runCommand($destination = '', $domainContext = null)
+    public function compileCommand($destination = '', $domainContext = null)
     {
         $this->validateMultiDomainInstallation($domainContext);
 
