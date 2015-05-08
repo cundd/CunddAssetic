@@ -30,6 +30,8 @@
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\Manager;
+use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Plugin;
 use Cundd\Assetic\Server\LiveReload;
 use Cundd\Assetic\Utility\ConfigurationUtility;
@@ -279,10 +281,12 @@ class AsseticCommandController extends CommandController
     {
         $this->validateMultiDomainInstallation($domainContext);
 
-        $sourcePath = $this->compile();
+        $usedPath = $sourcePath = $this->compile();
         if ($destination) {
-            $this->copyToDestination($sourcePath, $destination);
+            $usedPath = $this->copyToDestination($sourcePath, $destination);
         }
+
+        $this->outputLine('Compiled assets and saved file to "%s"', array($usedPath));
         $this->sendAndExit();
     }
 
@@ -388,20 +392,20 @@ class AsseticCommandController extends CommandController
     protected function compile()
     {
         $outputFileLink = '';
-        $compiler = $this->getCompiler();
-        if ($compiler) {
-            $compiler->forceCompile();
-            $compiler->collectAssets();
-            $compiler->clearHashCache();
+        $manager = $this->getManager();
+        if ($manager) {
+            $manager->forceCompile();
+            $manager->collectAssets();
+            $manager->clearHashCache();
 
             try {
-                $outputFileLink = $compiler->compile();
+                $outputFileLink = $manager->compile();
             } catch (\Exception $exception) {
                 $this->handleException($exception);
             }
 
-            if ($compiler->getExperimental()) {
-                $outputFileLink = $compiler->getSymlinkUri();
+            if ($manager->getExperimental()) {
+                $outputFileLink = $manager->getSymlinkUri();
             }
         }
         return $outputFileLink;
@@ -520,16 +524,15 @@ class AsseticCommandController extends CommandController
     /**
      * Returns a compiler instance with the configuration
      *
-     * @return Plugin
+     * @return ManagerInterface
      */
-    public function getCompiler()
+    public function getManager()
     {
         if (!$this->compiler) {
             $allConfiguration = $this->configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
             if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
                 $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
-                $this->compiler = new Plugin();
-                $this->compiler->setConfiguration($configuration);
+                $this->compiler = new Manager($configuration);
             }
         }
         return $this->compiler;
