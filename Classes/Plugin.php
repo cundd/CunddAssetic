@@ -24,9 +24,6 @@ namespace Cundd\Assetic;
  */
 
 use Assetic\Asset\AssetCollection;
-// use Assetic\Asset\FileAsset;
-// use Assetic\Asset\GlobAsset;
-
 use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
 use Assetic\AssetWriter;
@@ -34,6 +31,8 @@ use Assetic\AssetManager;
 use Assetic\FilterManager;
 use Assetic\Filter;
 use Cundd\Assetic\Utility\ConfigurationUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
 
 /**
  * Assetic Plugin
@@ -47,7 +46,9 @@ class Plugin {
 	const CACHE_IDENTIFIER_HASH = 'cundd_assetic_cache_identifier_hash';
 
 	/**
-	 * @var \tslib_content
+     * Content object
+     *
+	 * @var AbstractContentObject
 	 */
 	public $cObj;
 
@@ -68,6 +69,12 @@ class Plugin {
 	 * @var FilterManager
 	 */
 	protected $filterManager;
+
+    /**
+     * Cache manager
+     * @var \TYPO3\CMS\Core\Cache\CacheManager
+     */
+    protected $cacheManager;
 
 	/**
 	 * @var array
@@ -127,6 +134,7 @@ class Plugin {
 		$this->profile('Cundd Assetic plugin begin');
 		$this->setConfiguration($conf);
 
+        echo 'Hallo';
 
 		// Check if the assets should be compiled
 		if ($this->willCompile()) {
@@ -188,8 +196,6 @@ class Plugin {
 				$asset = NULL;
 				$filter = NULL;
 				$assetFilters = array();
-				$currentOptions = array();
-				$stylesheetType = '';
 				$stylesheetConf = is_array($this->configuration['stylesheets.'][$assetKey . '.']) ? $this->configuration['stylesheets.'][$assetKey . '.'] : array();
 
 				// Get the type to find the according filter
@@ -201,7 +207,7 @@ class Plugin {
 
 
 				$this->pd($stylesheet);
-				$stylesheet = \t3lib_div::getFileAbsFileName($stylesheet);
+				$stylesheet = GeneralUtility::getFileAbsFileName($stylesheet);
 				$this->pd($stylesheet);
 
 				// Make sure the filter manager nows the filter
@@ -271,6 +277,7 @@ class Plugin {
 			} catch (\Exception $exception) {
 				if ($this->isDevelopment()) {
 					if (is_a($exception, 'Exception_ScssException')) {
+                        /** @var \Exception_ScssException $exception */
 						$this->pd($exception->getUserInfo());
 					}
 
@@ -278,7 +285,7 @@ class Plugin {
 
 				} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
 					$output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
-					\t3lib_div::devLog($output, 'assetic');
+					GeneralUtility::devLog($output, 'assetic');
 				}
 			}
 			#}
@@ -334,7 +341,7 @@ class Plugin {
 			echo '<div style="' . $style . '">' . $heading . PHP_EOL . '<pre>' . $code .'</pre></div>';
 		} else if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
 			$code = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
-			\t3lib_div::devLog($code, 'assetic');
+            GeneralUtility::devLog($code, 'assetic');
 		}
 		return '';
 	}
@@ -345,9 +352,6 @@ class Plugin {
 	 * @return string Returns the new file name
 	 */
 	protected function moveTempFileToFileWithHash() {
-		$fileHash = '';
-		$finalFileName = '';
-
 		// $hashAlgorithm = 'crc32';
 		// $hashAlgorithm = 'sha1';
 		$hashAlgorithm = 'md5';
@@ -355,7 +359,6 @@ class Plugin {
 		$outputFilenameWithoutHash = $this->getCurrentOutputFilenameWithoutHash();
 		$outputFileDir = $this->getPathToWeb() . $this->getOutputFileDir();
 		$outputFileTempPath = $outputFileDir . $outputFilenameWithoutHash;
-		$outputFileFinalPath = '';
 
 		// Create the file hash and store it in the cache
 		$this->profile('Will create file hash');
@@ -372,7 +375,6 @@ class Plugin {
 
 		// Move the temp file to the new file
 		$this->profile('Will move compiled asset');
-		//printf('Rename "%s" to "%s"', $outputFileTempPath, $outputFileFinalPath);
 		rename($outputFileTempPath, $outputFileFinalPath);
 		$this->profile('Did move compiled asset');
 
@@ -430,7 +432,7 @@ class Plugin {
 	protected function prepareFunctionParameters(&$parameters) {
 		foreach ($parameters as &$parameter) {
 			if (strpos($parameter, '.') !== FALSE || strpos($parameter, DIRECTORY_SEPARATOR) !== FALSE) {
-				$parameter = \t3lib_div::getFileAbsFileName($parameter);
+				$parameter = GeneralUtility::getFileAbsFileName($parameter);
 			}
 		}
 	}
@@ -451,7 +453,7 @@ class Plugin {
 		}
 
 		$resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
-		$resource = '/' . str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
+		$resource = '/' . str_replace(PATH_site, '', GeneralUtility::getFileAbsFileName($resource));
 		$javaScriptCodeTemplate = "<script type=\"text/javascript\">
 	(function () {
 		var scriptElement = document.createElement('script');
@@ -460,11 +462,6 @@ class Plugin {
 	})();
 </script>";
 		return sprintf($javaScriptCodeTemplate, $resource, $port);
-//		return '<script type="text/javascript" src="' . $resource . '"></script>';
-
-//		$resource = 'EXT:assetic/Resources/Public/JavaScript/Assetic.js';
-//		$resource = str_replace(PATH_site, '', \t3lib_div::getFileAbsFileName($resource));
-//		return '<script type="text/javascript" src="' . $resource . '"></script>';
 	}
 
 	/**
@@ -893,11 +890,14 @@ class Plugin {
 		$identifier = sha1($this->getDomainIdentifier() . '-' . $identifier);
 		$this->pd($this->getDomainIdentifier() . '-' . $identifier);
 
-		// $this->pd('getCache', $identifier);
 		if (is_callable('apc_fetch')) {
 			return apc_fetch($identifier);
 		}
-		$cacheInstance = $GLOBALS['typo3CacheManager']->getCache('assetic_cache');
+
+        $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
+        if (!$cacheInstance) {
+            return null;
+        }
 		return $cacheInstance->get($identifier);
 	}
 
@@ -917,10 +917,26 @@ class Plugin {
 			$tags = array();
  			$lifetime = 60 * 60 * 24; // * 365 * 10;
 
-			$cacheInstance = $GLOBALS['typo3CacheManager']->getCache('assetic_cache');
-			$cacheInstance->set($identifier, $value, $tags, $lifetime);
+            $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
+            if (!$cacheInstance) {
+                return;
+            }
+            $cacheInstance->set($identifier, $value, $tags, $lifetime);
 		}
 	}
+
+    /**
+     * Returns the Cache Manager
+     *
+     * @return \TYPO3\CMS\Core\Cache\CacheManager
+     */
+    protected function getCacheManager()
+    {
+        if (!$this->cacheManager) {
+            $this->cacheManager = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Cache\\CacheManager');
+        }
+        return $this->cacheManager;
+    }
 
 	/**
 	 * Remove the cached hash
@@ -1032,6 +1048,3 @@ class Plugin {
 		return self::$willDebug;
 	}
 }
-
-class_alias('Cundd\\Assetic\\Plugin', 'Tx_Cundd_Assetic_Plugin', FALSE);
-?>

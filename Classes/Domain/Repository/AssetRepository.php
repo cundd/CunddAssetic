@@ -24,6 +24,7 @@ namespace Cundd\Assetic\Domain\Repository;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
+use TYPO3\CMS\Extbase\Persistence\Repository;
 
 /**
  *
@@ -32,7 +33,7 @@ namespace Cundd\Assetic\Domain\Repository;
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  *
  */
-class AssetRepository extends \TYPO3\CMS\Extbase\Persistence\Repository {
+class AssetRepository extends Repository
+{
 
 }
-?>
