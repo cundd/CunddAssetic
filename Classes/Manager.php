@@ -113,6 +113,7 @@ class Manager implements ManagerInterface
         // Check if the assets should be compiled
         if ($this->willCompile()) {
             $this->collectAssetsAndSetTarget();
+            $this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
             if ($this->compiler->compile()) {
                 $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->moveTempFileToFileWithHash();
                 AsseticGeneralUtility::pd('$renderedStylesheet', $renderedStylesheet);
@@ -464,6 +465,9 @@ class Manager implements ManagerInterface
         }
         $symlinkPath = $this->getSymlinkPath();
         if ($fileFinalPath !== $symlinkPath) {
+            if (file_exists($symlinkPath)) {
+                throw new \RuntimeException(sprintf('Symlink %s already exists', $symlinkPath), 1431361465);
+            }
             symlink($fileFinalPath, $symlinkPath);
         }
     }
