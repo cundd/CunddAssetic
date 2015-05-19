@@ -41,15 +41,7 @@ interface ManagerInterface
     public function collectAssets();
 
     /**
-     * Collects the files and tells assetic to compile the files
-     *
-     * @throws \Exception if an exception is thrown during rendering
-     * @return bool Returns if the files have been compiled successfully
-     */
-    public function compile();
-
-    /**
-     * Collects and compiles assets and returns the code to include compiled stylesheets
+     * Collects and compiles assets and returns the relative path to the compiled stylesheet
      *
      * @return string
      */
