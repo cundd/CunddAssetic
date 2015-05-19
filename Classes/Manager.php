@@ -101,13 +101,12 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Collects and compiles assets and returns the code to include compiled stylesheets
+     * Collects and compiles assets and returns the relative path to the compiled stylesheet
      *
      * @return string
      */
     public function collectAndCompile()
     {
-        AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
         $renderedStylesheet = null;
 
         // Check if the assets should be compiled
@@ -128,6 +127,7 @@ class Manager implements ManagerInterface
             $absolutePathToRenderedFile = ConfigurationUtility::getPathToWeb() . $renderedStylesheet;
             if (!file_exists($absolutePathToRenderedFile)) {
                 $this->forceCompile();
+
                 return $this->collectAndCompile();
             }
             AsseticGeneralUtility::pd(
@@ -140,12 +140,7 @@ class Manager implements ManagerInterface
             $renderedStylesheet = $this->getSymlinkUri();
         }
 
-        $content = '';
-        $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
-        $content .= $this->getLiveReloadCode();
-
-        AsseticGeneralUtility::profile('Cundd Assetic plugin end');
-        return $content;
+        return $renderedStylesheet;
     }
 
     /**
@@ -159,18 +154,8 @@ class Manager implements ManagerInterface
             $this->compiler = new Compiler($this->configuration);
             $this->compiler->setPluginLevelOptions($this->getPluginLevelOptions());
         }
-        return $this->compiler;
-    }
 
-    /**
-     * Collects the files and tells assetic to compile the files
-     *
-     * @throws \Exception if an exception is thrown during rendering
-     * @return bool Returns if the files have been compiled successfully
-     */
-    public function compile()
-    {
-        return $this->getCompiler()->compile();
+        return $this->compiler;
     }
 
     /**
@@ -195,6 +180,7 @@ class Manager implements ManagerInterface
 
         AsseticGeneralUtility::profile('Set output file ' . $this->getCurrentOutputFilenameWithoutHash());
         $assetCollection->setTargetPath($this->getCurrentOutputFilenameWithoutHash());
+
         return $assetCollection;
     }
 
@@ -210,8 +196,8 @@ class Manager implements ManagerInterface
         $hashAlgorithm = 'md5';
 
         $outputFilenameWithoutHash = $this->getCurrentOutputFilenameWithoutHash();
-        $outputFileDir = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
-        $outputFileTempPath = $outputFileDir . $outputFilenameWithoutHash;
+        $outputFileDir             = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
+        $outputFileTempPath        = $outputFileDir . $outputFilenameWithoutHash;
 
         // Create the file hash and store it in the cache
         AsseticGeneralUtility::profile('Will create file hash');
@@ -234,34 +220,6 @@ class Manager implements ManagerInterface
         $this->createSymlinkToFinalPath($outputFileFinalPath);
 
         return $finalFileName;
-    }
-
-    /**
-     * Returns the code for "live reload"
-     *
-     * @return string
-     */
-    protected function getLiveReloadCode()
-    {
-        if (!$this->getExperimental() || !AsseticGeneralUtility::isBackendUser()) {
-            return '';
-        }
-
-        $port = 35729;
-        if (isset($this->configuration['livereload.']) && isset($this->configuration['livereload.']['port'])) {
-            $port = intval($this->configuration['livereload.']['port']);
-        }
-
-        $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
-        $resource = '/' . str_replace(PATH_site, '', GeneralUtility::getFileAbsFileName($resource));
-        $javaScriptCodeTemplate = "<script type=\"text/javascript\">
-	(function () {
-		var scriptElement = document.createElement('script');
-		scriptElement.src = '%s' + '?host=' + location.host + '&port=%d';
-		document.getElementsByTagName('head')[0].appendChild(scriptElement);
-	})();
-</script>";
-        return sprintf($javaScriptCodeTemplate, $resource, $port);
     }
 
     /**
@@ -292,8 +250,8 @@ class Manager implements ManagerInterface
             AsseticGeneralUtility::say('Backend user detected: ' . (AsseticGeneralUtility::isBackendUser() ? 'yes' : 'no'));
             AsseticGeneralUtility::say('Development mode: ' . ($this->isDevelopment() ? 'on' : 'off'));
             AsseticGeneralUtility::say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));
-
         }
+
         return $this->willCompile;
     }
 
@@ -344,6 +302,7 @@ class Manager implements ManagerInterface
                 }
             }
         }
+
         return ConfigurationUtility::getDomainIdentifier() . $outputFileName;
     }
 
@@ -359,13 +318,14 @@ class Manager implements ManagerInterface
     {
         if (!$this->outputFileName) {
             // Add a hash for caching
-            $newHash = $this->getHash();
+            $newHash              = $this->getHash();
             $this->outputFileName = $this->getCurrentOutputFilenameWithoutHash();
             $this->outputFileName .= '_' . $newHash;
             $this->outputFileName .= '.css';
             AsseticGeneralUtility::pd($this->outputFileName);
         }
         AsseticGeneralUtility::pd($this->outputFileName);
+
         return $this->outputFileName;
     }
 
@@ -398,6 +358,7 @@ class Manager implements ManagerInterface
             $this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), $entry);
         }
         AsseticGeneralUtility::pd($entry);
+
         return $entry;
     }
 
@@ -409,10 +370,10 @@ class Manager implements ManagerInterface
     protected function getPreviousHash()
     {
         if (!$this->previousHash) {
-            $suffix = '.css';
+            $suffix   = '.css';
             $filePath = ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
 
-            $previousHash = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash());
+            $previousHash         = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash());
             $previousHashFilePath = $filePath . '_' . $previousHash . $suffix;
 
             if (!$previousHash || !file_exists($previousHashFilePath)) {
@@ -421,11 +382,12 @@ class Manager implements ManagerInterface
                     return '';
                 }
                 $lastMatchingFile = end($matchingFiles);
-                $previousHash = substr($lastMatchingFile, strlen($filePath) + 1, (-1 * strlen($suffix)));
+                $previousHash     = substr($lastMatchingFile, strlen($filePath) + 1, (-1 * strlen($suffix)));
             }
 
             $this->previousHash = $previousHash;
         }
+
         return $this->previousHash;
     }
 
@@ -447,9 +409,9 @@ class Manager implements ManagerInterface
      */
     public function collectPreviousFilteredAssetFiles()
     {
-        $suffix = '.css';
-        $outputFileDir = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
-        $filePath = $outputFileDir . $this->getCurrentOutputFilenameWithoutHash();
+        $suffix              = '.css';
+        $outputFileDir       = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
+        $filePath            = $outputFileDir . $this->getCurrentOutputFilenameWithoutHash();
         $this->filesToRemove = $this->findPreviousFilteredAssetFiles($filePath, $suffix);
     }
 
@@ -514,7 +476,7 @@ class Manager implements ManagerInterface
      */
     public function removePreviousFilteredAssetFiles()
     {
-        $success = true;
+        $success       = true;
         $matchingFiles = $this->filesToRemove;
         if (!$matchingFiles) {
             return '';
@@ -522,6 +484,7 @@ class Manager implements ManagerInterface
         foreach ($matchingFiles as $oldFilteredAssetFile) {
             $success *= unlink($oldFilteredAssetFile);
         }
+
         return $success;
     }
 
@@ -548,6 +511,7 @@ class Manager implements ManagerInterface
         usort($matchingFiles, function ($a, $b) {
             return filemtime($a) - filemtime($b);
         });
+
         return $matchingFiles;
     }
 
@@ -572,6 +536,7 @@ class Manager implements ManagerInterface
 
         // Check for the development mode
         $pluginLevelOptions['debug'] = $this->isDevelopment();
+
         return $pluginLevelOptions;
     }
 
@@ -585,6 +550,7 @@ class Manager implements ManagerInterface
         if (isset($this->configuration['development'])) {
             return (bool)intval($this->configuration['development']);
         }
+
         return false;
     }
 
@@ -603,6 +569,7 @@ class Manager implements ManagerInterface
                 $this->experimental = true;
             }
         }
+
         return $this->experimental;
     }
 
@@ -630,6 +597,7 @@ class Manager implements ManagerInterface
         if (!$cacheInstance) {
             return null;
         }
+
         return $cacheInstance->get($identifier);
     }
 
@@ -648,7 +616,7 @@ class Manager implements ManagerInterface
         if (is_callable('apc_store')) {
             apc_store($identifier, $value);
         } else {
-            $tags = array();
+            $tags     = array();
             $lifetime = 60 * 60 * 24; // * 365 * 10;
 
             $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
@@ -669,6 +637,7 @@ class Manager implements ManagerInterface
         if (!$this->cacheManager) {
             $this->cacheManager = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Cache\\CacheManager');
         }
+
         return $this->cacheManager;
     }
 

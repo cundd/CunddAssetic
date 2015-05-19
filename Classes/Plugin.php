@@ -23,6 +23,8 @@ namespace Cundd\Assetic;
  * SOFTWARE.
  */
 
+use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
 
 /**
@@ -30,26 +32,79 @@ use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
  *
  * @package Cundd_Assetic
  */
-class Plugin {
-	/**
+class Plugin
+{
+    /**
      * Content object
      *
-	 * @var AbstractContentObject
-	 */
-	public $cObj;
+     * @var AbstractContentObject
+     */
+    public $cObj;
 
-	/**
-	 * Output configured stylesheets as link tags
-	 *
-	 * Some processing will be done according to the TypoScript setup of the stylesheets.
-	 *
-	 * @param string $content
-	 * @param array $conf
-	 * @return string
-	 * @author Daniel Corn <info@cundd.net>
-	 */
-	public function main($content, $conf) {
-        $manager = new Manager($conf);
-		return $content . $manager->collectAndCompile();
-	}
+    /**
+     * Asset manager
+     *
+     * @var ManagerInterface
+     */
+    protected $manager;
+
+    /**
+     * @var array
+     */
+    protected $configuration;
+
+    /**
+     * Output configured stylesheets as link tags
+     *
+     * Some processing will be done according to the TypoScript setup of the stylesheets.
+     *
+     * @param string $content
+     * @param array  $conf
+     * @return string
+     * @author Daniel Corn <info@cundd.net>
+     */
+    public function main($content, $conf)
+    {
+        AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
+        $this->configuration = $conf;
+        $this->manager = new Manager($conf);
+
+        $renderedStylesheet = $this->manager->collectAndCompile();
+
+        $content = '';
+        $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
+        $content .= $this->getLiveReloadCode();
+
+        AsseticGeneralUtility::profile('Cundd Assetic plugin end');
+        return $content;
+    }
+
+    /**
+     * Returns the code for "live reload"
+     *
+     * @return string
+     */
+    protected function getLiveReloadCode()
+    {
+        if (!$this->manager->getExperimental() || !AsseticGeneralUtility::isBackendUser()) {
+            return '';
+        }
+
+        $port = 35729;
+        if (isset($this->configuration['livereload.']) && isset($this->configuration['livereload.']['port'])) {
+            $port = intval($this->configuration['livereload.']['port']);
+        }
+
+        $resource               = 'EXT:assetic/Resources/Public/Library/livereload.js';
+        $resource               = '/' . str_replace(PATH_site, '', GeneralUtility::getFileAbsFileName($resource));
+        $javaScriptCodeTemplate = "<script type=\"text/javascript\">
+	(function () {
+		var scriptElement = document.createElement('script');
+		scriptElement.src = '%s' + '?host=' + location.host + '&port=%d';
+		document.getElementsByTagName('head')[0].appendChild(scriptElement);
+	})();
+</script>";
+
+        return sprintf($javaScriptCodeTemplate, $resource, $port);
+    }
 }
