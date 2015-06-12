@@ -40,7 +40,6 @@ use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Factory as LoopFactory;
 use React\Socket\Server as ReactServer;
-
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\CommandController;
 
@@ -332,7 +331,7 @@ class AsseticCommandController extends CommandController
 
         // Websocket server
         $this->liveReloadServer = new LiveReload();
-        $socket = new ReactServer($loop);
+        $socket                 = new ReactServer($loop);
         $socket->listen($port, $address);
         new IoServer(
             new WsServer($this->liveReloadServer),
@@ -392,22 +391,20 @@ class AsseticCommandController extends CommandController
     protected function compile()
     {
         $outputFileLink = '';
-        $manager = $this->getManager();
+        $manager        = $this->getManager();
         if ($manager) {
             $manager->forceCompile();
-            $manager->collectAssets();
-            $manager->clearHashCache();
-
             try {
-                $outputFileLink = $manager->compile();
+                $manager->collectAndCompile();
             } catch (\Exception $exception) {
                 $this->handleException($exception);
             }
-
             if ($manager->getExperimental()) {
                 $outputFileLink = $manager->getSymlinkUri();
             }
+            $manager->clearHashCache();
         }
+
         return $outputFileLink;
     }
 
@@ -469,6 +466,7 @@ class AsseticCommandController extends CommandController
         if (copy($source, $destination)) {
             return $destination;
         }
+
         return $source;
     }
 
@@ -497,7 +495,7 @@ class AsseticCommandController extends CommandController
      */
     protected function handleException($exception)
     {
-        $heading = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
+        $heading           = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
         $exceptionPosition = 'in ' . $exception->getFile() . ' at line ' . $exception->getLine();
 
         $coloredText = self::SIGNAL . self::REVERSE . self::SIGNAL . self::BOLD_RED . $heading . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
@@ -531,10 +529,11 @@ class AsseticCommandController extends CommandController
         if (!$this->compiler) {
             $allConfiguration = $this->configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
             if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
-                $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
+                $configuration  = $allConfiguration['plugin.']['CunddAssetic.'];
                 $this->compiler = new Manager($configuration);
             }
         }
+
         return $this->compiler;
     }
 
@@ -547,7 +546,7 @@ class AsseticCommandController extends CommandController
      */
     protected function findFilesBySuffix($suffix, $startDirectory)
     {
-        $maxDepth = $this->findFilesMaxDepth;
+        $maxDepth      = $this->findFilesMaxDepth;
         $suffixPattern = '.{' . implode(',', (array)$suffix) . '}';
         if (substr($startDirectory, -1) !== '/') {
             $startDirectory .= '/';
@@ -558,10 +557,11 @@ class AsseticCommandController extends CommandController
 
         $i = 1;
         while ($i < $maxDepth) {
-            $pattern = $startDirectory . str_repeat('*/*', $i) . $suffixPattern;
+            $pattern    = $startDirectory . str_repeat('*/*', $i) . $suffixPattern;
             $foundFiles = array_merge($foundFiles, glob($pattern, GLOB_BRACE));
             $i++;
         }
+
         return $foundFiles;
     }
 
@@ -573,14 +573,16 @@ class AsseticCommandController extends CommandController
     protected function needsRecompile()
     {
         $lastCompileTime = $this->lastCompileTime;
-        $foundFiles = $this->collectFilesToWatch();
+        $foundFiles      = $this->collectFilesToWatch();
 
         foreach ($foundFiles as $currentFile) {
             if (filemtime($currentFile) > $lastCompileTime) {
                 $this->lastCompileTime = time();
+
                 return $currentFile;
             }
         }
+
         return false;
     }
 
@@ -596,7 +598,7 @@ class AsseticCommandController extends CommandController
 
             $assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes,
                 $this->otherAssetSuffixes);
-            $foundFiles = array();
+            $foundFiles  = array();
 
             foreach ($this->watchPaths as $currentWatchPath) {
                 $foundFilesForCurrentPath = $this->findFilesBySuffix($assetSuffix, $currentWatchPath);
@@ -606,8 +608,9 @@ class AsseticCommandController extends CommandController
             }
 
             $this->watchedFilesCacheTime = $currentTime;
-            $this->watchedFilesCache = $foundFiles;
+            $this->watchedFilesCache     = $foundFiles;
         }
+
         return $this->watchedFilesCache;
     }
 }
