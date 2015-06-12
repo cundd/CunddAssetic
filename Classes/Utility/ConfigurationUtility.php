@@ -33,7 +33,7 @@
 namespace Cundd\Assetic\Utility;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility as TYPO3GeneralUtility;
 
 /**
  * Helper class to read configuration
@@ -129,7 +129,7 @@ class ConfigurationUtility
         if (!self::$domainContext) {
             $domainContextTemp = '';
             if (TYPO3_MODE == 'BE') {
-                $domainContextTemp = GeneralUtility::_GP('id');
+                $domainContextTemp = TYPO3GeneralUtility::_GP('id');
             }
 
             if (TYPO3_MODE != 'BE' || !$domainContextTemp) {
