@@ -27,11 +27,12 @@ namespace Cundd\Assetic\Controller;
 
 use Cundd\Assetic\Manager;
 use Cundd\Assetic\ManagerInterface;
+use Cundd\CunddComposer\Autoloader;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
-\Tx_CunddComposer_Autoloader::register();
+Autoloader::register();
 
 /**
  *
