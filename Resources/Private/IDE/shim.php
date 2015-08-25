@@ -1,10 +1,9 @@
 <?php
-namespace Cundd\Assetic\Domain\Repository;
-
 /*
  *  Copyright notice
  *
- *  (c) 2012 Daniel Corn <info@cundd.net>, cundd
+ *  (c) 2015 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
+ *  Daniel Corn <cod@iresults.li>, iresults
  *
  *  All rights reserved
  *
@@ -24,16 +23,31 @@ namespace Cundd\Assetic\Domain\Repository;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
-use TYPO3\CMS\Extbase\Persistence\Repository;
 
 /**
- *
- *
- * @package assetic
- * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
- *
+ * @author COD
+ * Created 26.01.15 16:22
  */
-class AssetRepository extends Repository
+class Tx_CunddComposer_Autoloader
 {
+    public static function register()
+    {
+    }
+}
 
+class Tx_Iresults_Profiler
+{
+    public static function profile($msg)
+    {
+    }
+}
+
+class Exception_ScssException extends Exception
+{
+    /**
+     * @return mixed
+     */
+    public function getUserInfo()
+    {
+    }
 }
