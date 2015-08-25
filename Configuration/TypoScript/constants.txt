@@ -13,11 +13,11 @@ module.tx_assetic {
 		# cat=module.tx_assetic/enable; type=boolean; label=Compile if no backend user is logged in
 		allow_compile_without_login = 0
 
-		# cat=module.tx_assetic/enable; type=boolean; label=Enable experimental features
-		experimental = 0
-
 		livereload {
-			# cat=module.tx_assetic/livereload/a; type=int+; label=LiveReload port
+            # cat=module.tx_assetic/livereload/a; type=boolean; label=Add LiveReload JavaScript
+            add_javascript = 0
+
+			# cat=module.tx_assetic/livereload/b; type=int+; label=LiveReload port
 			port = 35729
 		}
 	}

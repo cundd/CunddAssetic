@@ -26,28 +26,40 @@
 
 /**
  * @author COD
- * Created 26.01.15 16:22
+ * Created 08.05.15 16:57
  */
-class Tx_CunddComposer_Autoloader
-{
-    public static function register()
-    {
-    }
-}
 
-class Tx_Iresults_Profiler
-{
-    public static function profile($msg)
-    {
-    }
-}
 
-class Exception_ScssException extends Exception
+namespace Cundd\Assetic\Compiler;
+
+
+/**
+ * Interface for the compiler
+ *
+ * @package Cundd\Assetic\Compiler
+ */
+interface CompilerInterface
 {
     /**
-     * @return mixed
+     * Collects all the assets and adds them to the asset manager
+     *
+     * @throws \LogicException if the assetic classes could not be found
+     * @return \Assetic\Asset\AssetCollection
      */
-    public function getUserInfo()
-    {
-    }
+    public function collectAssets();
+
+    /**
+     * Collects the files and tells assetic to compile the files
+     *
+     * @throws \Exception if an exception is thrown during rendering
+     * @return bool Returns if the files have been compiled successfully
+     */
+    public function compile();
+
+    /**
+     * Returns the shared asset manager
+     *
+     * @return \Assetic\AssetManager
+     */
+    public function getAssetManager();
 }

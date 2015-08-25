@@ -1,70 +1,61 @@
 # Module configuration
-module.tx_assetic {
-	view {
-		templateRootPath = {$module.tx_assetic.view.templateRootPath}
-		partialRootPath = {$module.tx_assetic.view.partialRootPath}
-		layoutRootPath = {$module.tx_assetic.view.layoutRootPath}
-	}
-}
-
 includeLibs.CunddAssetic = EXT:assetic/Classes/Plugin.php
 
 plugin.CunddAssetic = USER
 plugin.CunddAssetic {
-	userFunc = Tx_Cundd_Assetic_Plugin->main
-	#userFunc = Cundd\Assetic\Plugin->main
+    #    userFunc = Tx_Cundd_Assetic_Plugin->main
+    userFunc = Cundd\Assetic\Plugin->main
 
-	# Enable development mode to always compile files
-	development = 0
+    # Enable development mode to always compile files
+    development = 0
 
-	# Configure stylesheets
-	stylesheets =< plugin.CunddAsseticStylesheets
-	stylesheets {
+    # Configure stylesheets
+    stylesheets =< plugin.CunddAsseticStylesheets
+    stylesheets {
+        #    ### Example
+        #    ### Define the stylesheet to include
+        #    base = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Local/page.scss
+        #    base {
+        #        ### Add functions that will be called on the filter
+        #        functions {
+        #            ### Add a numeric prefix to allow the function to called
+        #            ### multiple times
+        #            0-addImportPath = fileadmin/framework/local/sass/
+        #            1-addImportPath = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Core/
+        #            2-addImportPath = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Library/
+        #        }
+        #    }
+    }
 
-	#	### Example
-	#	### Define the stylesheet to include
-	#	base = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Local/page.scss
-	#	base {
-	#		### Add functions that will be called on the filter
-	#		functions {
-	#			### Add a numeric prefix to allow the function to called
-	#			### multiple times
-	#			0-addImportPath = fileadmin/framework/local/sass/
-	#			1-addImportPath = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Core/
-	#			2-addImportPath = typo3conf/ext/Iresults.Master/Resources/Private/Stylesheets/Library/
-	#		}
-	#	}
+    filter_for_type {
+        sass = Assetic\Filter\Sass\SassFilter
+        scss = Assetic\Filter\Sass\ScssFilter
 
-	}
+        # Use no filter for CSS files
+        css = none
 
-	filter_for_type {
-		sass = Assetic\Filter\Sass\SassFilter
-		scss = Assetic\Filter\Sass\ScssFilter
+        # ### Example
+        # ### Use the PHP Sass compiler for scss files
+        # scss = Assetic\Filter\ScssphpFilter
+    }
 
-		# Use no filter for CSS files
-		css = none
+    filter_binaries {
+        ### Change the path to the filter binaries. I.e. if node.js is installed
+        ### into /usr/local/bin/
+        # lessFilter = /usr/local/bin/node
+    }
 
-		# ### Example
-		# ### Use the PHP Sass compiler for scss files
-		# scss = Assetic\Filter\ScssphpFilter
-	}
-
-	filter_binaries {
-		### Change the path to the filter binaries. I.e. if node.js is installed
-		### into /usr/local/bin/
-		# lessFilter = /usr/local/bin/node
-	}
-
-	allow_compile_without_login = {$module.tx_assetic.settings.allow_compile_without_login}
-	experimental = {$module.tx_assetic.settings.experimental}
-	livereload.port = {$module.tx_assetic.settings.livereload.port}
+    allow_compile_without_login = {$module.tx_assetic.settings.allow_compile_without_login}
+    livereload {
+        port = {$module.tx_assetic.settings.livereload.port}
+        add_javascript = {$module.tx_assetic.settings.livereload.add_javascript}
+    }
 }
-
 
 # If the TypoScript constant developmentMode is set, use CunddAssetic in
 # development mode too
 [globalVar = LIT:1 = {$developmentMode}]
-plugin.CunddAssetic.development = {$developmentMode}
+    plugin.CunddAssetic.development = {$developmentMode}
 [global]
 
 # Mirror plugin configuration to the module configuration
