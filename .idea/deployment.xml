@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="On explicit save action (⌘S)" serverName="ahv.li">
+  <component name="PublishConfigData" autoUpload="On explicit save action (⌘S)" serverName="lpm-group.li">
     <serverData>
       <paths name="aerztekammer.li">
         <serverdata>
@@ -11,6 +11,13 @@
         </serverdata>
       </paths>
       <paths name="ahv.li">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/typo3conf/ext/assetic" local="$PROJECT_DIR$/" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="lpm-group.li">
         <serverdata>
           <mappings>
             <mapping deploy="/typo3conf/ext/assetic" local="$PROJECT_DIR$/" web="/" />

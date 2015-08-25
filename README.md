@@ -122,42 +122,47 @@ In some cases you may have to specify the path to a CSS preprocessor to match yo
 Command line
 ------------
 
-Assetic provides three different CLI commands:
+Assetic provides three different CLI commands.
+
+To find information about the command's available options please run `typo3/cli_dispatch.phpsh extbase help` followed by the command.
 
 
-### compile:run
+### assetic:run
 
 Compiles the assets and exit.
 
 ```bash
-typo3/cli_dispatch.phpsh extbase compile:run
+typo3/cli_dispatch.phpsh extbase assetic:run
 ```
 
 
-### compile:watch
+### assetic:watch
 
 Watches for file changes in fileadmin/ and re-compiles the assets if needed.
 
 ```bash
-typo3/cli_dispatch.phpsh extbase compile:watch
+typo3/cli_dispatch.phpsh extbase assetic:watch
 ```
 
-**Options:**
 
-- `--interval`: Interval between file scans
+### assetic:livereload
 
-
-### compile:livereload
-
-Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed.
+Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed. The TypoScript constant `module.tx_assetic.settings.livereload.add_javascript` should be set to 1.
 
 ```bash
-typo3/cli_dispatch.phpsh extbase compile:livereload
+typo3/cli_dispatch.phpsh extbase assetic:livereload
 ```
 
-**Options:**
 
-- `--address`: IP address to listen
-- `--port`: Port to listen
-- `--interval`: Interval between file scans
+Additional tools
+----------------
 
+### Standalone auto-refresh tool
+
+Cundd Assetic provides a JavaScript that observes the CSS and JavaScript assets on the page for changes and automatically reloads them. For more information and usage visit [/Resources/Public/JavaScript](/Resources/Public/JavaScript).
+
+
+Sponsored by
+------------
+
+[![](http://www.iresults.li/fileadmin/framework/local/img/iresultsLogo.png)](http://www.iresults.li)

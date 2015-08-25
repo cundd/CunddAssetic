@@ -8,7 +8,7 @@
     <option name="urlToMagento" value="" />
     <option name="packages" value="" />
     <option name="themes" value="" />
-    <option name="showOldMagicentoNotification" value="false" />
+    <option name="projectClosedCorrectly" value="false" />
   </component>
 </project>
 
