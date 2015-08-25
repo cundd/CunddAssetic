@@ -35,7 +35,7 @@ use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Plugin;
 use Cundd\Assetic\Server\LiveReload;
 use Cundd\Assetic\Utility\ConfigurationUtility;
-use Cundd\Composer\Autoloader;
+use Cundd\CunddComposer\Autoloader;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Factory as LoopFactory;
