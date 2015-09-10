@@ -24,6 +24,7 @@ namespace Cundd\Assetic;
  */
 
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Cundd\CunddComposer\Autoloader;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
 
@@ -66,6 +67,8 @@ class Plugin
     public function main($content, $conf)
     {
         AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
+        Autoloader::register();
+
         $this->configuration = $conf;
         $this->manager = new Manager($conf);
 
