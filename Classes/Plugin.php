@@ -69,13 +69,19 @@ class Plugin
         $this->configuration = $conf;
         $this->manager = new Manager($conf);
 
-        $renderedStylesheet = $this->manager->collectAndCompile();
+        try {
+            $renderedStylesheet = $this->manager->collectAndCompile();
 
-        $content = '';
-        $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
-        $content .= $this->getLiveReloadCode();
-
+            $content = '';
+            $content .= '<link rel="stylesheet" type="text/css" href="'.$renderedStylesheet.'" media="all">';
+            $content .= $this->getLiveReloadCode();
+        } catch (\LogicException $exception) {
+            if ($exception->getCode() === 1356543545) {
+                return $exception->getMessage();
+            }
+        }
         AsseticGeneralUtility::profile('Cundd Assetic plugin end');
+
         return $content;
     }
 
@@ -95,8 +101,8 @@ class Plugin
             $port = intval($this->configuration['livereload.']['port']);
         }
 
-        $resource               = 'EXT:assetic/Resources/Public/Library/livereload.js';
-        $resource               = '/' . str_replace(PATH_site, '', GeneralUtility::getFileAbsFileName($resource));
+        $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
+        $resource = '/'.str_replace(PATH_site, '', GeneralUtility::getFileAbsFileName($resource));
         $javaScriptCodeTemplate = "<script type=\"text/javascript\">
 	(function () {
 		var scriptElement = document.createElement('script');
