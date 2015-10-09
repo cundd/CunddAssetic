@@ -82,6 +82,15 @@ class Manager implements ManagerInterface
     protected $previousHash = '';
 
     /**
+     * Defines if this instance is the owner of the symlink
+     *
+     * This defines if the instance is allowed to create a new symlink and was able to delete the old one
+     *
+     * @var bool
+     */
+    protected $isOwnerOfSymlink = false;
+
+    /**
      * Indicates if experimental features are enabled
      *
      * @var bool
@@ -427,10 +436,10 @@ class Manager implements ManagerInterface
         }
         $symlinkPath = $this->getSymlinkPath();
         if ($fileFinalPath !== $symlinkPath) {
-            if (file_exists($symlinkPath)) {
-                throw new \RuntimeException(sprintf('Symlink %s already exists', $symlinkPath), 1431361465);
+            // TODO: Implement ownership: If this Manager is the owner of the symlink throw an exception if it exists
+            if ($this->isOwnerOfSymlink || !file_exists($symlinkPath)) {
+                symlink($fileFinalPath, $symlinkPath);
             }
-            symlink($fileFinalPath, $symlinkPath);
         }
     }
 
@@ -444,8 +453,10 @@ class Manager implements ManagerInterface
         }
         // Unlink the symlink
         $symlinkPath = $this->getSymlinkPath();
-        if (file_exists($symlinkPath) && is_link($symlinkPath)) {
-            unlink($symlinkPath);
+        if (!file_exists($symlinkPath)) {
+            $this->isOwnerOfSymlink = true;
+        } elseif (is_link($symlinkPath)) {
+            $this->isOwnerOfSymlink = unlink($symlinkPath);
         }
     }
 
