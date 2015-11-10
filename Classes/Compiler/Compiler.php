@@ -363,6 +363,7 @@ class Compiler implements CompilerInterface
         if (isset($this->configuration['development'])) {
             return (bool)intval($this->configuration['development']);
         }
+
         return false;
     }
 
@@ -376,7 +377,16 @@ class Compiler implements CompilerInterface
         if (!$this->assetManager) {
             $this->assetManager = new AssetManager();
         }
+
         return $this->assetManager;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isStrict()
+    {
+        return isset($this->configuration['strict']) && $this->configuration['strict'];
     }
 
     /**
@@ -391,8 +401,10 @@ class Compiler implements CompilerInterface
     protected function applyFunctionsToFilterForType($filter, $stylesheetConfiguration, $stylesheetType)
     {
         if (!$stylesheetType) {
-            throw new \UnexpectedValueException('The given stylesheet type is invalid "' . $stylesheetType . '"',
-                1355910725);
+            throw new \UnexpectedValueException(
+                'The given stylesheet type is invalid "'.$stylesheetType.'"',
+                1355910725
+            );
         }
         $functions = $stylesheetConfiguration['functions.'];
         ksort($functions);
@@ -407,16 +419,20 @@ class Compiler implements CompilerInterface
                 $function = substr($function, 2);
             }
 
+
             AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
             if (is_callable(array($filter, $function))) {
                 call_user_func_array(array($filter, $function), $data);
+            } elseif ($this->isStrict()) {
+                throw new FilterException('Filter does not implement '.$function, 1447161985);
             } else {
-                trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
+                trigger_error('Filter does not implement '.$function, E_USER_NOTICE);
             }
         }
 
         AsseticGeneralUtility::pd($filter);
         $this->filterManager->set($stylesheetType, $filter);
+
         return $filter;
     }
 
