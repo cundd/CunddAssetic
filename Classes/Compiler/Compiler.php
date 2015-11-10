@@ -32,12 +32,12 @@
 namespace Cundd\Assetic\Compiler;
 
 use Assetic\Asset\AssetCollection;
+use Assetic\AssetManager;
+use Assetic\AssetWriter;
 use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
-use Assetic\AssetWriter;
-use Assetic\AssetManager;
-use Assetic\FilterManager;
 use Assetic\Filter;
+use Assetic\FilterManager;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -94,7 +94,6 @@ class Compiler implements CompilerInterface
     {
         AsseticGeneralUtility::profile('Will collect assets');
         $pathToWeb = ConfigurationUtility::getPathToWeb();
-        $pluginLevelOptions = $this->getPluginLevelOptions();
 
         // Check if the Assetic classes are available
         if (!class_exists('Assetic\\Asset\\AssetCollection', true)) {
@@ -112,56 +111,7 @@ class Compiler implements CompilerInterface
         $stylesheets = isset($this->configuration['stylesheets.']) ? $this->configuration['stylesheets.'] : array();
         foreach ($stylesheets as $assetKey => $stylesheet) {
             if (!is_array($stylesheet)) {
-                $asset = null;
-                $filter = null;
-                $assetFilters = array();
-                $stylesheetConf = is_array($this->configuration['stylesheets.'][$assetKey . '.']) ? $this->configuration['stylesheets.'][$assetKey . '.'] : array();
-
-                // Get the type to find the according filter
-                if (isset($stylesheetConf['type'])) {
-                    $stylesheetType = $stylesheetConf['type'] . '';
-                } else {
-                    $stylesheetType = substr(strrchr($stylesheet, '.'), 1);
-                }
-
-
-                AsseticGeneralUtility::pd($stylesheet);
-                $stylesheet = GeneralUtility::getFileAbsFileName($stylesheet);
-                AsseticGeneralUtility::pd($stylesheet);
-
-                // Make sure the filter manager knows the filter
-                if (!$this->filterManager->has($stylesheetType)) {
-                    $filter = $this->getFilterForType($stylesheetType);
-                    if ($filter) {
-                        $this->filterManager->set($stylesheetType, $this->getFilterForType($stylesheetType));
-                        $assetFilters = array($stylesheetType);
-                    }
-                } else {
-                    $assetFilters = array($stylesheetType);
-                }
-
-                // Check if there are filter functions
-                if (isset($stylesheetConf['functions.'])) {
-                    if (!$filter) {
-                        $filter = $this->getFilterForType($stylesheetType);
-                    }
-                    $this->applyFunctionsToFilterForType($filter, $stylesheetConf, $stylesheetType);
-                }
-
-                // Check if there are special options for this stylesheet
-                if (isset($stylesheetConf['options.'])) {
-                    $currentOptions = $stylesheetConf['options.'];
-                } else {
-                    $currentOptions = $pluginLevelOptions;
-                }
-                AsseticGeneralUtility::pd($currentOptions);
-
-                $asset = $factory->createAsset(
-                    array($stylesheet),
-                    $assetFilters,
-                    $currentOptions
-                );
-                $assetCollection->add($asset);
+                $this->createAsset($assetKey, $stylesheet, $assetCollection, $factory);
             }
         }
 
@@ -170,6 +120,7 @@ class Compiler implements CompilerInterface
         //$assetCollection->setTargetPath($this->getCurrentOutputFilenameWithoutHash());
         $assetManager->set('cundd_assetic', $assetCollection);
         AsseticGeneralUtility::profile('Did collect assets');
+
         return $assetCollection;
     }
 
@@ -181,7 +132,7 @@ class Compiler implements CompilerInterface
      */
     public function compile()
     {
-        $outputDirectory = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
+        $outputDirectory = ConfigurationUtility::getPathToWeb().ConfigurationUtility::getOutputFileDir();
         GeneralUtility::mkdir($outputDirectory);
 
         $writer = new AssetWriter($outputDirectory);
@@ -191,6 +142,7 @@ class Compiler implements CompilerInterface
             $writer->writeManagerAssets($this->getAssetManager());
         } catch (FilterException $exception) {
             $this->handleFilterException($exception);
+
             return false;
         } catch (\Exception $exception) {
             if ($this->isDevelopment()) {
@@ -202,14 +154,16 @@ class Compiler implements CompilerInterface
                 throw $exception;
             } else {
                 if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                    $output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
+                    $output = 'Caught exception #'.$exception->getCode().': '.$exception->getMessage();
                     GeneralUtility::devLog($output, 'assetic');
                 }
             }
+
             return false;
         }
 
         AsseticGeneralUtility::profile('Did compile asset');
+
         return true;
     }
 
@@ -231,9 +185,7 @@ class Compiler implements CompilerInterface
         }
 
         $filter = null;
-        $filterBinaryPath = null;
-        $filterClass = ucfirst($type) . 'Filter';
-        $filterBinaries = $this->configuration['filter_binaries.'];
+        $filterClass = ucfirst($type).'Filter';
         $filterForTypeDefinitions = $this->configuration['filter_for_type.'];
 
         // Check which filter should be used for the given type. This allows the
@@ -247,21 +199,20 @@ class Compiler implements CompilerInterface
             return null;
         }
 
-        // Replace the backslash in the filter class with an underscore
-        $filterClassIdentifier = strtolower(str_replace('\\', '_', $filterClass));
-        if (isset($filterBinaries[$filterClassIdentifier])) {
-            $filterBinaryPath = $filterBinaries[$filterClassIdentifier];
-        }
-
         if (class_exists($filterClass)) {
+            $filterBinaryPath = $this->getFilterBinaryPath($filterClass);
             if ($filterBinaryPath) {
                 $filter = new $filterClass($filterBinaryPath);
             } else {
                 $filter = new $filterClass();
             }
         } else {
-            throw new \LogicException('Filter class ' . $filterClass . ' not found', 1355846301);
+            throw new FilterException('Filter class '.$filterClass.' not found', 1355846301);
         }
+
+        // Store the just created filter
+        $this->filterManager->set($type, $filter);
+
         return $filter;
     }
 
@@ -283,13 +234,13 @@ class Compiler implements CompilerInterface
             $code = '';
             $backtrace = $exception->getTrace();
 
-            $heading = 'Caught Assetic error #' . $exception->getCode() . ': ' . $exception->getMessage();
+            $heading = 'Caught Assetic error #'.$exception->getCode().': '.$exception->getMessage();
             while ($step = current($backtrace)) {
-                $code .= '#' . $i . ': ' . $step['file'] . '(' . $step['line'] . '): ';
+                $code .= '#'.$i.': '.$step['file'].'('.$step['line'].'): ';
                 if (isset($step['class'])) {
-                    $code .= $step['class'] . $step['type'];
+                    $code .= $step['class'].$step['type'];
                 }
-                $code .= $step['function'] . '(arguments: ' . count($step['args']) . ')' . PHP_EOL;
+                $code .= $step['function'].'(arguments: '.count($step['args']).')'.PHP_EOL;
                 next($backtrace);
                 $i++;
             }
@@ -303,19 +254,24 @@ class Compiler implements CompilerInterface
                 'box-sizing'      => 'border-box',
                 'box-shadow'      => 'inset 0 0 4px rgba(0, 0, 0, 0.3)',
                 'font-family'     => 'sans-serif',
+                'white-space'     => 'pre',
             );
-            array_walk($styles, function (&$value, $key) {
-                $value = $key . ':' . $value;
-            });
+            array_walk(
+                $styles,
+                function (&$value, $key) {
+                    $value = $key.':'.$value;
+                }
+            );
             $style = implode(';', $styles);
 
-            echo '<div style="' . $style . '">' . $heading . PHP_EOL . '<pre>' . $code . '</pre></div>';
+            echo '<div style="'.$style.'">'.$heading.PHP_EOL.'<pre>'.$code.'</pre></div>';
         } else {
             if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                $code = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
+                $code = 'Caught exception #'.$exception->getCode().': '.$exception->getMessage();
                 GeneralUtility::devLog($code, 'assetic');
             }
         }
+
         return '';
     }
 
@@ -437,6 +393,63 @@ class Compiler implements CompilerInterface
     }
 
     /**
+     * Create and collect the Asset with the given key and stylesheet
+     *
+     * @param string          $assetKey
+     * @param string          $stylesheet
+     * @param AssetCollection $assetCollection
+     * @param AssetFactory    $factory
+     * @return AssetCollection|null
+     */
+    public function createAsset($assetKey, $stylesheet, AssetCollection $assetCollection, AssetFactory $factory)
+    {
+        $pluginLevelOptions = $this->getPluginLevelOptions();
+
+        $stylesheetConf = is_array(
+            $this->configuration['stylesheets.'][$assetKey.'.']
+        ) ? $this->configuration['stylesheets.'][$assetKey.'.'] : array();
+
+        // Get the type to find the according filter
+        if (isset($stylesheetConf['type'])) {
+            $stylesheetType = $stylesheetConf['type'].'';
+        } else {
+            $stylesheetType = substr(strrchr($stylesheet, '.'), 1);
+        }
+
+        $stylesheet = GeneralUtility::getFileAbsFileName($stylesheet);
+
+        // Make sure the filter manager knows the filter
+        $filter = $this->getFilterForType($stylesheetType);
+        if ($filter) {
+            $assetFilters = array($stylesheetType);
+        } else {
+            $assetFilters = array();
+        }
+
+        // Check if there are filter functions
+        if (isset($stylesheetConf['functions.'])) {
+            $this->applyFunctionsToFilterForType($filter, $stylesheetConf, $stylesheetType);
+        }
+
+        // Check if there are special options for this stylesheet
+        if (isset($stylesheetConf['options.'])) {
+            $currentOptions = $stylesheetConf['options.'];
+        } else {
+            $currentOptions = $pluginLevelOptions;
+        }
+        AsseticGeneralUtility::pd($currentOptions);
+
+        $asset = $factory->createAsset(
+            array($stylesheet),
+            $assetFilters,
+            $currentOptions
+        );
+        $assetCollection->add($asset);
+
+        return $asset;
+    }
+
+    /**
      * Prepares the data to be passed to a filter function.
      *
      * I.e. expands paths to their absolute path.
@@ -451,5 +464,44 @@ class Compiler implements CompilerInterface
                 $parameter = GeneralUtility::getFileAbsFileName($parameter);
             }
         }
+    }
+
+    /**
+     * @param string $filterClass
+     * @return string
+     */
+    private function getFilterBinaryPath($filterClass)
+    {
+        $filterBinaryPath = null;
+        $filterBinaries = $this->configuration['filter_binaries.'];
+
+        // Replace the backslash in the filter class with an underscore
+        $filterClassIdentifier = strtolower(str_replace('\\', '_', $filterClass));
+        if (isset($filterBinaries[$filterClassIdentifier])) {
+            $filterBinaryPath = $filterBinaries[$filterClassIdentifier];
+        }
+
+        if (is_string($filterBinaryPath) && $filterBinaryPath[0] === '~') {
+            $homeDirectory = $this->getHomeDirectory();
+            $filterBinaryPath = $homeDirectory.substr($filterBinaryPath, 1);
+        }
+
+        return $filterBinaryPath;
+    }
+
+    /**
+     * @return string
+     */
+    private function getHomeDirectory()
+    {
+        $homeDirectory = getenv('HOME');
+        if ($homeDirectory) {
+            return $homeDirectory;
+        }
+        if (isset($_SERVER['HOME'])) {
+            return $_SERVER['HOME'];
+        }
+
+        return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'].'/..' : '';
     }
 }
