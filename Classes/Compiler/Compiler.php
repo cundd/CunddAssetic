@@ -380,7 +380,10 @@ class Compiler implements CompilerInterface
             if (is_callable(array($filter, $function))) {
                 call_user_func_array(array($filter, $function), $data);
             } elseif ($this->isStrict()) {
-                throw new FilterException('Filter does not implement '.$function, 1447161985);
+                throw new FilterException(
+                    sprintf('Filter "%s" does not implement method "%s"', get_class($filter), $function),
+                    1447161985
+                );
             } else {
                 trigger_error('Filter does not implement '.$function, E_USER_NOTICE);
             }
