@@ -461,6 +461,22 @@ class Manager implements ManagerInterface
         if ($fileFinalPath !== $symlinkPath) {
             if ($this->isOwnerOfSymlink || !file_exists($symlinkPath)) {
                 if (!symlink($fileFinalPath, $symlinkPath)) {
+                    if (is_link($symlinkPath)) {
+                        throw new SymlinkException(
+                            sprintf(
+                                'Could not create the symlink "%s" because the path is a link',
+                                $symlinkPath
+                            )
+                        );
+                    }
+                    if (file_exists($symlinkPath)) {
+                        throw new SymlinkException(
+                            sprintf(
+                                'Could not create the symlink "%s" because a file exists at that path',
+                                $symlinkPath
+                            )
+                        );
+                    }
                     throw new SymlinkException(
                         sprintf('Could not create the symlink "%s" because of an unknown reason', $symlinkPath)
                     );
