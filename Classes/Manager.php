@@ -502,9 +502,7 @@ class Manager implements ManagerInterface
         }
         // Unlink the symlink
         $symlinkPath = $this->getSymlinkPath();
-        if (!file_exists($symlinkPath)) {
-            $this->isOwnerOfSymlink = true;
-        } elseif (is_link($symlinkPath)) {
+        if (is_link($symlinkPath)) {
             if (unlink($symlinkPath)) {
                 $this->isOwnerOfSymlink = true;
             } else {
@@ -513,6 +511,8 @@ class Manager implements ManagerInterface
                     sprintf('Could not acquire ownership of symlink "%s"', $symlinkPath)
                 );
             }
+        } elseif (!file_exists($symlinkPath)) {
+            $this->isOwnerOfSymlink = true;
         } else {
             throw new SymlinkException(
                 sprintf('Could not acquire ownership of symlink "%s" because it exists but is no link', $symlinkPath)
