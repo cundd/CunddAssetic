@@ -110,6 +110,7 @@ class Plugin
 	(function () {
 	    document.addEventListener('DOMContentLoaded', function() {
             var scriptElement = document.createElement('script');
+            scriptElement.async = true;
             scriptElement.src = '%s' + '?host=' + location.host + '&port=%d';
             document.getElementsByTagName('head')[0].appendChild(scriptElement);
 	    });
