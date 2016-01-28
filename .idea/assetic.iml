@@ -6,37 +6,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library name="PHP">
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/backend" />
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/fluid" />
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/core" />
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase" />
-          <root url="file://$MODULE_DIR$/vendor" />
-          <root url="file://$MODULE_DIR$/../PHPUnit" />
-        </CLASSES>
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/backend" />
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/fluid" />
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/core" />
-          <root url="file://$MODULE_DIR$/../Resources/typo3_src-6.1.1/typo3/sysext/extbase" />
-          <root url="file://$MODULE_DIR$/vendor" />
-          <root url="file://$MODULE_DIR$/../PHPUnit" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="PHARS">
-        <CLASSES>
-          <root url="phar://$MODULE_DIR$/../PHPUnit/phpunit.phar" />
-        </CLASSES>
-        <SOURCES>
-          <root url="phar://$MODULE_DIR$/../PHPUnit/phpunit.phar" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="sass-stdlib" level="application" />
   </component>
 </module>
-

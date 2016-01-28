@@ -47,6 +47,8 @@ nb-configuration.xml
 
 ### PhpStorm
 .idea/workspace.xml
+.idea/deployment.xml
+.idea/magicento.xml
 
 ### Eclipse
 *.pydevproject
