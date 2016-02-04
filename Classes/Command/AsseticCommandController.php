@@ -50,8 +50,7 @@ Autoloader::register();
  *
  * @package Cundd\Assetic\Command
  */
-class AsseticCommandController extends CommandController
-{
+class AsseticCommandController extends CommandController {
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
     // ESCAPE CHARACTER
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
@@ -276,8 +275,7 @@ class AsseticCommandController extends CommandController
      * @param string $destination   Specify a relative path where the compiled file should be copied to
      * @param string $domainContext Specify the domain of the current context [Only used in multidomain installations]
      */
-    public function compileCommand($destination = '', $domainContext = null)
-    {
+    public function compileCommand($destination = '', $domainContext = null) {
         $this->validateMultiDomainInstallation($domainContext);
 
         $usedPath = $sourcePath = $this->compile();
@@ -296,8 +294,7 @@ class AsseticCommandController extends CommandController
      * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by colon ":")
      * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
      */
-    public function watchCommand($interval = 1, $path = 'fileadmin', $domainContext = null)
-    {
+    public function watchCommand($interval = 1, $path = 'fileadmin', $domainContext = null) {
         $this->watchPaths = explode(':', $path);
         $this->printWatchedPaths();
         $this->validateMultiDomainInstallation($domainContext);
@@ -331,7 +328,7 @@ class AsseticCommandController extends CommandController
 
         // Websocket server
         $this->liveReloadServer = new LiveReload();
-        $socket                 = new ReactServer($loop);
+        $socket = new ReactServer($loop);
         $socket->listen($port, $address);
         new IoServer(
             new WsServer($this->liveReloadServer),
@@ -356,8 +353,7 @@ class AsseticCommandController extends CommandController
     /**
      * Re-compiles the sources if needed and additionally informs the LiveReload server about the changes
      */
-    public function recompileIfNeededAndInformLiveReloadServer()
-    {
+    public function recompileIfNeededAndInformLiveReloadServer() {
         $fileNeedsRecompile = $this->needsRecompile();
         if (!$fileNeedsRecompile) {
             return;
@@ -376,8 +372,7 @@ class AsseticCommandController extends CommandController
     /**
      * Re-compiles the sources if needed
      */
-    protected function recompileIfNeeded()
-    {
+    protected function recompileIfNeeded() {
         if ($this->needsRecompile()) {
             $this->compile();
         }
@@ -388,10 +383,9 @@ class AsseticCommandController extends CommandController
      *
      * @return string
      */
-    protected function compile()
-    {
+    protected function compile() {
         $outputFileLink = '';
-        $manager        = $this->getManager();
+        $manager = $this->getManager();
         if ($manager) {
             $manager->forceCompile();
             try {
@@ -413,8 +407,7 @@ class AsseticCommandController extends CommandController
      *
      * @param mixed $domainContext
      */
-    protected function validateMultiDomainInstallation($domainContext)
-    {
+    protected function validateMultiDomainInstallation($domainContext) {
         if (ConfigurationUtility::isMultiDomain()) {
 
             $this->outputLine(self::SIGNAL . self::BOLD_RED . 'Multidomain installations are currently not supported' . self::SIGNAL_ATTRIBUTES_OFF);
@@ -444,8 +437,7 @@ class AsseticCommandController extends CommandController
      * @param string $destination
      * @return string Returns the used path
      */
-    protected function copyToDestination($source, $destination)
-    {
+    protected function copyToDestination($source, $destination) {
         if (!$destination) {
             return $source;
         }
@@ -479,8 +471,7 @@ class AsseticCommandController extends CommandController
      * @param array  $arguments Optional arguments to use for sprintf
      * @return void
      */
-    protected function output($text, array $arguments = array())
-    {
+    protected function output($text, array $arguments = array()) {
         if ($arguments !== array()) {
             $text = vsprintf($text, $arguments);
         }
@@ -493,9 +484,8 @@ class AsseticCommandController extends CommandController
      *
      * @param \Exception $exception
      */
-    protected function handleException($exception)
-    {
-        $heading           = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
+    protected function handleException($exception) {
+        $heading = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
         $exceptionPosition = 'in ' . $exception->getFile() . ' at line ' . $exception->getLine();
 
         $coloredText = self::SIGNAL . self::REVERSE . self::SIGNAL . self::BOLD_RED . $heading . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
@@ -508,8 +498,7 @@ class AsseticCommandController extends CommandController
     /**
      * Prints the watched paths
      */
-    protected function printWatchedPaths()
-    {
+    protected function printWatchedPaths() {
         $this->outputLine(''
             . self::ESCAPE
             . self::GREEN
@@ -524,12 +513,11 @@ class AsseticCommandController extends CommandController
      *
      * @return ManagerInterface
      */
-    public function getManager()
-    {
+    public function getManager() {
         if (!$this->compiler) {
             $allConfiguration = $this->configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
             if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
-                $configuration  = $allConfiguration['plugin.']['CunddAssetic.'];
+                $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
                 $this->compiler = new Manager($configuration);
             }
         }
@@ -540,29 +528,16 @@ class AsseticCommandController extends CommandController
     /**
      * Returns all files with the given suffix under the given start directory
      *
-     * @param string|array $suffix
-     * @param string       $startDirectory
-     * @return array<string>
+     * @param string|string[] $suffix
+     * @param string          $startDirectory
+     * @return string[]
      */
-    protected function findFilesBySuffix($suffix, $startDirectory)
-    {
-        $maxDepth      = $this->findFilesMaxDepth;
-        $suffixPattern = '.{' . implode(',', (array)$suffix) . '}';
-        if (substr($startDirectory, -1) !== '/') {
-            $startDirectory .= '/';
-        }
-        $startDirectory .= '*';
-
-        $foundFiles = glob($startDirectory . $suffixPattern, GLOB_BRACE);
-
-        $i = 1;
-        while ($i < $maxDepth) {
-            $pattern    = $startDirectory . str_repeat('*/*', $i) . $suffixPattern;
-            $foundFiles = array_merge($foundFiles, glob($pattern, GLOB_BRACE));
-            $i++;
+    protected function findFilesBySuffix($suffix, $startDirectory) {
+        if (!defined('GLOB_BRACE')) {
+            return $this->findFilesBySuffixWithoutGlobBrace($suffix, $startDirectory);
         }
 
-        return $foundFiles;
+        return $this->findFilesBySuffixWithGlobBrace($suffix, $startDirectory);
     }
 
     /**
@@ -570,10 +545,9 @@ class AsseticCommandController extends CommandController
      *
      * @return string|bool
      */
-    protected function needsRecompile()
-    {
+    protected function needsRecompile() {
         $lastCompileTime = $this->lastCompileTime;
-        $foundFiles      = $this->collectFilesToWatch();
+        $foundFiles = $this->collectFilesToWatch();
 
         foreach ($foundFiles as $currentFile) {
             if (filemtime($currentFile) > $lastCompileTime) {
@@ -591,14 +565,13 @@ class AsseticCommandController extends CommandController
      *
      * string[]
      */
-    protected function collectFilesToWatch()
-    {
+    protected function collectFilesToWatch() {
         $currentTime = time();
         if (($currentTime - $this->watchedFilesCacheTime) > $this->watchedFilesCacheLifetime) {
 
             $assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes,
                 $this->otherAssetSuffixes);
-            $foundFiles  = array();
+            $foundFiles = array();
 
             foreach ($this->watchPaths as $currentWatchPath) {
                 $foundFilesForCurrentPath = $this->findFilesBySuffix($assetSuffix, $currentWatchPath);
@@ -608,9 +581,71 @@ class AsseticCommandController extends CommandController
             }
 
             $this->watchedFilesCacheTime = $currentTime;
-            $this->watchedFilesCache     = $foundFiles;
+            $this->watchedFilesCache = $foundFiles;
         }
 
         return $this->watchedFilesCache;
+    }
+
+    /**
+     * Returns all files with the given suffix under the given start directory
+     *
+     * @param string|string[] $suffix
+     * @param string          $startDirectory
+     * @return string[]
+     */
+    private function findFilesBySuffixWithoutGlobBrace($suffix, $startDirectory) {
+        $foundFiles = array();
+        if (is_array($suffix)) {
+            foreach ($suffix as $currentSuffix) {
+                $foundFiles = array_merge($foundFiles, $this->findFilesBySuffixWithoutGlobBrace($currentSuffix, $startDirectory));
+            }
+
+            return $foundFiles;
+        } elseif (!is_string($suffix)) {
+            throw new \InvalidArgumentException(
+                sprintf('Expected argument suffix to be of type string, %s given', gettype($suffix)),
+                1453993530
+            );
+        }
+
+        $maxDepth = $this->findFilesMaxDepth;
+        $startDirectory = rtrim($startDirectory, '/') . '/';
+
+        $pathPattern = $startDirectory . '*.' . $suffix;
+        $foundFiles = glob($pathPattern);
+
+        $i = 1;
+        while ($i < $maxDepth) {
+            $pattern = $startDirectory . str_repeat('*/*', $i) . $suffix;
+            $foundFiles = array_merge($foundFiles, glob($pattern));
+            $i++;
+        }
+
+        return $foundFiles;
+    }
+
+    /**
+     * Returns all files with the given suffix under the given start directory
+     *
+     * @param string|string[] $suffix
+     * @param string          $startDirectory
+     * @return string[]
+     */
+    private function findFilesBySuffixWithGlobBrace($suffix, $startDirectory) {
+        $maxDepth = $this->findFilesMaxDepth;
+        $suffixPattern = '.{' . implode(',', (array)$suffix) . '}';
+        $startDirectory = rtrim($startDirectory, '/') . '/*';
+
+        $foundFiles = glob($startDirectory . $suffixPattern, GLOB_BRACE);
+
+        $i = 1;
+        while ($i < $maxDepth) {
+            $pattern = $startDirectory . str_repeat('*/*', $i) . $suffixPattern;
+            $foundFiles = array_merge($foundFiles, glob($pattern, GLOB_BRACE));
+            $i++;
+        }
+
+        return $foundFiles;
     }
 }
