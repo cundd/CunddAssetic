@@ -16,16 +16,16 @@
     ],
     "require": {
         "php": ">=5.3.1",
-        "kriswallsmith/assetic": "1.1.x",
-        "cboden/ratchet": "0.2.8"
+        "kriswallsmith/assetic": "1.*"
     },
     "require-dev": {
         "leafo/lessphp": "*",
         "leafo/scssphp": "*",
-        "cundd/assetic_additions": "*"
+        "cundd/assetic_additions": "*",
+        "cboden/ratchet": "0.2.8"
     },
     "autoload": {
-        "psr-0": { "Cundd": "Classes/" }
+        "psr-4": { "Cundd\\Assetic\\": "Classes/" }
     },
     "repositories": [
         {

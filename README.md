@@ -108,16 +108,19 @@ If you want to invoke a method multiple times you can just add a numeric prefix 
 
 ### Configure the filter binary paths
 
-In some cases you may have to specify the path to a CSS preprocessor to match your OS' configuration. This can be done through the `filter_binaries` directive in your TypoScript
+In some cases you may have to specify the path to a CSS preprocessor to match your OS' configuration. This can be done through the `filter_binaries` directive in your TypoScript:
 
     plugin.CunddAssetic {
         filter_binaries {
 	    	# Change the path to the filter binaries. I.e. if node.js is installed
 	    	# into /usr/local/bin/
-    		lessFilter = /usr/local/bin/node
+    		assetic_filter_lessfilter = /usr/local/bin/node
+    		
+    		# The binary for filter class \Assetic\Filter\Sass\ScssFilter
+    		assetic_filter_sass_scssfilter = /usr/local/bin/sass
 	    }
     }
-
+    
 
 Command line
 ------------
