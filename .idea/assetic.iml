@@ -8,5 +8,25 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="sass-stdlib" level="application" />
-</component>
+    <orderEntry type="module-library">
+      <library name="PHP">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/vendor" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/core" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/extbase" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/fluid" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/fluid_styled_content" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/frontend" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/vendor" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/core" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/extbase" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/fluid" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/fluid_styled_content" />
+          <root url="file://$MODULE_DIR$/../../Resources/typo3_src-7.5.0/typo3/sysext/frontend" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+  </component>
 </module>
