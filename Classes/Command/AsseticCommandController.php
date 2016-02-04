@@ -652,7 +652,7 @@ class AsseticCommandController extends CommandController
 
         $i = 1;
         while ($i < $maxDepth) {
-            $pattern = $startDirectory.str_repeat('*/*', $i).$suffix;
+            $pattern = $startDirectory.str_repeat('*/*', $i).'.'.$suffix;
             $foundFiles = array_merge($foundFiles, glob($pattern));
             $i++;
         }
