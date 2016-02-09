@@ -39,6 +39,7 @@ use Assetic\AssetManager;
 use Assetic\FilterManager;
 use Assetic\Filter;
 use Cundd\Assetic\Utility\ConfigurationUtility;
+use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -115,11 +116,13 @@ class Compiler implements CompilerInterface
                 $asset = null;
                 $filter = null;
                 $assetFilters = array();
-                $stylesheetConf = is_array($this->configuration['stylesheets.'][$assetKey . '.']) ? $this->configuration['stylesheets.'][$assetKey . '.'] : array();
+                $stylesheetConf = is_array(
+                    $this->configuration['stylesheets.'][$assetKey.'.']
+                ) ? $this->configuration['stylesheets.'][$assetKey.'.'] : array();
 
                 // Get the type to find the according filter
                 if (isset($stylesheetConf['type'])) {
-                    $stylesheetType = $stylesheetConf['type'] . '';
+                    $stylesheetType = $stylesheetConf['type'].'';
                 } else {
                     $stylesheetType = substr(strrchr($stylesheet, '.'), 1);
                 }
@@ -170,6 +173,7 @@ class Compiler implements CompilerInterface
         //$assetCollection->setTargetPath($this->getCurrentOutputFilenameWithoutHash());
         $assetManager->set('cundd_assetic', $assetCollection);
         AsseticGeneralUtility::profile('Did collect assets');
+
         return $assetCollection;
     }
 
@@ -181,7 +185,7 @@ class Compiler implements CompilerInterface
      */
     public function compile()
     {
-        $outputDirectory = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
+        $outputDirectory = ConfigurationUtility::getPathToWeb().ConfigurationUtility::getOutputFileDir();
         GeneralUtility::mkdir($outputDirectory);
 
         $writer = new AssetWriter($outputDirectory);
@@ -191,6 +195,7 @@ class Compiler implements CompilerInterface
             $writer->writeManagerAssets($this->getAssetManager());
         } catch (FilterException $exception) {
             $this->handleFilterException($exception);
+
             return false;
         } catch (\Exception $exception) {
             if ($this->isDevelopment()) {
@@ -202,14 +207,16 @@ class Compiler implements CompilerInterface
                 throw $exception;
             } else {
                 if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                    $output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
+                    $output = 'Caught exception #'.$exception->getCode().': '.$exception->getMessage();
                     GeneralUtility::devLog($output, 'assetic');
                 }
             }
+
             return false;
         }
 
         AsseticGeneralUtility::profile('Did compile asset');
+
         return true;
     }
 
@@ -232,7 +239,7 @@ class Compiler implements CompilerInterface
 
         $filter = null;
         $filterBinaryPath = null;
-        $filterClass = ucfirst($type) . 'Filter';
+        $filterClass = ucfirst($type).'Filter';
         $filterBinaries = $this->configuration['filter_binaries.'];
         $filterForTypeDefinitions = $this->configuration['filter_for_type.'];
 
@@ -260,8 +267,9 @@ class Compiler implements CompilerInterface
                 $filter = new $filterClass();
             }
         } else {
-            throw new \LogicException('Filter class ' . $filterClass . ' not found', 1355846301);
+            throw new \LogicException('Filter class '.$filterClass.' not found', 1355846301);
         }
+
         return $filter;
     }
 
@@ -279,43 +287,15 @@ class Compiler implements CompilerInterface
                 throw $exception;
             }
 
-            $i = 0;
-            $code = '';
-            $backtrace = $exception->getTrace();
-
-            $heading = 'Caught Assetic error #' . $exception->getCode() . ': ' . $exception->getMessage();
-            while ($step = current($backtrace)) {
-                $code .= '#' . $i . ': ' . $step['file'] . '(' . $step['line'] . '): ';
-                if (isset($step['class'])) {
-                    $code .= $step['class'] . $step['type'];
-                }
-                $code .= $step['function'] . '(arguments: ' . count($step['args']) . ')' . PHP_EOL;
-                next($backtrace);
-                $i++;
-            }
-            $styles = array(
-                'width'           => '100%',
-                'overflow'        => 'scroll',
-                'border'          => '1px solid #777',
-                'background'      => '#ccc',
-                'padding'         => '5px',
-                '-moz-box-sizing' => 'border-box',
-                'box-sizing'      => 'border-box',
-                'box-shadow'      => 'inset 0 0 4px rgba(0, 0, 0, 0.3)',
-                'font-family'     => 'sans-serif',
-            );
-            array_walk($styles, function (&$value, $key) {
-                $value = $key . ':' . $value;
-            });
-            $style = implode(';', $styles);
-
-            echo '<div style="' . $style . '">' . $heading . PHP_EOL . '<pre>' . $code . '</pre></div>';
+            $exceptionPrinter = new ExceptionPrinter();
+            $exceptionPrinter->printException($exception);
         } else {
             if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                $code = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
-                GeneralUtility::devLog($code, 'assetic');
+                $message = 'Caught exception #'.$exception->getCode().': '.$exception->getMessage();
+                GeneralUtility::devLog($message, 'assetic');
             }
         }
+
         return '';
     }
 
@@ -363,6 +343,7 @@ class Compiler implements CompilerInterface
         if (isset($this->configuration['development'])) {
             return (bool)intval($this->configuration['development']);
         }
+
         return false;
     }
 
@@ -376,6 +357,7 @@ class Compiler implements CompilerInterface
         if (!$this->assetManager) {
             $this->assetManager = new AssetManager();
         }
+
         return $this->assetManager;
     }
 
@@ -391,8 +373,10 @@ class Compiler implements CompilerInterface
     protected function applyFunctionsToFilterForType($filter, $stylesheetConfiguration, $stylesheetType)
     {
         if (!$stylesheetType) {
-            throw new \UnexpectedValueException('The given stylesheet type is invalid "' . $stylesheetType . '"',
-                1355910725);
+            throw new \UnexpectedValueException(
+                'The given stylesheet type is invalid "'.$stylesheetType.'"',
+                1355910725
+            );
         }
         $functions = $stylesheetConfiguration['functions.'];
         ksort($functions);
@@ -411,12 +395,13 @@ class Compiler implements CompilerInterface
             if (is_callable(array($filter, $function))) {
                 call_user_func_array(array($filter, $function), $data);
             } else {
-                trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
+                trigger_error('Filter does not implement '.$function, E_USER_NOTICE);
             }
         }
 
         AsseticGeneralUtility::pd($filter);
         $this->filterManager->set($stylesheetType, $filter);
+
         return $filter;
     }
 
