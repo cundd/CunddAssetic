@@ -74,7 +74,7 @@ class AssetController extends ActionController
     public function listAction()
     {
         $assetCollection = array();
-        $manager         = $this->getManager();
+        $manager = $this->getManager();
 
         $this->pd($manager);
 
@@ -107,13 +107,16 @@ class AssetController extends ActionController
                 $outputFileLink = $manager->collectAndCompile();
                 $manager->clearHashCache();
                 if (defined('TYPO3_MODE') && TYPO3_MODE === 'BE') {
-                    $outputFileLink = '../' . $outputFileLink;
+                    $outputFileLink = '../'.$outputFileLink;
                 }
-                $outputFileLink = '<a href="' . $outputFileLink . '" target="_blank">' . $manager->getOutputFilePath() . '</a>';
-                $this->addFlashMessage('Stylesheets have been compiled to ' . $outputFileLink);
+                $outputFileLink = '<a href="'.$outputFileLink.'" target="_blank">'.$manager->getOutputFilePath().'</a>';
+                $this->addFlashMessage('Stylesheets have been compiled to '.$outputFileLink);
             } catch (\Exception $exception) {
-                $this->addFlashMessage('Could not compile files: #' . $exception->getCode() . ': ' . $exception->getMessage(),
-                    '', FlashMessage::ERROR);
+                $this->addFlashMessage(
+                    'Could not compile files: #'.$exception->getCode().': '.$exception->getMessage(),
+                    '',
+                    FlashMessage::ERROR
+                );
             }
         }
         $this->pd($manager);
@@ -135,8 +138,11 @@ class AssetController extends ActionController
                 $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
                 $this->manager = new Manager($configuration);
             } else {
-                $this->addFlashMessage('Make sure the static template is included', 'No configuration found',
-                    FlashMessage::WARNING);
+                $this->addFlashMessage(
+                    'Make sure the static template is included',
+                    'No configuration found',
+                    FlashMessage::WARNING
+                );
             }
         }
 
@@ -162,12 +168,18 @@ class AssetController extends ActionController
         $storeInSession = true
     ) {
         if (!is_string($messageBody)) {
-            throw new \InvalidArgumentException('The message body must be of type string, "' . gettype($messageBody) . '" given.',
-                1243258395);
+            throw new \InvalidArgumentException(
+                'The message body must be of type string, "'.gettype($messageBody).'" given.',
+                1243258395
+            );
         }
         /* @var \TYPO3\CMS\Core\Messaging\FlashMessage $flashMessage */
         $flashMessage = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-            'TYPO3\\CMS\\Core\\Messaging\\FlashMessage', $messageBody, $messageTitle, $severity, $storeInSession
+            'TYPO3\\CMS\\Core\\Messaging\\FlashMessage',
+            $messageBody,
+            $messageTitle,
+            $severity,
+            $storeInSession
         );
         $this->controllerContext->getFlashMessageQueue()->enqueue($flashMessage);
     }
