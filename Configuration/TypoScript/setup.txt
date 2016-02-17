@@ -42,10 +42,11 @@ plugin.CunddAssetic {
     filter_binaries {
         ### Change the path to the filter binaries. I.e. if node.js is installed
         ### into /usr/local/bin/
-        # lessFilter = /usr/local/bin/node
+        # assetic_filter_lessfilter = /usr/local/bin/node
     }
 
     allow_compile_without_login = {$module.tx_assetic.settings.allow_compile_without_login}
+    strict = {$module.tx_assetic.settings.strict}
     livereload {
         port = {$module.tx_assetic.settings.livereload.port}
         add_javascript = {$module.tx_assetic.settings.livereload.add_javascript}

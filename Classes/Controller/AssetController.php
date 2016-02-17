@@ -107,7 +107,7 @@ class AssetController extends ActionController
                 $outputFileLink = $manager->collectAndCompile();
                 $manager->clearHashCache();
                 if (defined('TYPO3_MODE') && TYPO3_MODE === 'BE') {
-                    $outputFileLink = '../'.$outputFileLink;
+                    $outputFileLink = '../' . $outputFileLink;
                 }
                 $outputFileLink = '<a href="'.$outputFileLink.'" target="_blank">'.$manager->getOutputFilePath().'</a>';
                 $this->addFlashMessage('Stylesheets have been compiled to '.$outputFileLink);
