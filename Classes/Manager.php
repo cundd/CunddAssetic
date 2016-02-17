@@ -25,6 +25,8 @@ namespace Cundd\Assetic;
 
 use Cundd\Assetic\Compiler\Compiler;
 use Cundd\Assetic\Compiler\CompilerInterface;
+use Cundd\Assetic\Exception\OutputFileException;
+use Cundd\Assetic\Exception\SymlinkException;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -82,6 +84,15 @@ class Manager implements ManagerInterface
     protected $previousHash = '';
 
     /**
+     * Defines if this instance is the owner of the symlink
+     *
+     * This defines if the instance is allowed to create a new symlink and was able to delete the old one
+     *
+     * @var bool
+     */
+    protected $isOwnerOfSymlink = false;
+
+    /**
      * Indicates if experimental features are enabled
      *
      * @var bool
@@ -114,25 +125,26 @@ class Manager implements ManagerInterface
             $this->collectAssetsAndSetTarget();
             $this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
             if ($this->compiler->compile()) {
-                $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->moveTempFileToFileWithHash();
+                $renderedStylesheet = ConfigurationUtility::getOutputFileDir().$this->moveTempFileToFileWithHash();
                 AsseticGeneralUtility::pd('$renderedStylesheet', $renderedStylesheet);
             }
         } else {
-            $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename();
+            $renderedStylesheet = ConfigurationUtility::getOutputFileDir().$this->getCurrentOutputFilename();
 
             /*
              * Check if the expected output file exists. If it doesn't, set
              * willCompile to TRUE and call the main routine again
              */
-            $absolutePathToRenderedFile = ConfigurationUtility::getPathToWeb() . $renderedStylesheet;
+            $absolutePathToRenderedFile = ConfigurationUtility::getPathToWeb().$renderedStylesheet;
             if (!file_exists($absolutePathToRenderedFile)) {
                 $this->forceCompile();
 
                 return $this->collectAndCompile();
             }
             AsseticGeneralUtility::pd(
-                ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename(),
-                ConfigurationUtility::getOutputFileDir(), $this->getCurrentOutputFilename()
+                ConfigurationUtility::getOutputFileDir().$this->getCurrentOutputFilename(),
+                ConfigurationUtility::getOutputFileDir(),
+                $this->getCurrentOutputFilename()
             );
         }
 
@@ -178,7 +190,7 @@ class Manager implements ManagerInterface
     {
         $assetCollection = $this->getCompiler()->collectAssets();
 
-        AsseticGeneralUtility::profile('Set output file ' . $this->getCurrentOutputFilenameWithoutHash());
+        AsseticGeneralUtility::profile('Set output file '.$this->getCurrentOutputFilenameWithoutHash());
         $assetCollection->setTargetPath($this->getCurrentOutputFilenameWithoutHash());
 
         return $assetCollection;
@@ -196,25 +208,39 @@ class Manager implements ManagerInterface
         $hashAlgorithm = 'md5';
 
         $outputFilenameWithoutHash = $this->getCurrentOutputFilenameWithoutHash();
-        $outputFileDir             = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
-        $outputFileTempPath        = $outputFileDir . $outputFilenameWithoutHash;
+        $outputFileDir = ConfigurationUtility::getPathToWeb().ConfigurationUtility::getOutputFileDir();
+        $outputFileTempPath = $outputFileDir.$outputFilenameWithoutHash;
 
         // Create the file hash and store it in the cache
         AsseticGeneralUtility::profile('Will create file hash');
 
         $fileHash = hash_file($hashAlgorithm, $outputFileTempPath);
         AsseticGeneralUtility::profile('Did create file hash');
-        $this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $outputFilenameWithoutHash, $fileHash);
-        $finalFileName = $outputFilenameWithoutHash . '_' . $fileHash . '.css';
+        $this->setCache(self::CACHE_IDENTIFIER_HASH.'_'.$outputFilenameWithoutHash, $fileHash);
+        $finalFileName = $outputFilenameWithoutHash.'_'.$fileHash.'.css';
 
         $this->_setCurrentOutputFilename($finalFileName);
-        $outputFileFinalPath = $outputFileDir . $finalFileName;
+        $outputFileFinalPath = $outputFileDir.$finalFileName;
 
         $this->removePreviousFilteredAssetFiles();
 
         // Move the temp file to the new file
         AsseticGeneralUtility::profile('Will move compiled asset');
-        rename($outputFileTempPath, $outputFileFinalPath);
+
+        if (is_link($outputFileFinalPath)) {
+            if (!unlink($outputFileFinalPath)) {
+                throw new OutputFileException(sprintf('Output file "%s" already exists', $outputFileFinalPath));
+            }
+        }
+        if (!rename($outputFileTempPath, $outputFileFinalPath)) {
+            throw new OutputFileException(
+                sprintf(
+                    'Could not rename temporary output file. Source: "%s", destination: "%s"',
+                    $outputFileTempPath,
+                    $outputFileFinalPath
+                )
+            );
+        }
         AsseticGeneralUtility::profile('Did move compiled asset');
 
         $this->createSymlinkToFinalPath($outputFileFinalPath);
@@ -242,14 +268,18 @@ class Manager implements ManagerInterface
         if ($this->willCompile === -1) {
             // If no backend user is logged in, check if it is allowed
             if (!AsseticGeneralUtility::isBackendUser()) {
-                $this->willCompile = (bool)($this->isDevelopment() * intval($this->configuration['allow_compile_without_login']));
+                $this->willCompile = (bool)($this->isDevelopment() * intval(
+                        $this->configuration['allow_compile_without_login']
+                    ));
             } else {
                 $this->willCompile = $this->isDevelopment();
             }
 
-            AsseticGeneralUtility::say('Backend user detected: ' . (AsseticGeneralUtility::isBackendUser() ? 'yes' : 'no'));
-            AsseticGeneralUtility::say('Development mode: ' . ($this->isDevelopment() ? 'on' : 'off'));
-            AsseticGeneralUtility::say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));
+            AsseticGeneralUtility::say(
+                'Backend user detected: '.(AsseticGeneralUtility::isBackendUser() ? 'yes' : 'no')
+            );
+            AsseticGeneralUtility::say('Development mode: '.($this->isDevelopment() ? 'on' : 'off'));
+            AsseticGeneralUtility::say('Will compile: '.($this->willCompile ? 'yes' : 'no'));
         }
 
         return $this->willCompile;
@@ -272,7 +302,7 @@ class Manager implements ManagerInterface
      */
     public function getOutputFilePath()
     {
-        return ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename();
+        return ConfigurationUtility::getOutputFileDir().$this->getCurrentOutputFilename();
     }
 
     /**
@@ -298,12 +328,12 @@ class Manager implements ManagerInterface
                 if (!is_array($stylesheet)) {
                     $stylesheetFileName = basename($stylesheet);
                     $stylesheetFileName = str_replace(array('.', ' '), '', $stylesheetFileName);
-                    $outputFileName .= $stylesheetFileName . '_';
+                    $outputFileName .= $stylesheetFileName.'_';
                 }
             }
         }
 
-        return ConfigurationUtility::getDomainIdentifier() . $outputFileName;
+        return ConfigurationUtility::getDomainIdentifier().$outputFileName;
     }
 
     /**
@@ -318,9 +348,9 @@ class Manager implements ManagerInterface
     {
         if (!$this->outputFileName) {
             // Add a hash for caching
-            $newHash              = $this->getHash();
+            $newHash = $this->getHash();
             $this->outputFileName = $this->getCurrentOutputFilenameWithoutHash();
-            $this->outputFileName .= '_' . $newHash;
+            $this->outputFileName .= '_'.$newHash;
             $this->outputFileName .= '.css';
             AsseticGeneralUtility::pd($this->outputFileName);
         }
@@ -355,7 +385,7 @@ class Manager implements ManagerInterface
             $entry = '';#time();
 
             // Save value in cache
-            $this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), $entry);
+            $this->setCache(self::CACHE_IDENTIFIER_HASH.'_'.$this->getCurrentOutputFilenameWithoutHash(), $entry);
         }
         AsseticGeneralUtility::pd($entry);
 
@@ -370,11 +400,13 @@ class Manager implements ManagerInterface
     protected function getPreviousHash()
     {
         if (!$this->previousHash) {
-            $suffix   = '.css';
-            $filePath = ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+            $suffix = '.css';
+            $filePath = ConfigurationUtility::getOutputFileDir().$this->getCurrentOutputFilenameWithoutHash();
 
-            $previousHash         = '' . $this->getCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash());
-            $previousHashFilePath = $filePath . '_' . $previousHash . $suffix;
+            $previousHash = ''.$this->getCache(
+                    self::CACHE_IDENTIFIER_HASH.'_'.$this->getCurrentOutputFilenameWithoutHash()
+                );
+            $previousHashFilePath = $filePath.'_'.$previousHash.$suffix;
 
             if (!$previousHash || !file_exists($previousHashFilePath)) {
                 $matchingFiles = $this->findPreviousFilteredAssetFiles($filePath, $suffix);
@@ -382,7 +414,7 @@ class Manager implements ManagerInterface
                     return '';
                 }
                 $lastMatchingFile = end($matchingFiles);
-                $previousHash     = substr($lastMatchingFile, strlen($filePath) + 1, (-1 * strlen($suffix)));
+                $previousHash = substr($lastMatchingFile, strlen($filePath) + 1, (-1 * strlen($suffix)));
             }
 
             $this->previousHash = $previousHash;
@@ -409,9 +441,9 @@ class Manager implements ManagerInterface
      */
     public function collectPreviousFilteredAssetFiles()
     {
-        $suffix              = '.css';
-        $outputFileDir       = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
-        $filePath            = $outputFileDir . $this->getCurrentOutputFilenameWithoutHash();
+        $suffix = '.css';
+        $outputFileDir = ConfigurationUtility::getPathToWeb().ConfigurationUtility::getOutputFileDir();
+        $filePath = $outputFileDir.$this->getCurrentOutputFilenameWithoutHash();
         $this->filesToRemove = $this->findPreviousFilteredAssetFiles($filePath, $suffix);
     }
 
@@ -427,10 +459,36 @@ class Manager implements ManagerInterface
         }
         $symlinkPath = $this->getSymlinkPath();
         if ($fileFinalPath !== $symlinkPath) {
-            if (file_exists($symlinkPath)) {
-                throw new \RuntimeException(sprintf('Symlink %s already exists', $symlinkPath), 1431361465);
+            if ($this->isOwnerOfSymlink || !is_link($symlinkPath)) {
+                if (!is_link($symlinkPath) && !symlink($fileFinalPath, $symlinkPath)) {
+                    if (file_exists($symlinkPath)) {
+                        throw new SymlinkException(
+                            sprintf(
+                                'Could not create the symlink "%s" because a file exists at that path',
+                                $symlinkPath
+                            )
+                        );
+                    }
+                    if (is_link($symlinkPath)) {
+                        throw new SymlinkException(
+                            sprintf(
+                                'Could not create the symlink "%s" because the path is a link',
+                                $symlinkPath
+                            )
+                        );
+                    }
+                    throw new SymlinkException(
+                        sprintf('Could not create the symlink "%s" because of an unknown reason', $symlinkPath)
+                    );
+                }
+            } else {
+                throw new SymlinkException(
+                    sprintf(
+                        'Could not create the symlink because the file "%s" already exists and the manager is not the symlink\'s owner',
+                        $symlinkPath
+                    )
+                );
             }
-            symlink($fileFinalPath, $symlinkPath);
         }
     }
 
@@ -444,8 +502,21 @@ class Manager implements ManagerInterface
         }
         // Unlink the symlink
         $symlinkPath = $this->getSymlinkPath();
-        if (file_exists($symlinkPath) && is_link($symlinkPath)) {
-            unlink($symlinkPath);
+        if (is_link($symlinkPath)) {
+            if (unlink($symlinkPath)) {
+                $this->isOwnerOfSymlink = true;
+            } else {
+                $this->isOwnerOfSymlink = false;
+                throw new SymlinkException(
+                    sprintf('Could not acquire ownership of symlink "%s"', $symlinkPath)
+                );
+            }
+        } elseif (!file_exists($symlinkPath)) {
+            $this->isOwnerOfSymlink = true;
+        } else {
+            throw new SymlinkException(
+                sprintf('Could not acquire ownership of symlink "%s" because it exists but is no link', $symlinkPath)
+            );
         }
     }
 
@@ -456,7 +527,7 @@ class Manager implements ManagerInterface
      */
     public function getSymlinkUri()
     {
-        return ConfigurationUtility::getOutputFileDir() . '_debug_' . $this->getCurrentOutputFilenameWithoutHash() . '.css';
+        return ConfigurationUtility::getOutputFileDir().'_debug_'.$this->getCurrentOutputFilenameWithoutHash().'.css';
     }
 
     /**
@@ -466,7 +537,7 @@ class Manager implements ManagerInterface
      */
     public function getSymlinkPath()
     {
-        return ConfigurationUtility::getPathToWeb() . $this->getSymlinkUri();
+        return ConfigurationUtility::getPathToWeb().$this->getSymlinkUri();
     }
 
     /**
@@ -476,7 +547,7 @@ class Manager implements ManagerInterface
      */
     public function removePreviousFilteredAssetFiles()
     {
-        $success       = true;
+        $success = true;
         $matchingFiles = $this->filesToRemove;
         if (!$matchingFiles) {
             return '';
@@ -498,19 +569,21 @@ class Manager implements ManagerInterface
     protected function findPreviousFilteredAssetFiles($filePath, $suffix = '.css')
     {
         AsseticGeneralUtility::profile('Will call glob');
-        $matchingFiles = glob($filePath . '_' . '*' . $suffix);
+        $matchingFiles = glob($filePath.'_'.'*'.$suffix);
         AsseticGeneralUtility::profile('Did call glob');
 
-        AsseticGeneralUtility::pd('GLOB', $filePath);
-
+        // Glob will not return invalid symlinks
         if (!$matchingFiles) {
             return array();
         }
 
         // Sort by mtime
-        usort($matchingFiles, function ($a, $b) {
-            return filemtime($a) - filemtime($b);
-        });
+        usort(
+            $matchingFiles,
+            function ($a, $b) {
+                return filemtime($a) - filemtime($b);
+            }
+        );
 
         return $matchingFiles;
     }
@@ -586,8 +659,8 @@ class Manager implements ManagerInterface
      */
     protected function getCache($identifier)
     {
-        $identifier = sha1(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
-        AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
+        $identifier = sha1(ConfigurationUtility::getDomainIdentifier().'-'.$identifier);
+        AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier().'-'.$identifier);
 
         if (is_callable('apc_fetch')) {
             return apc_fetch($identifier);
@@ -609,14 +682,14 @@ class Manager implements ManagerInterface
      */
     protected function setCache($identifier, $value)
     {
-        $identifier = sha1(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
-        AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
+        $identifier = sha1(ConfigurationUtility::getDomainIdentifier().'-'.$identifier);
+        AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier().'-'.$identifier);
 
         // AsseticGeneralUtility::pd('setCache', $identifier, $value);
         if (is_callable('apc_store')) {
             apc_store($identifier, $value);
         } else {
-            $tags     = array();
+            $tags = array();
             $lifetime = 60 * 60 * 24; // * 365 * 10;
 
             $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
@@ -648,6 +721,6 @@ class Manager implements ManagerInterface
      */
     public function clearHashCache()
     {
-        $this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), '');
+        $this->setCache(self::CACHE_IDENTIFIER_HASH.'_'.$this->getCurrentOutputFilenameWithoutHash(), '');
     }
 }

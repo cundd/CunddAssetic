@@ -1,10 +1,9 @@
 <?php
-namespace Cundd\Assetic\Domain\Repository;
-
 /*
  *  Copyright notice
  *
- *  (c) 2012 Daniel Corn <info@cundd.net>, cundd
+ *  (c) 2015 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
+ *  Daniel Corn <cod@iresults.li>, iresults
  *
  *  All rights reserved
  *
@@ -24,16 +23,21 @@ namespace Cundd\Assetic\Domain\Repository;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
-use TYPO3\CMS\Extbase\Persistence\Repository;
 
 /**
- *
- *
- * @package assetic
- * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
- *
+ * @author COD
+ * Created 19.10.15 16:39
  */
-class AssetRepository extends Repository
+
+
+namespace Cundd\Assetic\Exception;
+
+/**
+ * File related exception
+ *
+ * @package Cundd\Assetic\Exception
+ */
+abstract class AbstractFileException extends \RuntimeException
 {
 
 }
