@@ -39,6 +39,7 @@ use Assetic\Factory\AssetFactory;
 use Assetic\Filter;
 use Assetic\FilterManager;
 use Cundd\Assetic\Utility\ConfigurationUtility;
+use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -229,46 +230,12 @@ class Compiler implements CompilerInterface
             if (php_sapi_name() == 'cli') {
                 throw $exception;
             }
-
-            $i = 0;
-            $code = '';
-            $backtrace = $exception->getTrace();
-
-            $heading = 'Caught Assetic error #'.$exception->getCode().': '.$exception->getMessage();
-            while ($step = current($backtrace)) {
-                $code .= '#'.$i.': '.$step['file'].'('.$step['line'].'): ';
-                if (isset($step['class'])) {
-                    $code .= $step['class'].$step['type'];
-                }
-                $code .= $step['function'].'(arguments: '.count($step['args']).')'.PHP_EOL;
-                next($backtrace);
-                $i++;
-            }
-            $styles = array(
-                'width'           => '100%',
-                'overflow'        => 'scroll',
-                'border'          => '1px solid #777',
-                'background'      => '#ccc',
-                'padding'         => '5px',
-                '-moz-box-sizing' => 'border-box',
-                'box-sizing'      => 'border-box',
-                'box-shadow'      => 'inset 0 0 4px rgba(0, 0, 0, 0.3)',
-                'font-family'     => 'sans-serif',
-                'white-space'     => 'pre',
-            );
-            array_walk(
-                $styles,
-                function (&$value, $key) {
-                    $value = $key.':'.$value;
-                }
-            );
-            $style = implode(';', $styles);
-
-            echo '<div style="'.$style.'">'.$heading.PHP_EOL.'<pre>'.$code.'</pre></div>';
+            $exceptionPrinter = new ExceptionPrinter();
+            $exceptionPrinter->printException($exception);
         } else {
             if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                $code = 'Caught exception #'.$exception->getCode().': '.$exception->getMessage();
-                GeneralUtility::devLog($code, 'assetic');
+                $message = 'Caught exception #'.$exception->getCode().': '.$exception->getMessage();
+                GeneralUtility::devLog($message, 'assetic');
             }
         }
 
