@@ -55,6 +55,7 @@ plugin.CunddAssetic {
 # If the TypoScript constant developmentMode is set, use CunddAssetic in
 # development mode too
 [globalVar = LIT:1 = {$developmentMode}]
+    plugin.CunddAssetic = USER_INT
     plugin.CunddAssetic.development = {$developmentMode}
 [global]
 
