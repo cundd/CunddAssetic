@@ -32,6 +32,9 @@
 
 namespace Cundd\Assetic\Compiler;
 
+use Assetic\Asset\AssetCollection;
+use Assetic\Factory\AssetFactory;
+
 
 /**
  * Interface for the compiler
@@ -62,4 +65,15 @@ interface CompilerInterface
      * @return \Assetic\AssetManager
      */
     public function getAssetManager();
+
+    /**
+     * Create and collect the Asset with the given key and stylesheet
+     *
+     * @param string          $assetKey
+     * @param string          $stylesheet
+     * @param AssetCollection $assetCollection
+     * @param AssetFactory    $factory
+     * @return AssetCollection|null
+     */
+    public function createAsset($assetKey, $stylesheet, AssetCollection $assetCollection, AssetFactory $factory);
 }
