@@ -30,6 +30,7 @@
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\FileWatcher\FileCategories;
 use Cundd\Assetic\Manager;
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Plugin;
@@ -50,154 +51,13 @@ Autoloader::register();
  *
  * @package Cundd\Assetic\Command
  */
-class AsseticCommandController extends CommandController {
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    // ESCAPE CHARACTER
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    /**
-     * The escape character
-     */
-    const ESCAPE = "\033";
-
-    /**
-     * The escape character
-     */
-    const SIGNAL = self::ESCAPE;
-
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    // COLORS
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    /**
-     * Bold color red
-     */
-    const BOLD_RED = "[1;31m";
-
-    /**
-     * Bold color green
-     */
-    const BOLD_GREEN = "[1;32m";
-
-    /**
-     * Bold with color blue
-     */
-    const BOLD_BLUE = "[1;34m";
-
-    /**
-     * Bold color cyan
-     */
-    const BOLD_CYAN = "[1;36m";
-
-    /**
-     * Bold color yellow
-     */
-    const BOLD_YELLOW = "[1;33m";
-
-    /**
-     * Bold color magenta
-     */
-    const BOLD_MAGENTA = "[1;35m";
-
-    /**
-     * Bold color white
-     */
-    const BOLD_WHITE = "[1;37m";
-
-    /**
-     * Normal
-     */
-    const NORMAL = "[0m";
-
-    /**
-     * Color black
-     */
-    const BLACK = "[0;30m";
-
-    /**
-     * Color red
-     */
-    const RED = "[0;31m";
-
-    /**
-     * Color green
-     */
-    const GREEN = "[0;32m";
-
-    /**
-     * Color yellow
-     */
-    const YELLOW = "[0;33m";
-
-    /**
-     * Color blue
-     */
-    const BLUE = "[0;34m";
-
-    /**
-     * Color cyan
-     */
-    const CYAN = "[0;36m";
-
-    /**
-     * Color magenta
-     */
-    const MAGENTA = "[0;35m";
-
-    /**
-     * Color brown
-     */
-    const BROWN = "[0;33m";
-
-    /**
-     * Color gray
-     */
-    const GRAY = "[0;37m";
-
-    /**
-     * Bold
-     */
-    const BOLD = "[1m";
-
-
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    // UNDERSCORE
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    /**
-     * Underscored
-     */
-    const UNDERSCORE = "[4m";
-
-
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    // REVERSE
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    /**
-     * Reversed
-     */
-    const REVERSE = "[7m";
-
-
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    // MACROS
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-    /**
-     * Send a sequence to turn attributes off
-     */
-    const SIGNAL_ATTRIBUTES_OFF = "\033[0m";
-
-
+class AsseticCommandController extends CommandController implements ColorInterface{
     /**
      * Compiler instance
      *
      * @var Plugin
      */
     protected $compiler;
-
-    /**
-     * Timestamp of the last re-compile
-     *
-     * @var integer
-     */
-    protected $lastCompileTime;
 
     /**
      * The configuration manager
@@ -208,66 +68,17 @@ class AsseticCommandController extends CommandController {
     protected $configurationManager;
 
     /**
+     * The file watcher
+     *
+     * @var \Cundd\Assetic\FileWatcher\FileWatcher
+     * @inject
+     */
+    protected $fileWatcher;
+
+    /**
      * @var LiveReload
      */
     protected $liveReloadServer;
-
-    /**
-     * List of style file suffixes
-     *
-     * @var array
-     */
-    protected $styleAssetSuffixes = array('less', 'scss', 'sass', 'css');
-
-    /**
-     * List of script file suffixes
-     *
-     * @var array
-     */
-    protected $scriptAssetSuffixes = array('js', 'coffee');
-
-    /**
-     * List of other file suffixes that should trigger a full page reload
-     *
-     * @var array
-     */
-    protected $otherAssetSuffixes = array('php', 'ts', 'html');
-
-    /**
-     * Array of paths to watch for changes
-     *
-     * @var string[]
-     */
-    protected $watchPaths = array();
-
-    /**
-     * Max depth to collect files for
-     *
-     * @var int
-     */
-    protected $findFilesMaxDepth = 7;
-
-    /**
-     * Array of watched files
-     *
-     * @var string[]
-     */
-    protected $watchedFilesCache = array();
-
-    /**
-     * Timestamp of the last directory scan
-     *
-     * @var int
-     */
-    protected $watchedFilesCacheTime = 0;
-
-    /**
-     * Lifetime of the directory scan cache
-     *
-     * @var int
-     */
-    protected $watchedFilesCacheLifetime = 5;
-
 
     /**
      * Compiles the assets
@@ -295,7 +106,7 @@ class AsseticCommandController extends CommandController {
      * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
      */
     public function watchCommand($interval = 1, $path = 'fileadmin', $domainContext = null) {
-        $this->watchPaths = explode(':', $path);
+        $this->fileWatcher->setWatchPaths(explode(':', $path));
         $this->printWatchedPaths();
         $this->validateMultiDomainInstallation($domainContext);
         while (true) {
@@ -316,11 +127,13 @@ class AsseticCommandController extends CommandController {
     public function liveReloadCommand(
         $address = '0.0.0.0',
         $port = 35729,
-        $interval = 1,
+        $interval = -1,
         $path = 'fileadmin',
         $domainContext = null
     ) {
-        $this->watchPaths = explode(':', $path);
+        $interval = $interval < 0 ? 0.5 : $interval;
+        $this->fileWatcher->setWatchPaths(explode(':', $path));
+        $this->fileWatcher->setInterval($interval);
         $this->printWatchedPaths();
         $this->validateMultiDomainInstallation($domainContext);
 
@@ -359,8 +172,10 @@ class AsseticCommandController extends CommandController {
             return;
         }
 
-        $needFullPageReload = in_array(pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION),
-            array_merge($this->scriptAssetSuffixes, $this->otherAssetSuffixes));
+        $needFullPageReload = in_array(
+            pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION),
+            array_merge(FileCategories::$scriptAssetSuffixes, FileCategories::$otherAssetSuffixes)
+        );
         if ($needFullPageReload) {
             $this->liveReloadServer->fileDidChange($fileNeedsRecompile, false);
         } else {
@@ -502,7 +317,7 @@ class AsseticCommandController extends CommandController {
         $this->outputLine(''
             . self::ESCAPE
             . self::GREEN
-            . 'Watching path(s): ' . implode(', ', $this->watchPaths)
+            . 'Watching path(s): ' . implode(', ', $this->fileWatcher->getWatchPaths())
             . self::ESCAPE
             . self::NORMAL
         );
@@ -526,126 +341,14 @@ class AsseticCommandController extends CommandController {
     }
 
     /**
-     * Returns all files with the given suffix under the given start directory
-     *
-     * @param string|string[] $suffix
-     * @param string          $startDirectory
-     * @return string[]
-     */
-    protected function findFilesBySuffix($suffix, $startDirectory) {
-        if (!defined('GLOB_BRACE')) {
-            return $this->findFilesBySuffixWithoutGlobBrace($suffix, $startDirectory);
-        }
-
-        return $this->findFilesBySuffixWithGlobBrace($suffix, $startDirectory);
-    }
-
-    /**
      * If a file changed it's path will be returned, otherwise FALSE
      *
      * @return string|bool
      */
     protected function needsRecompile() {
-        $lastCompileTime = $this->lastCompileTime;
-        $foundFiles = $this->collectFilesToWatch();
-
-        foreach ($foundFiles as $currentFile) {
-            if (filemtime($currentFile) > $lastCompileTime) {
-                $this->lastCompileTime = time();
-
-                return $currentFile;
-            }
-        }
-
-        return false;
+        return $this->fileWatcher->getChangedFileSinceLastCheck();
     }
 
-    /**
-     * Returns the files that are watched
-     *
-     * string[]
-     */
-    protected function collectFilesToWatch() {
-        $currentTime = time();
-        if (($currentTime - $this->watchedFilesCacheTime) > $this->watchedFilesCacheLifetime) {
 
-            $assetSuffix = array_merge($this->scriptAssetSuffixes, $this->styleAssetSuffixes,
-                $this->otherAssetSuffixes);
-            $foundFiles = array();
 
-            foreach ($this->watchPaths as $currentWatchPath) {
-                $foundFilesForCurrentPath = $this->findFilesBySuffix($assetSuffix, $currentWatchPath);
-                if ($foundFilesForCurrentPath) {
-                    $foundFiles = array_merge($foundFiles, $foundFilesForCurrentPath);
-                }
-            }
-
-            $this->watchedFilesCacheTime = $currentTime;
-            $this->watchedFilesCache = $foundFiles;
-        }
-
-        return $this->watchedFilesCache;
-    }
-
-    /**
-     * Returns all files with the given suffix under the given start directory
-     *
-     * @param string|string[] $suffix
-     * @param string          $startDirectory
-     * @return string[]
-     */
-    private function findFilesBySuffixWithoutGlobBrace($suffix, $startDirectory) {
-        $foundFiles = array();
-        if (is_array($suffix)) {
-            foreach ($suffix as $currentSuffix) {
-                $foundFiles = array_merge($foundFiles, $this->findFilesBySuffixWithoutGlobBrace($currentSuffix, $startDirectory));
-            }
-
-            return $foundFiles;
-        } elseif (!is_string($suffix)) {
-            throw new \InvalidArgumentException(
-                sprintf('Expected argument suffix to be of type string, %s given', gettype($suffix)),
-                1453993530
-            );
-        }
-
-        $maxDepth = $this->findFilesMaxDepth;
-        $startDirectory = rtrim($startDirectory, '/') . '/';
-
-        $pathPattern = $startDirectory . '*.' . $suffix;
-        $foundFiles = glob($pathPattern);
-
-        $i = 1;
-        while ($i < $maxDepth) {
-            $pattern = $startDirectory . str_repeat('*/*', $i) . $suffix;
-            $foundFiles = array_merge($foundFiles, glob($pattern));
-            $i++;
-        }
-
-        return $foundFiles;
-    }
-
-    /**
-     * Returns all files with the given suffix under the given start directory
-     *
-     * @param string|string[] $suffix
-     * @param string          $startDirectory
-     * @return string[]
-     */
-    private function findFilesBySuffixWithGlobBrace($suffix, $startDirectory) {
-        $maxDepth = $this->findFilesMaxDepth;
-        $suffixPattern = '.{' . implode(',', (array)$suffix) . '}';
-        $startDirectory = rtrim($startDirectory, '/') . '/*';
-
-        $foundFiles = glob($startDirectory . $suffixPattern, GLOB_BRACE);
-
-        $i = 1;
-        while ($i < $maxDepth) {
-            $pattern = $startDirectory . str_repeat('*/*', $i) . $suffixPattern;
-            $foundFiles = array_merge($foundFiles, glob($pattern, GLOB_BRACE));
-            $i++;
-        }
-
-        return $foundFiles;
-    }
 }
