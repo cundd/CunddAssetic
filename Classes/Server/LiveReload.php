@@ -291,7 +291,7 @@ class LiveReload implements MessageComponentInterface
      */
     public function fileDidChange($changedFile, $liveCss = true)
     {
-        $this->debug("File $changedFile did change" . PHP_EOL, self::LOG_LEVEL_INFO);
+        $this->debug("File '$changedFile' did change" . PHP_EOL, self::LOG_LEVEL_INFO);
 
         $message = $this->reloadMessage;
         $message['path'] = $changedFile;

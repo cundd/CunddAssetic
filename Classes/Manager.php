@@ -233,11 +233,13 @@ class Manager implements ManagerInterface
             }
         }
         if (!rename($outputFileTempPath, $outputFileFinalPath)) {
+            $reason = $this->getReasonForWriteFailure($outputFileFinalPath);
             throw new OutputFileException(
                 sprintf(
-                    'Could not rename temporary output file. Source: "%s", destination: "%s"',
+                    'Could not rename temporary output file. Source: "%s", destination: "%s" because %s',
                     $outputFileTempPath,
-                    $outputFileFinalPath
+                    $outputFileFinalPath,
+                    $reason
                 )
             );
         }
@@ -461,24 +463,13 @@ class Manager implements ManagerInterface
         if ($fileFinalPath !== $symlinkPath) {
             if ($this->isOwnerOfSymlink || !is_link($symlinkPath)) {
                 if (!is_link($symlinkPath) && !symlink($fileFinalPath, $symlinkPath)) {
-                    if (file_exists($symlinkPath)) {
-                        throw new SymlinkException(
-                            sprintf(
-                                'Could not create the symlink "%s" because a file exists at that path',
-                                $symlinkPath
-                            )
-                        );
-                    }
-                    if (is_link($symlinkPath)) {
-                        throw new SymlinkException(
-                            sprintf(
-                                'Could not create the symlink "%s" because the path is a link',
-                                $symlinkPath
-                            )
-                        );
-                    }
                     throw new SymlinkException(
-                        sprintf('Could not create the symlink "%s" because of an unknown reason', $symlinkPath)
+                        sprintf(
+                            'Could not create the symlink "%s" because %s',
+                            $symlinkPath,
+                            $this->getReasonForWriteFailure($symlinkPath)
+                        ),
+                        1456396454
                     );
                 }
             } else {
@@ -601,7 +592,7 @@ class Manager implements ManagerInterface
     {
         // Get the options
         $pluginLevelOptions = array(
-            'output' => $this->getCurrentOutputFilename()
+            'output' => $this->getCurrentOutputFilename(),
         );
         if (isset($this->configuration['options.'])) {
             $pluginLevelOptions = $this->configuration['options.'];
@@ -646,6 +637,26 @@ class Manager implements ManagerInterface
         return $this->experimental;
     }
 
+    /**
+     * Tries to detect the reason for the write failer
+     *
+     * @param string $path
+     * @return string
+     */
+    private function getReasonForWriteFailure($path) {
+        if (file_exists($path)) {
+            $reason = 'the file exists';
+        } elseif (is_link($path)) {
+            $reason = 'it is a link';
+        } elseif (!is_writable(dirname($path))) {
+            $reason = 'the directory is not writable';
+        } elseif (!is_writable($path)) {
+            $reason = 'the file path is not writable';
+        } else {
+            $reason = 'of an unknown reason';
+        }
+        return $reason;
+    }
 
 
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
