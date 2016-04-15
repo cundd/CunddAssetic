@@ -18,13 +18,15 @@
         "kriswallsmith/assetic": "1.*"
     },
     "require-dev": {
-        "leafo/lessphp": "*",
-        "leafo/scssphp": "*",
         "cundd/assetic_additions": "*",
         "cboden/ratchet": "0.2.8"
     },
     "autoload": {
         "psr-4": { "Cundd\\Assetic\\": "Classes/" }
+    },
+    "suggest": {
+        "leafo/lessphp": "Allows to compile LESS with PHP",
+        "leafo/scssphp": "Allows to compile SCSS 3.x with PHP"
     },
     "repositories": [
         {
