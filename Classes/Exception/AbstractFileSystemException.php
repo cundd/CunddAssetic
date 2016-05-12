@@ -33,11 +33,11 @@
 namespace Cundd\Assetic\Exception;
 
 /**
- * File related exception
+ * File system related exception
  *
  * @package Cundd\Assetic\Exception
  */
-abstract class AbstractFileException extends AbstractFileSystemException
+abstract class AbstractFileSystemException extends \RuntimeException
 {
 
 }

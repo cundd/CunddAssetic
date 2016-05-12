@@ -8,6 +8,8 @@
 
 namespace Cundd\Assetic\FileWatcher;
 
+use Cundd\Assetic\Exception\FilePathException;
+
 
 /**
  * Class to test files for changes
@@ -70,8 +72,11 @@ class FileWatcher
      * @param \string[] $watchPaths
      * @return $this
      */
-    public function setWatchPaths($watchPaths)
+    public function setWatchPaths(array $watchPaths)
     {
+        if ($watchPaths && 0 === count(array_filter($watchPaths, 'file_exists'))) {
+            throw new FilePathException(sprintf('None of the watch paths %s exist', implode(',', $watchPaths)));
+        }
         $this->watchPaths = $watchPaths;
 
         return $this;
@@ -82,7 +87,8 @@ class FileWatcher
      *
      * @return string|bool
      */
-    public function getChangedFileSinceLastCheck() {
+    public function getChangedFileSinceLastCheck()
+    {
         $lastCompileTime = $this->lastChangeTime;
         $foundFiles = $this->collectFilesToWatch();
 
@@ -131,7 +137,7 @@ class FileWatcher
      * Returns all files with the given suffix under the given start directory
      *
      * @param string|string[] $suffix
-     * @param string $startDirectory
+     * @param string          $startDirectory
      * @return string[]
      */
     private function findFilesBySuffixWithoutGlobBrace($suffix, $startDirectory)
@@ -139,7 +145,10 @@ class FileWatcher
         $foundFiles = array();
         if (is_array($suffix)) {
             foreach ($suffix as $currentSuffix) {
-                $foundFiles = array_merge($foundFiles, $this->findFilesBySuffixWithoutGlobBrace($currentSuffix, $startDirectory));
+                $foundFiles = array_merge(
+                    $foundFiles,
+                    $this->findFilesBySuffixWithoutGlobBrace($currentSuffix, $startDirectory)
+                );
             }
 
             return $foundFiles;
@@ -151,14 +160,14 @@ class FileWatcher
         }
 
         $maxDepth = $this->findFilesMaxDepth;
-        $startDirectory = rtrim($startDirectory, '/') . '/';
+        $startDirectory = rtrim($startDirectory, '/').'/';
 
-        $pathPattern = $startDirectory . '*.' . $suffix;
+        $pathPattern = $startDirectory.'*.'.$suffix;
         $foundFiles = glob($pathPattern);
 
         $i = 1;
         while ($i < $maxDepth) {
-            $pattern = $startDirectory . str_repeat('*/*', $i) . $suffix;
+            $pattern = $startDirectory.str_repeat('*/*', $i).$suffix;
             $foundFiles = array_merge($foundFiles, glob($pattern));
             $i++;
         }
@@ -170,20 +179,20 @@ class FileWatcher
      * Returns all files with the given suffix under the given start directory
      *
      * @param string|string[] $suffix
-     * @param string $startDirectory
+     * @param string          $startDirectory
      * @return string[]
      */
     private function findFilesBySuffixWithGlobBrace($suffix, $startDirectory)
     {
         $maxDepth = $this->findFilesMaxDepth;
-        $suffixPattern = '.{' . implode(',', (array)$suffix) . '}';
-        $startDirectory = rtrim($startDirectory, '/') . '/*';
+        $suffixPattern = '.{'.implode(',', (array)$suffix).'}';
+        $startDirectory = rtrim($startDirectory, '/').'/*';
 
-        $foundFiles = glob($startDirectory . $suffixPattern, GLOB_BRACE);
+        $foundFiles = glob($startDirectory.$suffixPattern, GLOB_BRACE);
 
         $i = 1;
         while ($i < $maxDepth) {
-            $pattern = $startDirectory . str_repeat('*/*', $i) . $suffixPattern;
+            $pattern = $startDirectory.str_repeat('*/*', $i).$suffixPattern;
             $foundFiles = array_merge($foundFiles, glob($pattern, GLOB_BRACE));
             $i++;
         }
@@ -195,7 +204,7 @@ class FileWatcher
      * Returns all files with the given suffix under the given start directory
      *
      * @param string|string[] $suffix
-     * @param string $startDirectory
+     * @param string          $startDirectory
      * @return string[]
      */
     private function findFilesBySuffix($suffix, $startDirectory)
