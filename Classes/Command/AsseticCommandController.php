@@ -106,11 +106,15 @@ class AsseticCommandController extends CommandController implements ColorInterfa
      *
      * @param integer $interval      Interval between checks
      * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by colon ":")
+     * @param string  $suffixes      File suffixes to watch for changes (separated by comma ",")
      * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
      */
-    public function watchCommand($interval = 1, $path = 'fileadmin', $domainContext = null)
+    public function watchCommand($interval = 1, $path = 'fileadmin', $suffixes = '', $domainContext = null)
     {
         $this->fileWatcher->setWatchPaths($this->prepareWatchPaths($path));
+        if ($suffixes) {
+            $this->fileWatcher->setAssetSuffixes(explode(',', $suffixes));
+        }
         $this->printWatchedPaths();
         $this->validateMultiDomainInstallation($domainContext);
         while (true) {
@@ -125,19 +129,25 @@ class AsseticCommandController extends CommandController implements ColorInterfa
      * @param string  $address       IP to listen
      * @param int     $port          Port to listen
      * @param integer $interval      Interval between checks
-     * @param string  $path          path(s) that should be watched (Multiple paths separated by colon ":")
+     * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by colon ":")
+     * @param string  $suffixes      File suffixes to watch for changes (separated by comma ",")
      * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
+     * @throws \React\Socket\ConnectionException
      */
     public function liveReloadCommand(
         $address = '0.0.0.0',
         $port = 35729,
         $interval = -1,
         $path = 'fileadmin',
+        $suffixes = '',
         $domainContext = null
     ) {
         $interval = $interval < 0 ? 0.5 : $interval;
         $this->fileWatcher->setWatchPaths($this->prepareWatchPaths($path));
         $this->fileWatcher->setInterval($interval);
+        if ($suffixes) {
+            $this->fileWatcher->setAssetSuffixes(explode(',', $suffixes));
+        }
         $this->printWatchedPaths();
         $this->validateMultiDomainInstallation($domainContext);
 

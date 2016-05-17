@@ -16,7 +16,7 @@ use Cundd\Assetic\Exception\FilePathException;
  *
  * @package Cundd\Assetic\FileWatcher
  */
-class FileWatcher
+class FileWatcher implements FileWatcherInterface
 {
     /**
      * Array of watched files
@@ -61,7 +61,47 @@ class FileWatcher
     private $lastChangeTime;
 
     /**
-     * @return \string[]
+     * @var string[]
+     */
+    private $assetSuffixes = [];
+
+    /**
+     * FileWatcher constructor
+     */
+    public function __construct()
+    {
+        $this->assetSuffixes = array_merge(
+            FileCategories::$scriptAssetSuffixes,
+            FileCategories::$styleAssetSuffixes,
+            FileCategories::$otherAssetSuffixes
+        );
+    }
+
+    /**
+     * Returns the array of file suffix to watch for changes
+     *
+     * @return string[]
+     */
+    public function getAssetSuffixes()
+    {
+        return $this->assetSuffixes;
+    }
+
+    /**
+     * Sets the array of file suffix to watch for changes
+     *
+     * @param string[] $assetSuffixes
+     * @return $this
+     */
+    public function setAssetSuffixes(array $assetSuffixes)
+    {
+        $this->assetSuffixes = $assetSuffixes;
+
+        return $this;
+    }
+
+    /**
+     * @return string[]
      */
     public function getWatchPaths()
     {
@@ -69,7 +109,7 @@ class FileWatcher
     }
 
     /**
-     * @param \string[] $watchPaths
+     * @param string[] $watchPaths
      * @return $this
      */
     public function setWatchPaths(array $watchPaths)
@@ -106,21 +146,16 @@ class FileWatcher
     /**
      * Returns the files that are watched
      *
-     * string[]
+     * @return string[]
      */
     public function collectFilesToWatch()
     {
         $currentTime = time();
         if (($currentTime - $this->watchedFilesCacheTime) > $this->watchedFilesCacheLifetime) {
-            $assetSuffix = array_merge(
-                FileCategories::$scriptAssetSuffixes,
-                FileCategories::$styleAssetSuffixes,
-                FileCategories::$otherAssetSuffixes
-            );
             $foundFiles = array();
 
             foreach ($this->watchPaths as $currentWatchPath) {
-                $foundFilesForCurrentPath = $this->findFilesBySuffix($assetSuffix, $currentWatchPath);
+                $foundFilesForCurrentPath = $this->findFilesBySuffix($this->assetSuffixes, $currentWatchPath);
                 if ($foundFilesForCurrentPath) {
                     $foundFiles = array_merge($foundFiles, $foundFilesForCurrentPath);
                 }
@@ -131,6 +166,15 @@ class FileWatcher
         }
 
         return $this->watchedFilesCache;
+    }
+
+    /**
+     * @param int $interval
+     * @return $this
+     */
+    public function setInterval($interval)
+    {
+        return $this;
     }
 
     /**
@@ -214,9 +258,5 @@ class FileWatcher
         }
 
         return $this->findFilesBySuffixWithGlobBrace($suffix, $startDirectory);
-    }
-
-    public function setInterval($interval)
-    {
     }
 }
