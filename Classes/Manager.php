@@ -227,6 +227,7 @@ class Manager implements ManagerInterface
         // Move the temp file to the new file
         AsseticGeneralUtility::profile('Will move compiled asset');
 
+        clearstatcache(true, $outputFileFinalPath);
         if (is_link($outputFileFinalPath)) {
             if (!unlink($outputFileFinalPath)) {
                 throw new OutputFileException(sprintf('Output file "%s" already exists', $outputFileFinalPath));
@@ -461,6 +462,7 @@ class Manager implements ManagerInterface
         }
         $symlinkPath = $this->getSymlinkPath();
         if ($fileFinalPath !== $symlinkPath) {
+            clearstatcache(true, $symlinkPath);
             if ($this->isOwnerOfSymlink || !is_link($symlinkPath)) {
                 if (!is_link($symlinkPath) && !symlink($fileFinalPath, $symlinkPath)) {
                     throw new SymlinkException(
@@ -638,12 +640,13 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Tries to detect the reason for the write failer
+     * Tries to detect the reason for the write failure
      *
      * @param string $path
      * @return string
      */
     private function getReasonForWriteFailure($path) {
+        clearstatcache(true, $path);
         if (file_exists($path)) {
             $reason = 'the file exists';
         } elseif (is_link($path)) {
