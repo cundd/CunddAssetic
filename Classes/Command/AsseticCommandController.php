@@ -104,14 +104,21 @@ class AsseticCommandController extends CommandController implements ColorInterfa
     /**
      * Automatically re-compiles the assets if files in path (or 'fileadmin/') changed
      *
-     * @param integer $interval      Interval between checks
-     * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by colon ":")
-     * @param string  $suffixes      File suffixes to watch for changes (separated by comma ",")
-     * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
+     * @param integer $interval         Interval between checks
+     * @param string  $path             Directory path(s) that should be watched (Multiple paths separated by colon ":")
+     * @param string  $suffixes         File suffixes to watch for changes (separated by comma ",")
+     * @param string  $domainContext    Specify the domain of the current context [Only used in multidomain installations]
+     * @param int     $maxDepth         Maximum directory depth of file to watch
      */
-    public function watchCommand($interval = 1, $path = 'fileadmin', $suffixes = '', $domainContext = null)
-    {
+    public function watchCommand(
+        $interval = 1,
+        $path = 'fileadmin',
+        $suffixes = '',
+        $domainContext = null,
+        $maxDepth = 7
+    ) {
         $this->fileWatcher->setWatchPaths($this->prepareWatchPaths($path));
+        $this->fileWatcher->setFindFilesMaxDepth(intval($maxDepth));
         if ($suffixes) {
             $this->fileWatcher->setAssetSuffixes(explode(',', $suffixes));
         }
@@ -132,6 +139,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
      * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by colon ":")
      * @param string  $suffixes      File suffixes to watch for changes (separated by comma ",")
      * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
+     * @param int     $maxDepth      Maximum directory depth of file to watch
      * @throws \React\Socket\ConnectionException
      */
     public function liveReloadCommand(
@@ -140,10 +148,12 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         $interval = -1,
         $path = 'fileadmin',
         $suffixes = '',
-        $domainContext = null
+        $domainContext = null,
+        $maxDepth = 7
     ) {
         $interval = $interval < 0 ? 0.5 : $interval;
         $this->fileWatcher->setWatchPaths($this->prepareWatchPaths($path));
+        $this->fileWatcher->setFindFilesMaxDepth(intval($maxDepth));
         $this->fileWatcher->setInterval($interval);
         if ($suffixes) {
             $this->fileWatcher->setAssetSuffixes(explode(',', $suffixes));

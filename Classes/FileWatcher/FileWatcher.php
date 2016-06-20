@@ -78,6 +78,26 @@ class FileWatcher implements FileWatcherInterface
     }
 
     /**
+     * Returns the maximum directory depth of file to watch
+     *
+     * @return int
+     */
+    public function getFindFilesMaxDepth()
+    {
+        return $this->findFilesMaxDepth;
+    }
+
+    /**
+     * Sets the maximum directory depth of file to watch
+     *
+     * @param int $findFilesMaxDepth
+     */
+    public function setFindFilesMaxDepth($findFilesMaxDepth)
+    {
+        $this->findFilesMaxDepth = $findFilesMaxDepth;
+    }
+
+    /**
      * Returns the array of file suffix to watch for changes
      *
      * @return string[]
