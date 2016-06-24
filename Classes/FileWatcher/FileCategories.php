@@ -30,5 +30,5 @@ abstract class FileCategories
      *
      * @var array
      */
-    public static $otherAssetSuffixes = array('php', 'ts', 'html');
+    public static $otherAssetSuffixes = array('php', 'ts', 'html', 'htm');
 }
