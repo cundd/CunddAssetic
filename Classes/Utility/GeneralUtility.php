@@ -45,7 +45,7 @@ abstract class GeneralUtility
      *
      * @var bool
      */
-    static protected $willDebug = -1;
+    protected static $willDebug = -1;
 
     /**
      * Returns if a backend user is logged in

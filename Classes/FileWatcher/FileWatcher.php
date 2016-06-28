@@ -14,7 +14,6 @@ use RecursiveIteratorIterator;
 use RecursiveRegexIterator;
 use RegexIterator;
 
-
 /**
  * Class to test files for changes
  *

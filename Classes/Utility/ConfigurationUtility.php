@@ -157,7 +157,8 @@ class ConfigurationUtility
      *
      * @return string
      */
-    public static function getDomainIdentifier() {
+    public static function getDomainIdentifier()
+    {
         if (!ConfigurationUtility::isMultiDomain()) {
             return '';
         }
@@ -165,7 +166,7 @@ class ConfigurationUtility
         $domain = ConfigurationUtility::getDomainContext();
         if (substr($domain, 0, 7) === 'http://') {
             $domain = substr($domain, 7);
-        } else if (substr($domain, 0, 8) === 'https://') {
+        } elseif (substr($domain, 0, 8) === 'https://') {
             $domain = substr($domain, 8);
         }
 
@@ -200,7 +201,8 @@ class ConfigurationUtility
      *
      * @return string $outputFileDir
      */
-    public static function getOutputFileDir() {
+    public static function getOutputFileDir()
+    {
         return self::$outputFileDir;
     }
 
@@ -208,7 +210,8 @@ class ConfigurationUtility
      * Sets the path to the output file directory
      * @param string $outputFileDir
      */
-    public static function setOutputFileDir($outputFileDir) {
+    public static function setOutputFileDir($outputFileDir)
+    {
         self::$outputFileDir = $outputFileDir;
     }
 }

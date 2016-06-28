@@ -35,7 +35,6 @@ namespace Cundd\Assetic\Compiler;
 use Assetic\Asset\AssetCollection;
 use Assetic\Factory\AssetFactory;
 
-
 /**
  * Interface for the compiler
  *

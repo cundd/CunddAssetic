@@ -253,7 +253,6 @@ class AsseticCommandController extends CommandController implements ColorInterfa
     protected function validateMultiDomainInstallation($domainContext)
     {
         if (ConfigurationUtility::isMultiDomain()) {
-
             $this->outputLine(
                 self::SIGNAL.self::BOLD_RED.'Multidomain installations are currently not supported'.self::SIGNAL_ATTRIBUTES_OFF
             );

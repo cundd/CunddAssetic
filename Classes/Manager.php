@@ -106,7 +106,7 @@ class Manager implements ManagerInterface
      */
     protected $filesToRemove = array();
 
-    function __construct($configuration)
+    public function __construct($configuration)
     {
         $this->configuration = $configuration;
     }
@@ -645,7 +645,8 @@ class Manager implements ManagerInterface
      * @param string $path
      * @return string
      */
-    private function getReasonForWriteFailure($path) {
+    private function getReasonForWriteFailure($path)
+    {
         clearstatcache(true, $path);
         if (file_exists($path)) {
             $reason = 'the file exists';

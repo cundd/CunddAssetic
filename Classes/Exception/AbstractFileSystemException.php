@@ -39,5 +39,4 @@ namespace Cundd\Assetic\Exception;
  */
 abstract class AbstractFileSystemException extends \RuntimeException
 {
-
 }

@@ -39,5 +39,4 @@ namespace Cundd\Assetic\Exception;
  */
 class FilePathException extends AbstractFileSystemException
 {
-
 }

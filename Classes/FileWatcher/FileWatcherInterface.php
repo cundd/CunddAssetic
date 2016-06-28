@@ -30,7 +30,6 @@
  */
 namespace Cundd\Assetic\FileWatcher;
 
-
 /**
  * Interface for classes that test files for changes
  */
