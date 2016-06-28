@@ -9,6 +9,10 @@
 namespace Cundd\Assetic\FileWatcher;
 
 use Cundd\Assetic\Exception\FilePathException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RecursiveRegexIterator;
+use RegexIterator;
 
 
 /**
@@ -204,79 +208,23 @@ class FileWatcher implements FileWatcherInterface
      * @param string          $startDirectory
      * @return string[]
      */
-    private function findFilesBySuffixWithoutGlobBrace($suffix, $startDirectory)
-    {
-        $foundFiles = array();
-        if (is_array($suffix)) {
-            foreach ($suffix as $currentSuffix) {
-                $foundFiles = array_merge(
-                    $foundFiles,
-                    $this->findFilesBySuffixWithoutGlobBrace($currentSuffix, $startDirectory)
-                );
-            }
-
-            return $foundFiles;
-        } elseif (!is_string($suffix)) {
-            throw new \InvalidArgumentException(
-                sprintf('Expected argument suffix to be of type string, %s given', gettype($suffix)),
-                1453993530
-            );
-        }
-
-        $maxDepth = $this->findFilesMaxDepth;
-        $startDirectory = rtrim($startDirectory, '/').'/';
-
-        $pathPattern = $startDirectory.'*.'.$suffix;
-        $foundFiles = glob($pathPattern);
-
-        $i = 1;
-        while ($i < $maxDepth) {
-            $pattern = $startDirectory.str_repeat('*/*', $i).$suffix;
-            $foundFiles = array_merge($foundFiles, glob($pattern));
-            $i++;
-        }
-
-        return $foundFiles;
-    }
-
-    /**
-     * Returns all files with the given suffix under the given start directory
-     *
-     * @param string|string[] $suffix
-     * @param string          $startDirectory
-     * @return string[]
-     */
-    private function findFilesBySuffixWithGlobBrace($suffix, $startDirectory)
-    {
-        $maxDepth = $this->findFilesMaxDepth;
-        $suffixPattern = '.{'.implode(',', (array)$suffix).'}';
-        $startDirectory = rtrim($startDirectory, '/').'/*';
-
-        $foundFiles = glob($startDirectory.$suffixPattern, GLOB_BRACE);
-
-        $i = 1;
-        while ($i < $maxDepth) {
-            $pattern = $startDirectory.str_repeat('*/*', $i).$suffixPattern;
-            $foundFiles = array_merge($foundFiles, glob($pattern, GLOB_BRACE));
-            $i++;
-        }
-
-        return $foundFiles;
-    }
-
-    /**
-     * Returns all files with the given suffix under the given start directory
-     *
-     * @param string|string[] $suffix
-     * @param string          $startDirectory
-     * @return string[]
-     */
     private function findFilesBySuffix($suffix, $startDirectory)
     {
-        if (!defined('GLOB_BRACE')) {
-            return $this->findFilesBySuffixWithoutGlobBrace($suffix, $startDirectory);
-        }
+        $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($startDirectory));
+        $regexIterator = new RegexIterator(
+            $directoryIterator,
+            sprintf('/^.+\.(%s)$/i', implode('|', $suffix)),
+            RecursiveRegexIterator::GET_MATCH
+        );
 
-        return $this->findFilesBySuffixWithGlobBrace($suffix, $startDirectory);
+        return array_filter(
+            array_map(
+                function ($pathCollection) {
+                    return $pathCollection[0];
+                },
+                iterator_to_array($regexIterator)
+            ),
+            'is_file'
+        );
     }
 }
