@@ -32,7 +32,6 @@
 
 namespace Cundd\Assetic\Server;
 
-
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 
@@ -122,7 +121,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var array
      */
-    static protected $logLevelPrefix = array(
+    protected static $logLevelPrefix = array(
         self::LOG_LEVEL_EMERGENCY => '!!!',
         self::LOG_LEVEL_ALERT     => '!!',
         self::LOG_LEVEL_CRITICAL  => '!',
@@ -155,9 +154,9 @@ class LiveReload implements MessageComponentInterface
         'protocols'  => array(
             'http://livereload.com/protocols/official-7',
             'http://livereload.com/protocols/official-8',
-			//'http://livereload.com/protocols/official-9',
-			//'http://livereload.com/protocols/2.x-origin-version-negotiation',
-			//'http://livereload.com/protocols/2.x-remote-control',
+            //'http://livereload.com/protocols/official-9',
+            //'http://livereload.com/protocols/2.x-origin-version-negotiation',
+            //'http://livereload.com/protocols/2.x-remote-control',
         ),
         'serverName' => 'CunddAssetic',
     );

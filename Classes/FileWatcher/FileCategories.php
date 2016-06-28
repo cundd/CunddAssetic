@@ -8,7 +8,6 @@
 
 namespace Cundd\Assetic\FileWatcher;
 
-
 abstract class FileCategories
 {
     /**

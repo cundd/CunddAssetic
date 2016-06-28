@@ -25,7 +25,7 @@
  */
 namespace Cundd\CunddComposer;
 
-class Autoloader
+class autoloader_shim
 {
     public static function register()
     {

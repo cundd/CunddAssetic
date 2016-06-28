@@ -8,7 +8,6 @@
 
 namespace Cundd\Assetic\Command;
 
-
 interface ColorInterface
 {
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM

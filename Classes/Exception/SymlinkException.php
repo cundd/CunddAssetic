@@ -39,5 +39,4 @@ namespace Cundd\Assetic\Exception;
  */
 class SymlinkException extends AbstractFileException
 {
-
 }

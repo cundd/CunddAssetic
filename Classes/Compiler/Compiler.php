@@ -80,7 +80,7 @@ class Compiler implements CompilerInterface
     protected $pluginLevelOptions = array();
 
 
-    function __construct($configuration)
+    public function __construct($configuration)
     {
         $this->configuration = $configuration;
     }
