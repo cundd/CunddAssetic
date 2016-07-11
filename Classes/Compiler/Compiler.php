@@ -38,6 +38,7 @@ use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
 use Assetic\Filter;
 use Assetic\FilterManager;
+use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
@@ -140,6 +141,11 @@ class Compiler implements CompilerInterface
 
         AsseticGeneralUtility::profile('Will compile asset');
         try {
+
+            var_dump($this->getAssetManager()->getNames());
+
+
+
             $writer->writeManagerAssets($this->getAssetManager());
         } catch (FilterException $exception) {
             $this->handleFilterException($exception);
@@ -386,7 +392,11 @@ class Compiler implements CompilerInterface
             $stylesheetType = substr(strrchr($stylesheet, '.'), 1);
         }
 
+        $originalStylesheet = $stylesheet;
         $stylesheet = GeneralUtility::getFileAbsFileName($stylesheet);
+        if (!$stylesheet) {
+            throw new FilePathException(sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet));
+        }
 
         // Make sure the filter manager knows the filter
         $filter = $this->getFilterForType($stylesheetType);
