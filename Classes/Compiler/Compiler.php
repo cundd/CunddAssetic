@@ -141,11 +141,6 @@ class Compiler implements CompilerInterface
 
         AsseticGeneralUtility::profile('Will compile asset');
         try {
-
-            var_dump($this->getAssetManager()->getNames());
-
-
-
             $writer->writeManagerAssets($this->getAssetManager());
         } catch (FilterException $exception) {
             $this->handleFilterException($exception);
