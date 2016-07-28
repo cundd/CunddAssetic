@@ -156,7 +156,7 @@ class FileWatcher implements FileWatcherInterface
         $foundFiles = $this->collectFilesToWatch();
 
         foreach ($foundFiles as $currentFile) {
-            if (filemtime($currentFile) > $lastCompileTime) {
+            if (file_exists($currentFile) && filemtime($currentFile) > $lastCompileTime) {
                 $this->lastChangeTime = time();
 
                 return $currentFile;
