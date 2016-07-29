@@ -105,7 +105,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
      * Automatically re-compiles the assets if files in path (or 'fileadmin/') changed
      *
      * @param integer $interval         Interval between checks
-     * @param string  $path             Directory path(s) that should be watched (Multiple paths separated by colon ":")
+     * @param string  $path             Directory path(s) that should be watched (Multiple paths separated by comma ",")
      * @param string  $suffixes         File suffixes to watch for changes (separated by comma ",")
      * @param string  $domainContext    Specify the domain of the current context [Only used in multidomain installations]
      * @param int     $maxDepth         Maximum directory depth of file to watch
@@ -136,7 +136,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
      * @param string  $address       IP to listen
      * @param int     $port          Port to listen
      * @param integer $interval      Interval between checks
-     * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by colon ":")
+     * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by comma ",")
      * @param string  $suffixes      File suffixes to watch for changes (separated by comma ",")
      * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
      * @param int     $maxDepth      Maximum directory depth of file to watch
@@ -399,9 +399,12 @@ class AsseticCommandController extends CommandController implements ColorInterfa
      */
     private function prepareWatchPaths($path)
     {
-        // "Escape" the colon
+        // "Escape" the colon in "EXT:"
         $path = str_replace('EXT:', 'EXT;', $path);
-        $watchPaths = array_filter(explode(':', $path));
+
+        // Replace the colon with a comma
+        $path = str_replace(':', ',', $path);
+        $watchPaths = array_filter(explode(',', $path));
 
         return array_map(
             function ($path) {
