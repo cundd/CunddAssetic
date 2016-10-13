@@ -23,9 +23,9 @@ namespace Cundd\Assetic;
  * SOFTWARE.
  */
 
+use Cundd\Assetic\Helper\LiveReloadHelper;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\CunddComposer\Autoloader;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
 
 /**
@@ -76,7 +76,7 @@ class Plugin
             $renderedStylesheet = $this->manager->collectAndCompile();
 
             $content = '';
-            $content .= '<link rel="stylesheet" type="text/css" href="'.$renderedStylesheet.'" media="all">';
+            $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
             $content .= $this->getLiveReloadCode();
         } catch (\LogicException $exception) {
             if ($exception->getCode() === 1356543545) {
@@ -95,28 +95,8 @@ class Plugin
      */
     protected function getLiveReloadCode()
     {
-        if (!$this->manager->getExperimental() || !AsseticGeneralUtility::isBackendUser()) {
-            return '';
-        }
+        $helper = new LiveReloadHelper($this->manager, $this->configuration);
 
-        $port = 35729;
-        if (isset($this->configuration['livereload.']) && isset($this->configuration['livereload.']['port'])) {
-            $port = intval($this->configuration['livereload.']['port']);
-        }
-
-        $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
-        $resource = '/'.str_replace(PATH_site, '', GeneralUtility::getFileAbsFileName($resource));
-        $javaScriptCodeTemplate = "<script type=\"text/javascript\">
-	(function () {
-	    document.addEventListener('DOMContentLoaded', function() {
-            var scriptElement = document.createElement('script');
-            scriptElement.async = true;
-            scriptElement.src = '%s' + '?host=' + location.host + '&port=%d';
-            document.getElementsByTagName('head')[0].appendChild(scriptElement);
-	    });
-	})();
-</script>";
-
-        return sprintf($javaScriptCodeTemplate, $resource, $port);
+        return $helper->getLiveReloadCodeIfEnabled();
     }
 }
