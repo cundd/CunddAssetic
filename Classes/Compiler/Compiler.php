@@ -134,7 +134,7 @@ class Compiler implements CompilerInterface
      */
     public function compile()
     {
-        $outputDirectory = ConfigurationUtility::getPathToWeb().ConfigurationUtility::getOutputFileDir();
+        $outputDirectory = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
         GeneralUtility::mkdir($outputDirectory);
 
         $writer = new AssetWriter($outputDirectory);
@@ -156,7 +156,7 @@ class Compiler implements CompilerInterface
                 throw $exception;
             } else {
                 if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                    $output = 'Caught exception #'.$exception->getCode().': '.$exception->getMessage();
+                    $output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
                     GeneralUtility::devLog($output, 'assetic');
                 }
             }
@@ -187,7 +187,7 @@ class Compiler implements CompilerInterface
         }
 
         $filter = null;
-        $filterClass = ucfirst($type).'Filter';
+        $filterClass = ucfirst($type) . 'Filter';
         $filterForTypeDefinitions = $this->configuration['filter_for_type.'];
 
         // Check which filter should be used for the given type. This allows the
@@ -209,7 +209,7 @@ class Compiler implements CompilerInterface
                 $filter = new $filterClass();
             }
         } else {
-            throw new FilterException('Filter class '.$filterClass.' not found', 1355846301);
+            throw new FilterException('Filter class ' . $filterClass . ' not found', 1355846301);
         }
 
         // Store the just created filter
@@ -235,7 +235,7 @@ class Compiler implements CompilerInterface
             $exceptionPrinter->printException($exception);
         } else {
             if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                $message = 'Caught exception #'.$exception->getCode().': '.$exception->getMessage();
+                $message = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
                 GeneralUtility::devLog($message, 'assetic');
             }
         }
@@ -326,7 +326,7 @@ class Compiler implements CompilerInterface
     {
         if (!$stylesheetType) {
             throw new \UnexpectedValueException(
-                'The given stylesheet type is invalid "'.$stylesheetType.'"',
+                'The given stylesheet type is invalid "' . $stylesheetType . '"',
                 1355910725
             );
         }
@@ -353,7 +353,7 @@ class Compiler implements CompilerInterface
                     1447161985
                 );
             } else {
-                trigger_error('Filter does not implement '.$function, E_USER_NOTICE);
+                trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
             }
         }
 
@@ -377,12 +377,12 @@ class Compiler implements CompilerInterface
         $pluginLevelOptions = $this->getPluginLevelOptions();
 
         $stylesheetConf = is_array(
-            $this->configuration['stylesheets.'][$assetKey.'.']
-        ) ? $this->configuration['stylesheets.'][$assetKey.'.'] : array();
+            $this->configuration['stylesheets.'][$assetKey . '.']
+        ) ? $this->configuration['stylesheets.'][$assetKey . '.'] : array();
 
         // Get the type to find the according filter
         if (isset($stylesheetConf['type'])) {
-            $stylesheetType = $stylesheetConf['type'].'';
+            $stylesheetType = $stylesheetConf['type'] . '';
         } else {
             $stylesheetType = substr(strrchr($stylesheet, '.'), 1);
         }
@@ -390,7 +390,9 @@ class Compiler implements CompilerInterface
         $originalStylesheet = $stylesheet;
         $stylesheet = GeneralUtility::getFileAbsFileName($stylesheet);
         if (!$stylesheet) {
-            throw new FilePathException(sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet));
+            throw new FilePathException(
+                sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet)
+            );
         }
 
         // Make sure the filter manager knows the filter
@@ -452,13 +454,21 @@ class Compiler implements CompilerInterface
 
         // Replace the backslash in the filter class with an underscore
         $filterClassIdentifier = strtolower(str_replace('\\', '_', $filterClass));
-        if (isset($filterBinaries[$filterClassIdentifier])) {
-            $filterBinaryPath = $filterBinaries[$filterClassIdentifier];
+        if (!isset($filterBinaries[$filterClassIdentifier])) {
+            return null;
         }
 
-        if (is_string($filterBinaryPath) && $filterBinaryPath[0] === '~') {
+        $filterBinaryPath = $filterBinaries[$filterClassIdentifier];
+        if (!is_string($filterBinaryPath)) {
+            // @TODO: Check if this can/should happen
+            return $filterBinaryPath;
+        }
+
+        if ($filterBinaryPath[0] === '~') {
             $homeDirectory = $this->getHomeDirectory();
-            $filterBinaryPath = $homeDirectory.substr($filterBinaryPath, 1);
+            $filterBinaryPath = $homeDirectory . substr($filterBinaryPath, 1);
+        } elseif (substr($filterBinaryPath, 0,4) === 'EXT:') {
+            $filterBinaryPath = GeneralUtility::getFileAbsFileName($filterBinaryPath);
         }
 
         return $filterBinaryPath;
@@ -477,6 +487,6 @@ class Compiler implements CompilerInterface
             return $_SERVER['HOME'];
         }
 
-        return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'].'/..' : '';
+        return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/..' : '';
     }
 }
