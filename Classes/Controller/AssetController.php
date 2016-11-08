@@ -93,33 +93,13 @@ class AssetController extends ActionController
     }
 
     /**
-     * action show
+     * Action that compiles the stylesheet
      *
-     * @return void
+     * @param bool $clearPageCache
      */
-    public function compileAction()
+    public function compileAction($clearPageCache = false)
     {
-        $manager = $this->getManager();
-        if ($manager) {
-            $manager->forceCompile();
-
-            try {
-                $outputFileLink = $manager->collectAndCompile();
-                $manager->clearHashCache();
-                if (defined('TYPO3_MODE') && TYPO3_MODE === 'BE') {
-                    $outputFileLink = '../' . $outputFileLink;
-                }
-                $outputFileLink = '<a href="'.$outputFileLink.'" target="_blank">'.$manager->getOutputFilePath().'</a>';
-                $this->addFlashMessage('Stylesheets have been compiled to '.$outputFileLink);
-            } catch (\Exception $exception) {
-                $this->addFlashMessage(
-                    'Could not compile files: #'.$exception->getCode().': '.$exception->getMessage(),
-                    '',
-                    FlashMessage::ERROR
-                );
-            }
-        }
-        $this->pd($manager);
+        $this->compile($clearPageCache);
         $this->redirect('list');
     }
 
@@ -169,7 +149,7 @@ class AssetController extends ActionController
     ) {
         if (!is_string($messageBody)) {
             throw new \InvalidArgumentException(
-                'The message body must be of type string, "'.gettype($messageBody).'" given.',
+                'The message body must be of type string, "' . gettype($messageBody) . '" given.',
                 1243258395
             );
         }
@@ -188,7 +168,6 @@ class AssetController extends ActionController
      * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
      *
      * @param    mixed $var1
-     * @return    string The printed content
      */
     public function pd($var1 = '__iresults_pd_noValue')
     {
@@ -196,5 +175,52 @@ class AssetController extends ActionController
             $arguments = func_get_args();
             call_user_func_array(array('Tx_Iresults', 'pd'), $arguments);
         }
+    }
+
+    /**
+     * Compile the assets
+     *
+     * @param bool $clearPageCache
+     */
+    private function compile($clearPageCache)
+    {
+        $manager = $this->getManager();
+        if ($manager) {
+            $manager->forceCompile();
+
+            try {
+                $outputFileLink = $manager->collectAndCompile();
+                $manager->clearHashCache();
+                $this->addFlashMessage(
+                    'Stylesheets have been compiled to ' . $this->prepareOutputFileLink($outputFileLink, $manager)
+                );
+
+                if ($clearPageCache) {
+                    $this->cacheService->clearPageCache();
+                }
+            } catch (\Exception $exception) {
+                $this->addFlashMessage(
+                    'Could not compile files: #' . $exception->getCode() . ': ' . $exception->getMessage(),
+                    '',
+                    FlashMessage::ERROR
+                );
+            }
+        }
+        $this->pd($manager);
+    }
+
+    /**
+     * @param string           $outputFileLink
+     * @param ManagerInterface $manager
+     * @return string
+     */
+    private function prepareOutputFileLink($outputFileLink, $manager)
+    {
+        if (defined('TYPO3_MODE') && TYPO3_MODE === 'BE') {
+            $outputFileLink = '../' . $outputFileLink;
+        }
+        $outputFileLink = '<a href="' . $outputFileLink . '" target="_blank">' . $manager->getOutputFilePath() . '</a>';
+
+        return $outputFileLink;
     }
 }
