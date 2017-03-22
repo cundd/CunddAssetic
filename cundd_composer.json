@@ -18,7 +18,7 @@
         "kriswallsmith/assetic": "1.*"
     },
     "require-dev": {
-        "cundd/assetic_additions": "*",
+        "cundd/assetic_additions": "^1.0",
         "cboden/ratchet": "0.2.8"
     },
     "autoload": {
@@ -27,11 +27,5 @@
     "suggest": {
         "leafo/lessphp": "Allows to compile LESS with PHP",
         "leafo/scssphp": "Allows to compile SCSS 3.x with PHP"
-    },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/cundd/assetic_additions.git"
-        }
-    ]
+    }
 }
