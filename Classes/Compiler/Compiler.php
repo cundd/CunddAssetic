@@ -438,7 +438,8 @@ class Compiler implements CompilerInterface
     {
         foreach ($parameters as &$parameter) {
             if (strpos($parameter, '.') !== false || strpos($parameter, DIRECTORY_SEPARATOR) !== false) {
-                $parameter = GeneralUtility::getFileAbsFileName($parameter);
+                $path = GeneralUtility::getFileAbsFileName($parameter);
+                $parameter = realpath($path) ?: $path;
             }
         }
     }
@@ -467,7 +468,7 @@ class Compiler implements CompilerInterface
         if ($filterBinaryPath[0] === '~') {
             $homeDirectory = $this->getHomeDirectory();
             $filterBinaryPath = $homeDirectory . substr($filterBinaryPath, 1);
-        } elseif (substr($filterBinaryPath, 0,4) === 'EXT:') {
+        } elseif (substr($filterBinaryPath, 0, 4) === 'EXT:') {
             $filterBinaryPath = GeneralUtility::getFileAbsFileName($filterBinaryPath);
         }
 
