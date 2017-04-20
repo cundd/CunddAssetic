@@ -15,10 +15,10 @@
     ],
     "require": {
         "php": ">=5.3.3",
+        "cundd/assetic_additions": "^1.0",
         "kriswallsmith/assetic": "1.*"
     },
     "require-dev": {
-        "cundd/assetic_additions": "^1.0",
         "cboden/ratchet": "0.2.8"
     },
     "autoload": {
