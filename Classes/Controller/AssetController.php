@@ -29,7 +29,9 @@ namespace Cundd\Assetic\Controller;
 use Cundd\Assetic\Manager;
 use Cundd\Assetic\ManagerInterface;
 use Cundd\CunddComposer\Autoloader;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
@@ -145,7 +147,7 @@ class AssetController extends ActionController
     public function addFlashMessage(
         $messageBody,
         $messageTitle = '',
-        $severity = \TYPO3\CMS\Core\Messaging\AbstractMessage::OK,
+        $severity = AbstractMessage::OK,
         $storeInSession = true
     ) {
         if (!is_string($messageBody)) {
@@ -155,7 +157,7 @@ class AssetController extends ActionController
             );
         }
         /* @var \TYPO3\CMS\Core\Messaging\FlashMessage $flashMessage */
-        $flashMessage = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+        $flashMessage = GeneralUtility::makeInstance(
             'TYPO3\\CMS\\Core\\Messaging\\FlashMessage',
             $messageBody,
             $messageTitle,
