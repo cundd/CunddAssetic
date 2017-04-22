@@ -129,7 +129,7 @@ class LiveReload implements MessageComponentInterface
         self::LOG_LEVEL_WARNING   => '(w)',
         self::LOG_LEVEL_NOTICE    => '(n)',
         self::LOG_LEVEL_INFO      => '(i)',
-        self::LOG_LEVEL_DEBUG     => '(d)'
+        self::LOG_LEVEL_DEBUG     => '(d)',
     );
 
     /**
@@ -198,7 +198,8 @@ class LiveReload implements MessageComponentInterface
     public function onMessage(ConnectionInterface $from, $msg)
     {
         $this->debug(
-            sprintf('Received message "%s" from connection %d address %s' . PHP_EOL,
+            sprintf(
+                'Received message "%s" from connection %d address %s' . PHP_EOL,
                 $msg,
                 $from->resourceId,
                 $from->remoteAddress

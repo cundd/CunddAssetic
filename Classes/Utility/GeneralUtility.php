@@ -60,6 +60,7 @@ abstract class GeneralUtility
         ) {
             return false;
         }
+
         return true;
     }
 
@@ -109,7 +110,6 @@ abstract class GeneralUtility
      * Print a profiling message.
      *
      * @param    string $msg
-     * @return    string The printed content
      */
     public static function profile($msg = '')
     {
@@ -138,6 +138,7 @@ abstract class GeneralUtility
                 self::$willDebug = false;
             }
         }
+
         return self::$willDebug;
     }
 }

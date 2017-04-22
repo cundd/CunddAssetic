@@ -51,13 +51,13 @@ class ExceptionPrinter
         $trace = '';
         $backtrace = $exception->getTrace();
 
-        $heading = 'Caught Assetic error #'.$exception->getCode().': '.$exception->getMessage();
+        $heading = 'Caught Assetic error #' . $exception->getCode() . ': ' . $exception->getMessage();
         while ($step = current($backtrace)) {
-            $trace .= '#'.$i.': '.$step['file'].'('.$step['line'].'): ';
+            $trace .= '#' . $i . ': ' . $step['file'] . '(' . $step['line'] . '): ';
             if (isset($step['class'])) {
-                $trace .= $step['class'].$step['type'];
+                $trace .= $step['class'] . $step['type'];
             }
-            $trace .= $step['function'].'(arguments: '.count($step['args']).')'.PHP_EOL;
+            $trace .= $step['function'] . '(arguments: ' . count($step['args']) . ')' . PHP_EOL;
             next($backtrace);
             $i++;
         }
@@ -91,7 +91,7 @@ class ExceptionPrinter
         array_walk(
             $fontStyle,
             function (&$value, $key) {
-                $value = $key.':'.$value;
+                $value = $key . ':' . $value;
             }
         );
 
@@ -113,7 +113,7 @@ class ExceptionPrinter
         array_walk(
             $fontStyle,
             function (&$value, $key) {
-                $value = $key.':'.$value;
+                $value = $key . ':' . $value;
             }
         );
 
@@ -137,7 +137,7 @@ class ExceptionPrinter
         array_walk(
             $boxStyles,
             function (&$value, $key) {
-                $value = $key.':'.$value;
+                $value = $key . ':' . $value;
             }
         );
 

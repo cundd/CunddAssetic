@@ -1,4 +1,5 @@
 <?php
+
 namespace Cundd\Assetic\Domain\Model;
 
 /*

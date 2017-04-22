@@ -28,6 +28,7 @@
  * @author COD
  * Created 17.05.16 10:34
  */
+
 namespace Cundd\Assetic\FileWatcher;
 
 /**

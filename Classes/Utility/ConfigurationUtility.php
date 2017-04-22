@@ -59,6 +59,7 @@ class ConfigurationUtility
 
     /**
      * Path to the output file directory
+     *
      * @var string
      */
     protected static $outputFileDir = 'typo3temp/cundd_assetic/';
@@ -86,6 +87,7 @@ class ConfigurationUtility
         if (isset($configuration[$key])) {
             return $configuration[$key];
         }
+
         return null;
     }
 
@@ -148,6 +150,7 @@ class ConfigurationUtility
             }
             self::setDomainContext($domainContextTemp);
         }
+
         return self::$domainContext;
     }
 
@@ -171,6 +174,7 @@ class ConfigurationUtility
         }
 
         $domain = str_replace('.', '', $domain);
+
         return $domain . '-';
     }
 
@@ -208,6 +212,7 @@ class ConfigurationUtility
 
     /**
      * Sets the path to the output file directory
+     *
      * @param string $outputFileDir
      */
     public static function setOutputFileDir($outputFileDir)

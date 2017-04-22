@@ -104,11 +104,11 @@ class AsseticCommandController extends CommandController implements ColorInterfa
     /**
      * Automatically re-compiles the assets if files in path (or 'fileadmin/') changed
      *
-     * @param integer $interval         Interval between checks
-     * @param string  $path             Directory path(s) that should be watched (Multiple paths separated by comma ",")
-     * @param string  $suffixes         File suffixes to watch for changes (separated by comma ",")
-     * @param string  $domainContext    Specify the domain of the current context [Only used in multidomain installations]
-     * @param int     $maxDepth         Maximum directory depth of file to watch
+     * @param integer $interval      Interval between checks
+     * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by comma ",")
+     * @param string  $suffixes      File suffixes to watch for changes (separated by comma ",")
+     * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
+     * @param int     $maxDepth      Maximum directory depth of file to watch
      */
     public function watchCommand(
         $interval = 1,
@@ -177,11 +177,11 @@ class AsseticCommandController extends CommandController implements ColorInterfa
 
         $this->outputLine(
             ''
-            .self::ESCAPE
-            .self::GREEN
-            .'Websocket server listening on '.$address.':'.$port.' running under PHP version '.PHP_VERSION
-            .self::ESCAPE
-            .self::NORMAL
+            . self::ESCAPE
+            . self::GREEN
+            . 'Websocket server listening on ' . $address . ':' . $port . ' running under PHP version ' . PHP_VERSION
+            . self::ESCAPE
+            . self::NORMAL
         );
 
 
@@ -254,7 +254,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
     {
         if (ConfigurationUtility::isMultiDomain()) {
             $this->outputLine(
-                self::SIGNAL.self::BOLD_RED.'Multidomain installations are currently not supported'.self::SIGNAL_ATTRIBUTES_OFF
+                self::SIGNAL . self::BOLD_RED . 'Multidomain installations are currently not supported' . self::SIGNAL_ATTRIBUTES_OFF
             );
             $this->sendAndExit(1);
 
@@ -271,11 +271,11 @@ class AsseticCommandController extends CommandController implements ColorInterfa
             ConfigurationUtility::setDomainContext($domainContext);
             $this->outputLine(
                 ''
-                .self::ESCAPE
-                .self::GREEN
-                .'Switched to domain context '.ConfigurationUtility::getDomainContext()
-                .self::ESCAPE
-                .self::NORMAL
+                . self::ESCAPE
+                . self::GREEN
+                . 'Switched to domain context ' . ConfigurationUtility::getDomainContext()
+                . self::ESCAPE
+                . self::NORMAL
             );
         }
     }
@@ -302,7 +302,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
             $destination .= basename($source);
         }
 
-        $destination = PATH_site.$destination;
+        $destination = PATH_site . $destination;
         if (!file_exists(dirname($destination))) {
             mkdir(dirname($destination), 0775, true);
         }
@@ -338,12 +338,13 @@ class AsseticCommandController extends CommandController implements ColorInterfa
      */
     protected function handleException($exception)
     {
-        $heading = 'Exception: #'.$exception->getCode().':'.$exception->getMessage();
-        $exceptionPosition = 'in '.$exception->getFile().' at line '.$exception->getLine();
+        $heading = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
+        $exceptionPosition = 'in ' . $exception->getFile() . ' at line ' . $exception->getLine();
 
-        $coloredText = self::SIGNAL.self::REVERSE.self::SIGNAL.self::BOLD_RED.$heading.self::SIGNAL_ATTRIBUTES_OFF.PHP_EOL;
-        $coloredText .= self::SIGNAL.self::BOLD_RED.$exceptionPosition.self::SIGNAL_ATTRIBUTES_OFF.PHP_EOL;
-        $coloredText .= self::SIGNAL.self::RED.$exception->getTraceAsString().self::SIGNAL_ATTRIBUTES_OFF.PHP_EOL;
+        $coloredText = self::SIGNAL . self::REVERSE . self::SIGNAL . self::BOLD_RED . $heading . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
+        $coloredText .= self::SIGNAL . self::BOLD_RED . $exceptionPosition . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
+        $coloredText .= self::SIGNAL . self::RED . $exception->getTraceAsString(
+            ) . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
 
         fwrite(STDOUT, $coloredText);
     }
@@ -355,11 +356,11 @@ class AsseticCommandController extends CommandController implements ColorInterfa
     {
         $this->outputLine(
             ''
-            .self::ESCAPE
-            .self::GREEN
-            .'Watching path(s): '.implode(', ', $this->fileWatcher->getWatchPaths())
-            .self::ESCAPE
-            .self::NORMAL
+            . self::ESCAPE
+            . self::GREEN
+            . 'Watching path(s): ' . implode(', ', $this->fileWatcher->getWatchPaths())
+            . self::ESCAPE
+            . self::NORMAL
         );
     }
 
@@ -409,7 +410,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         return array_map(
             function ($path) {
                 if (substr($path, 0, 4) === 'EXT;') {
-                    return GeneralUtility::getFileAbsFileName('typo3conf/ext/'.substr($path, 4));
+                    return GeneralUtility::getFileAbsFileName('typo3conf/ext/' . substr($path, 4));
                 }
 
                 return $path;
