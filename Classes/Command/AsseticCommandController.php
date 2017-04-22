@@ -37,10 +37,9 @@ use Cundd\Assetic\Plugin;
 use Cundd\Assetic\Server\LiveReload;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\CunddComposer\Autoloader;
+use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
-use React\EventLoop\Factory as LoopFactory;
-use React\Socket\Server as ReactServer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\CommandController;
@@ -125,7 +124,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         $this->printWatchedPaths();
         $this->validateMultiDomainInstallation($domainContext);
         while (true) {
-            $this->runWatchCycle();
+            $this->recompileIfNeeded();
             sleep($interval);
         }
     }
@@ -161,19 +160,19 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         $this->printWatchedPaths();
         $this->validateMultiDomainInstallation($domainContext);
 
-        $loop = LoopFactory::create();
-
         // Websocket server
         $this->liveReloadServer = new LiveReload();
-        $socket = new ReactServer($loop);
-        $socket->listen($port, $address);
-        new IoServer(
-            new WsServer($this->liveReloadServer),
-            $socket,
-            $loop
+        $server = IoServer::factory(
+            new HttpServer(
+                new WsServer(
+                    $this->liveReloadServer
+                )
+            ),
+            $port,
+            $address
         );
 
-        $loop->addPeriodicTimer($interval, array($this, 'recompileIfNeededAndInformLiveReloadServer'));
+        $server->loop->addPeriodicTimer($interval, array($this, 'recompileIfNeededAndInformLiveReloadServer'));
 
         $this->outputLine(
             ''
@@ -184,8 +183,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
             . self::NORMAL
         );
 
-
-        $loop->run();
+        $server->run();
     }
 
     /**
@@ -212,22 +210,23 @@ class AsseticCommandController extends CommandController implements ColorInterfa
 
     /**
      * Re-compiles the sources if needed
-     *
-     * @return string[] Returns an empty array if nothing has changed
      */
     protected function recompileIfNeeded()
     {
         $changedFile = $this->needsRecompile();
-        if ($changedFile) {
-            $compiledFile = $this->compile();
-
-            return [
-                'changedFile'  => (string)$changedFile,
-                'compiledFile' => (string)$compiledFile,
-            ];
+        if (!$changedFile) {
+            return;
         }
+        $compiledFile = $this->compile();
 
-        return [];
+        $this->outputLine(
+            ''
+            . self::ESCAPE
+            . self::GREEN
+            . 'File ' . $changedFile . ' has changed. Assets have been compiled into ' . $compiledFile
+            . self::ESCAPE
+            . self::NORMAL
+        );
     }
 
     /**
@@ -427,23 +426,5 @@ class AsseticCommandController extends CommandController implements ColorInterfa
             },
             $watchPaths
         );
-    }
-
-    private function runWatchCycle()
-    {
-        $files = $this->recompileIfNeeded();
-        if ($files) {
-            $changedFile = $files['changedFile'];
-            $compiledFile = $files['compiledFile'];
-            $this->outputLine(
-                ''
-                . self::ESCAPE
-                . self::GREEN
-                . 'File ' . $changedFile . ' has changed. Assets have been compiled into ' . $compiledFile
-                . self::ESCAPE
-                . self::NORMAL
-            );
-
-        }
     }
 }

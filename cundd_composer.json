@@ -5,7 +5,6 @@
     "homepage": "https://github.com/cundd/CunddAssetic",
     "type": "library",
     "license": "MIT",
-    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Daniel Corn",
@@ -19,7 +18,7 @@
         "kriswallsmith/assetic": "1.*"
     },
     "require-dev": {
-        "cboden/ratchet": "0.2.8"
+        "cboden/ratchet": "^0.3"
     },
     "autoload": {
         "psr-4": { "Cundd\\Assetic\\": "Classes/" }

@@ -34,6 +34,8 @@ namespace Cundd\Assetic\Server;
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
+use Ratchet\Mock\Connection;
+use Ratchet\Wamp\WampConnection;
 
 /**
  * LiveReload message component
@@ -197,6 +199,7 @@ class LiveReload implements MessageComponentInterface
      */
     public function onMessage(ConnectionInterface $from, $msg)
     {
+        /** @var WampConnection|Connection $from */
         $this->debug(
             sprintf(
                 'Received message "%s" from connection %d address %s' . PHP_EOL,
@@ -227,6 +230,7 @@ class LiveReload implements MessageComponentInterface
      */
     public function onOpen(ConnectionInterface $conn)
     {
+        /** @var WampConnection|Connection $conn */
         // Store the new connection to send messages to later
         $this->clients->attach($conn);
         $this->send($conn, $this->handshakeMessage);
@@ -264,6 +268,7 @@ class LiveReload implements MessageComponentInterface
      */
     public function onClose(ConnectionInterface $conn)
     {
+        /** @var WampConnection|Connection $conn */
         // The connection is closed, remove it, as we can no longer send it messages
         $this->clients->detach($conn);
         $this->debug("Connection {$conn->resourceId} has disconnected\n", '-');
