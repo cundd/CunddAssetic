@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.6 || ^7.0",
         "cundd/assetic_additions": "^1.0",
         "kriswallsmith/assetic": "1.*"
     },
