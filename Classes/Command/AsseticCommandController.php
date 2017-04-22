@@ -125,7 +125,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         $this->printWatchedPaths();
         $this->validateMultiDomainInstallation($domainContext);
         while (true) {
-            $this->recompileIfNeeded();
+            $this->runWatchCycle();
             sleep($interval);
         }
     }
@@ -212,12 +212,22 @@ class AsseticCommandController extends CommandController implements ColorInterfa
 
     /**
      * Re-compiles the sources if needed
+     *
+     * @return string[] Returns an empty array if nothing has changed
      */
     protected function recompileIfNeeded()
     {
-        if ($this->needsRecompile()) {
-            $this->compile();
+        $changedFile = $this->needsRecompile();
+        if ($changedFile) {
+            $compiledFile = $this->compile();
+
+            return [
+                'changedFile'  => (string)$changedFile,
+                'compiledFile' => (string)$compiledFile,
+            ];
         }
+
+        return [];
     }
 
     /**
@@ -417,5 +427,23 @@ class AsseticCommandController extends CommandController implements ColorInterfa
             },
             $watchPaths
         );
+    }
+
+    private function runWatchCycle()
+    {
+        $files = $this->recompileIfNeeded();
+        if ($files) {
+            $changedFile = $files['changedFile'];
+            $compiledFile = $files['compiledFile'];
+            $this->outputLine(
+                ''
+                . self::ESCAPE
+                . self::GREEN
+                . 'File ' . $changedFile . ' has changed. Assets have been compiled into ' . $compiledFile
+                . self::ESCAPE
+                . self::NORMAL
+            );
+
+        }
     }
 }
