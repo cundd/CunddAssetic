@@ -232,7 +232,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         if ($manager) {
             $manager->forceCompile();
             try {
-                $manager->collectAndCompile();
+                $outputFileLink = $manager->collectAndCompile();
             } catch (\Exception $exception) {
                 $this->handleException($exception);
             }
