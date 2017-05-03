@@ -1,23 +1,29 @@
-#Using Assetic auto-refresh standalone
+Using Assetic auto-refresh standalone
+=====================================
 
-If you want to use the Assetic auto-refresh script standalone and you have jQuery installed you can simply execute the following:
+If you want to use the Assetic auto-refresh script standalone you can simply execute the following:
 
-```javascript	
+```javascript
+/* Optional settings */
 window.Assetic = {
 	reloadInterval: 2000,
 	monitor: ['js']
 };
-jQuery.getScript('https://raw.githubusercontent.com/cundd/CunddAssetic/master/Resources/Public/JavaScript/Assetic.js');
+(function() { /* Load the library */
+    var loaderTag = document.createElement('script');
+    loaderTag.src = 'https://cdn.rawgit.com/cundd/CunddAssetic/master/Resources/Public/JavaScript/Assetic.js';
+    loaderTag.integrity="sha512-N6KmO975a4B4Lc2m+BOg7R+gJypJlpdAycgDvb/B2gk/RulK5FL2dAF1RpnRkB5WAabZBWViLcZ9f3nBstJCSQ==";
+    loaderTag.crossOrigin="anonymous";
+    loaderTag.async = true;
+    document.getElementsByTagName('head')[0].appendChild(loaderTag);
+})();
 ```
 
-Or the one-liner:
+To load the library via a `script` tag use:
 
-```javascript	
-jQuery.getScript('https://raw.githubusercontent.com/cundd/CunddAssetic/master/Resources/Public/JavaScript/Assetic.js');
-```
-	
-Or with additional options:
-
-```javascript	
-window.Assetic = { reloadInterval: 2000, monitor: ['js'] }; jQuery.getScript('https://raw.githubusercontent.com/cundd/CunddAssetic/master/Resources/Public/JavaScript/Assetic.js');
+```html
+<script src="https://cdn.rawgit.com/cundd/CunddAssetic/master/Resources/Public/JavaScript/Assetic.js"
+            integrity="sha512-N6KmO975a4B4Lc2m+BOg7R+gJypJlpdAycgDvb/B2gk/RulK5FL2dAF1RpnRkB5WAabZBWViLcZ9f3nBstJCSQ=="
+            crossorigin="anonymous"
+            async defer></script>
 ```
