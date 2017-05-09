@@ -82,7 +82,7 @@
 		startTime: (+new Date),
 		lostFocusTime: null,
 
-		debugMode: asseticConfiguration.debugMode ? true : false,
+		debugMode: !!asseticConfiguration.debugMode,
 
 		init: function () {
 			var length;
@@ -198,7 +198,7 @@
 
 			for (var i = 0; i < length; i++) {
 				asset = assets[i];
-				if (asset == _recentlyChangedStylesheetAsset) {
+				if (asset === _recentlyChangedStylesheetAsset) {
 					originalUrl = originalUrls[i];
 					newUrl = originalUrl + "?reload=" + timestamp;
 					this.reloadStylesheets(newUrl, originalUrl, asset);
@@ -270,12 +270,12 @@
 
 
 			// Reload the JavaScript assets each X. time
-			if ((_runCounter % Assetic.reloadJavaScriptEach) == 0) {
+			if ((_runCounter % Assetic.reloadJavaScriptEach) === 0) {
 				Assetic.reloadJavaScriptAssets();
 			}
 
 			// Reload the Stylesheet assets each X. time or if recentlyChangedStylesheetAsset is not defined
-			if ((_runCounter % Assetic.reloadStylesheetsEach) == 0 || !Assetic.recentlyChangedStylesheetAsset) {
+			if ((_runCounter % Assetic.reloadStylesheetsEach) === 0 || !Assetic.recentlyChangedStylesheetAsset) {
 				Assetic.reloadStylesheetAssets();
 			} else {
 				Assetic.debug('reload recent css', Assetic.recentlyChangedStylesheetAsset);
