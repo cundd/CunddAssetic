@@ -11,8 +11,8 @@ window.Assetic = {
 };
 (function() { /* Load the library */
     var loaderTag = document.createElement('script');
-    loaderTag.src = 'https://cdn.rawgit.com/cundd/CunddAssetic/master/Resources/Public/JavaScript/Assetic.js';
-    loaderTag.integrity="sha512-N6KmO975a4B4Lc2m+BOg7R+gJypJlpdAycgDvb/B2gk/RulK5FL2dAF1RpnRkB5WAabZBWViLcZ9f3nBstJCSQ==";
+    loaderTag.src = 'https://cdn.rawgit.com/cundd/CunddAssetic/15a168ffb62e8b0a02acd2d1838c741961379215/Resources/Public/JavaScript/Assetic.js';
+    loaderTag.integrity="sha512-prz6lZ/LelOqCp2B0D3gpRG7PUwTQ4IVeBwwTM/SZlnsSNPpFvi/Yc2brRUagd3iW0K3XaGI5+pnJyrAY/U5bA==";
     loaderTag.crossOrigin="anonymous";
     loaderTag.async = true;
     document.getElementsByTagName('head')[0].appendChild(loaderTag);
@@ -22,8 +22,8 @@ window.Assetic = {
 To load the library via a `script` tag use:
 
 ```html
-<script src="https://cdn.rawgit.com/cundd/CunddAssetic/master/Resources/Public/JavaScript/Assetic.js"
-            integrity="sha512-N6KmO975a4B4Lc2m+BOg7R+gJypJlpdAycgDvb/B2gk/RulK5FL2dAF1RpnRkB5WAabZBWViLcZ9f3nBstJCSQ=="
+<script src="https://cdn.rawgit.com/cundd/CunddAssetic/15a168ffb62e8b0a02acd2d1838c741961379215/Resources/Public/JavaScript/Assetic.js"
+            integrity="sha512-prz6lZ/LelOqCp2B0D3gpRG7PUwTQ4IVeBwwTM/SZlnsSNPpFvi/Yc2brRUagd3iW0K3XaGI5+pnJyrAY/U5bA=="
             crossorigin="anonymous"
             async defer></script>
 ```
