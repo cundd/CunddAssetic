@@ -192,10 +192,10 @@ class AssetController extends ActionController
             $manager->forceCompile();
 
             try {
-                $outputFileLink = $manager->collectAndCompile();
+                $manager->collectAndCompile();
                 $manager->clearHashCache();
                 $this->addFlashMessage(
-                    'Stylesheets have been compiled to ' . $this->prepareOutputFileLink($outputFileLink, $manager)
+                    'Stylesheets have been compiled to ' . $manager->getOutputFilePath()
                 );
 
                 if ($clearPageCache) {
@@ -210,20 +210,5 @@ class AssetController extends ActionController
             }
         }
         $this->pd($manager);
-    }
-
-    /**
-     * @param string           $outputFileLink
-     * @param ManagerInterface $manager
-     * @return string
-     */
-    private function prepareOutputFileLink($outputFileLink, $manager)
-    {
-        if (defined('TYPO3_MODE') && TYPO3_MODE === 'BE') {
-            $outputFileLink = '../' . $outputFileLink;
-        }
-        $outputFileLink = '<a href="' . $outputFileLink . '" target="_blank">' . $manager->getOutputFilePath() . '</a>';
-
-        return $outputFileLink;
     }
 }
