@@ -105,7 +105,7 @@ class Manager implements ManagerInterface
      *
      * @var array
      */
-    protected $filesToRemove = array();
+    protected $filesToRemove = [];
 
     public function __construct($configuration)
     {
@@ -123,37 +123,28 @@ class Manager implements ManagerInterface
 
         // Check if the assets should be compiled
         if ($this->willCompile()) {
-            $this->collectAssetsAndSetTarget();
-            $this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
-            if ($this->compiler->compile()) {
-                $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->moveTempFileToFileWithHash();
-                AsseticGeneralUtility::pd('$renderedStylesheet', $renderedStylesheet);
-            }
-        } else {
-            $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename();
-
-            /*
-             * Check if the expected output file exists. If it doesn't, set
-             * willCompile to TRUE and call the main routine again
-             */
-            $absolutePathToRenderedFile = ConfigurationUtility::getPathToWeb() . $renderedStylesheet;
-            if (!file_exists($absolutePathToRenderedFile)) {
-                $this->forceCompile();
-
-                return $this->collectAndCompile();
-            }
-            AsseticGeneralUtility::pd(
-                ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename(),
-                ConfigurationUtility::getOutputFileDir(),
-                $this->getCurrentOutputFilename()
-            );
+            return $this->collectAssetsAndCompile();
         }
 
-        if ($this->getExperimental() && AsseticGeneralUtility::isBackendUser()) {
-            $renderedStylesheet = $this->getSymlinkUri();
-        }
+        $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename();
 
-        return $renderedStylesheet;
+        /*
+         * Check if the expected output file exists. If it doesn't, set
+         * willCompile to TRUE and call the main routine again
+         */
+        $absolutePathToRenderedFile = ConfigurationUtility::getPathToWeb() . $renderedStylesheet;
+        if (!file_exists($absolutePathToRenderedFile)) {
+            $this->forceCompile();
+
+            return $this->collectAssetsAndCompile();
+        }
+        AsseticGeneralUtility::pd(
+            ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename(),
+            ConfigurationUtility::getOutputFileDir(),
+            $this->getCurrentOutputFilename()
+        );
+
+        return $absolutePathToRenderedFile;
     }
 
     /**
@@ -312,32 +303,33 @@ class Manager implements ManagerInterface
     /**
      * Returns the current output filename without the hash
      *
+     * If an output file name is set in the configuration use it, otherwise create it by combining the file names of the
+     * assets.
+     *
      * @return string
      */
     public function getCurrentOutputFilenameWithoutHash()
     {
-        $outputFileName = '';
-
-        /*
-         * If an output file name is set in the configuration use it, otherwise
-         * create it by combining the file names of the assets.
-         */
         // Get the output name from the configuration
         if (isset($this->configuration['output'])) {
-            $outputFileName = $this->configuration['output'];
-        } else {
-            // Loop through all configured stylesheets
-            $stylesheets = $this->configuration['stylesheets.'];
-            foreach ($stylesheets as $assetKey => $stylesheet) {
-                if (!is_array($stylesheet)) {
-                    $stylesheetFileName = basename($stylesheet);
-                    $stylesheetFileName = str_replace(array('.', ' '), '', $stylesheetFileName);
-                    $outputFileName .= $stylesheetFileName . '_';
-                }
+            return ConfigurationUtility::getDomainIdentifier() . $this->configuration['output'];
+        }
+
+        $outputFileNameParts = [];
+
+        // Loop through all configured stylesheets
+        $stylesheets = $this->configuration['stylesheets.'];
+        foreach ($stylesheets as $assetKey => $stylesheet) {
+            // If the current value of $stylesheet is an array it's the detailed configuration of a stylesheet, not
+            // the stylesheet path itself
+            if (!is_array($stylesheet)) {
+                $stylesheetFileName = basename($stylesheet);
+                $stylesheetFileName = str_replace(['.', ' '], '', $stylesheetFileName);
+                $outputFileNameParts[] = $stylesheetFileName;
             }
         }
 
-        return ConfigurationUtility::getDomainIdentifier() . $outputFileName;
+        return ConfigurationUtility::getDomainIdentifier() . implode('_', $outputFileNameParts);
     }
 
     /**
@@ -568,7 +560,7 @@ class Manager implements ManagerInterface
 
         // Glob will not return invalid symlinks
         if (!$matchingFiles) {
-            return array();
+            return [];
         }
 
         // Sort by mtime
@@ -594,9 +586,9 @@ class Manager implements ManagerInterface
     public function getPluginLevelOptions()
     {
         // Get the options
-        $pluginLevelOptions = array(
+        $pluginLevelOptions = [
             'output' => $this->getCurrentOutputFilename(),
-        );
+        ];
         if (isset($this->configuration['options.'])) {
             $pluginLevelOptions = $this->configuration['options.'];
         }
@@ -702,7 +694,7 @@ class Manager implements ManagerInterface
         if (is_callable('apc_store')) {
             apc_store($identifier, $value);
         } else {
-            $tags = array();
+            $tags = [];
             $lifetime = 60 * 60 * 24; // * 365 * 10;
 
             $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
@@ -735,5 +727,24 @@ class Manager implements ManagerInterface
     public function clearHashCache()
     {
         $this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), '');
+    }
+
+    /**
+     * @return string
+     */
+    private function collectAssetsAndCompile()
+    {
+        $this->collectAssetsAndSetTarget();
+        $this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
+        if ($this->compiler->compile()) {
+            $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->moveTempFileToFileWithHash();
+            AsseticGeneralUtility::pd('$renderedStylesheet', $renderedStylesheet);
+
+            return $this->getExperimental() && AsseticGeneralUtility::isBackendUser()
+                ? $this->getSymlinkUri()
+                : $renderedStylesheet;
+        }
+
+        throw new OutputFileException('No output file compiled');
     }
 }

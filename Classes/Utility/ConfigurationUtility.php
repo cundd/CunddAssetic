@@ -187,7 +187,7 @@ class ConfigurationUtility
     protected static function _validateHost($host)
     {
         // Remove any dash ('-'), dot ('.') and colon (':', allowed because of the port)
-        return ctype_alnum(str_replace(array('-', '.', ':'), '', $host));
+        return ctype_alnum(str_replace(['-', '.', ':'], '', $host));
     }
 
     /**

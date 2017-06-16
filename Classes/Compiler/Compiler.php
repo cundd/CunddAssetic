@@ -73,12 +73,12 @@ class Compiler implements CompilerInterface
      *
      * @var array
      */
-    protected $configuration = array();
+    protected $configuration = [];
 
     /**
      * @var array
      */
-    protected $pluginLevelOptions = array();
+    protected $pluginLevelOptions = [];
 
 
     public function __construct($configuration)
@@ -110,7 +110,9 @@ class Compiler implements CompilerInterface
         $factory->setFilterManager($this->filterManager);
 
         // Loop through all configured stylesheets
-        $stylesheets = isset($this->configuration['stylesheets.']) ? $this->configuration['stylesheets.'] : array();
+        $stylesheets = isset($this->configuration['stylesheets.']) ? $this->configuration['stylesheets.'] : [];
+        if (0 === count($stylesheets)) {
+        }
         foreach ($stylesheets as $assetKey => $stylesheet) {
             if (!is_array($stylesheet)) {
                 $this->createAsset($assetKey, $stylesheet, $assetCollection, $factory);
@@ -155,10 +157,7 @@ class Compiler implements CompilerInterface
 
                 throw $exception;
             } else {
-                if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                    $output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
-                    GeneralUtility::devLog($output, 'assetic');
-                }
+                $this->logException($exception);
             }
 
             return false;
@@ -234,10 +233,7 @@ class Compiler implements CompilerInterface
             $exceptionPrinter = new ExceptionPrinter();
             $exceptionPrinter->printException($exception);
         } else {
-            if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-                $message = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
-                GeneralUtility::devLog($message, 'assetic');
-            }
+            $this->logException($exception);
         }
 
         return '';
@@ -330,7 +326,7 @@ class Compiler implements CompilerInterface
         ksort($functions);
         foreach ($functions as $function => $data) {
             if (!is_array($data)) {
-                $data = array($data);
+                $data = [$data];
             }
             $this->prepareFunctionParameters($data);
 
@@ -341,8 +337,8 @@ class Compiler implements CompilerInterface
 
 
             AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
-            if (is_callable(array($filter, $function))) {
-                call_user_func_array(array($filter, $function), $data);
+            if (is_callable([$filter, $function])) {
+                call_user_func_array([$filter, $function], $data);
             } elseif ($this->isStrict()) {
                 throw new FilterException(
                     sprintf('Filter "%s" does not implement method "%s"', get_class($filter), $function),
@@ -374,7 +370,7 @@ class Compiler implements CompilerInterface
 
         $stylesheetConf = is_array(
             $this->configuration['stylesheets.'][$assetKey . '.']
-        ) ? $this->configuration['stylesheets.'][$assetKey . '.'] : array();
+        ) ? $this->configuration['stylesheets.'][$assetKey . '.'] : [];
 
         // Get the type to find the according filter
         if (isset($stylesheetConf['type'])) {
@@ -394,9 +390,9 @@ class Compiler implements CompilerInterface
         // Make sure the filter manager knows the filter
         $filter = $this->getFilterForType($stylesheetType);
         if ($filter) {
-            $assetFilters = array($stylesheetType);
+            $assetFilters = [$stylesheetType];
         } else {
-            $assetFilters = array();
+            $assetFilters = [];
         }
 
         // Check if there are filter functions
@@ -413,7 +409,7 @@ class Compiler implements CompilerInterface
         AsseticGeneralUtility::pd($currentOptions);
 
         $asset = $factory->createAsset(
-            array($stylesheet),
+            [$stylesheet],
             $assetFilters,
             $currentOptions
         );
@@ -485,5 +481,16 @@ class Compiler implements CompilerInterface
         }
 
         return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/..' : '';
+    }
+
+    /**
+     * @param \Exception $exception
+     */
+    private function logException(\Exception $exception)
+    {
+        if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
+            $output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
+            GeneralUtility::devLog($output, 'assetic');
+        }
     }
 }

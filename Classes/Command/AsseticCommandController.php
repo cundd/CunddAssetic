@@ -30,6 +30,7 @@
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\FileWatcher\FileCategories;
 use Cundd\Assetic\Manager;
 use Cundd\Assetic\ManagerInterface;
@@ -91,12 +92,12 @@ class AsseticCommandController extends CommandController implements ColorInterfa
     {
         $this->validateMultiDomainInstallation($domainContext);
 
-        $usedPath = $sourcePath = $this->compile();
+        $usedPath = $sourcePath = $this->compile(false);
         if ($destination) {
             $usedPath = $this->copyToDestination($sourcePath, $destination);
         }
 
-        $this->outputLine('Compiled assets and saved file to "%s"', array($usedPath));
+        $this->outputLine('Compiled assets and saved file to "%s"', [$usedPath]);
         $this->sendAndExit();
     }
 
@@ -172,7 +173,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
             $address
         );
 
-        $server->loop->addPeriodicTimer($interval, array($this, 'recompileIfNeededAndInformLiveReloadServer'));
+        $server->loop->addPeriodicTimer($interval, [$this, 'recompileIfNeededAndInformLiveReloadServer']);
 
         $this->outputLine(
             ''
@@ -203,7 +204,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         if ($needFullPageReload) {
             $this->liveReloadServer->fileDidChange($fileNeedsRecompile, false);
         } else {
-            $changedFile = $this->compile();
+            $changedFile = $this->compile(true);
             $this->liveReloadServer->fileDidChange($changedFile);
         }
     }
@@ -217,7 +218,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         if (!$changedFile) {
             return;
         }
-        $compiledFile = $this->compile();
+        $compiledFile = $this->compile(true);
 
         $this->outputLine(
             ''
@@ -232,26 +233,35 @@ class AsseticCommandController extends CommandController implements ColorInterfa
     /**
      * Compile the assets
      *
+     * @param bool $graceful
      * @return string
+     * @throws \Exception
      */
-    protected function compile()
+    protected function compile($graceful)
     {
-        $outputFileLink = '';
         $manager = $this->getManager();
-        if ($manager) {
-            $manager->forceCompile();
-            try {
-                $outputFileLink = $manager->collectAndCompile();
-            } catch (\Exception $exception) {
-                $this->handleException($exception);
-            }
+        $manager->forceCompile();
+
+        if (0 === count($manager->collectAssets()->all())) {
+            throw new MissingConfigurationException('No assets have been found');
+        }
+        try {
+            $outputFileLink = $manager->collectAndCompile();
             if ($manager->getExperimental()) {
                 $outputFileLink = $manager->getSymlinkUri();
             }
             $manager->clearHashCache();
+
+            return $outputFileLink;
+        } catch (\Exception $exception) {
+            $this->handleException($exception);
+
+            if (!$graceful) {
+                throw $exception;
+            }
         }
 
-        return $outputFileLink;
+        return '';
     }
 
     /**
@@ -331,9 +341,9 @@ class AsseticCommandController extends CommandController implements ColorInterfa
      * @param array  $arguments Optional arguments to use for sprintf
      * @return void
      */
-    protected function output($text, array $arguments = array())
+    protected function output($text, array $arguments = [])
     {
-        if ($arguments !== array()) {
+        if ($arguments !== []) {
             $text = vsprintf($text, $arguments);
         }
         fwrite(STDOUT, $text);
@@ -352,8 +362,9 @@ class AsseticCommandController extends CommandController implements ColorInterfa
 
         $coloredText = self::SIGNAL . self::REVERSE . self::SIGNAL . self::BOLD_RED . $heading . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
         $coloredText .= self::SIGNAL . self::BOLD_RED . $exceptionPosition . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
-        $coloredText .= self::SIGNAL . self::RED . $exception->getTraceAsString(
-            ) . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
+        $coloredText .= self::SIGNAL . self::RED
+            . $exception->getTraceAsString()
+            . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
 
         fwrite(STDOUT, $coloredText);
     }
@@ -387,6 +398,8 @@ class AsseticCommandController extends CommandController implements ColorInterfa
             if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
                 $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
                 $this->compiler = new Manager($configuration);
+            } else {
+                throw new \UnexpectedValueException('Could not read configuration for "plugin.CunddAssetic"');
             }
         }
 
