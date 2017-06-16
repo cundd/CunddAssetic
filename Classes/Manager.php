@@ -144,7 +144,7 @@ class Manager implements ManagerInterface
             $this->getCurrentOutputFilename()
         );
 
-        return $absolutePathToRenderedFile;
+        return $renderedStylesheet;
     }
 
     /**
