@@ -614,11 +614,7 @@ class Manager implements ManagerInterface
      */
     public function isDevelopment()
     {
-        if (isset($this->configuration['development'])) {
-            return (bool)intval($this->configuration['development']);
-        }
-
-        return false;
+        return ConfigurationUtility::isDevelopment($this->configuration);
     }
 
     /**

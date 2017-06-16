@@ -219,4 +219,19 @@ class ConfigurationUtility
     {
         self::$outputFileDir = $outputFileDir;
     }
+
+    /**
+     * Returns if development mode is on
+     *
+     * @param array $configuration Configuration to check
+     * @return bool
+     */
+    public static function isDevelopment(array $configuration)
+    {
+        if (php_sapi_name() === 'cli') {
+            return true;
+        }
+
+        return isset($configuration['development']) ? (bool)intval($configuration['development']) : false;
+    }
 }
