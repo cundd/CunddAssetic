@@ -15,19 +15,19 @@ abstract class FileCategories
      *
      * @var array
      */
-    public static $styleAssetSuffixes = array('less', 'scss', 'sass', 'css');
+    public static $styleAssetSuffixes = ['less', 'scss', 'sass', 'css'];
 
     /**
      * List of script file suffixes
      *
      * @var array
      */
-    public static $scriptAssetSuffixes = array('js', 'coffee');
+    public static $scriptAssetSuffixes = ['js', 'coffee'];
 
     /**
      * List of other file suffixes that should trigger a full page reload
      *
      * @var array
      */
-    public static $otherAssetSuffixes = array('php', 'ts', 'html', 'htm');
+    public static $otherAssetSuffixes = ['php', 'ts', 'html', 'htm'];
 }

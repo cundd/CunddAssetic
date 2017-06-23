@@ -67,7 +67,7 @@ abstract class GeneralUtility
     /**
      * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
      *
-     * @param    mixed $var1
+     * @param mixed $var1
      */
     public static function pd($var1 = '__iresults_pd_noValue')
     {
@@ -77,7 +77,7 @@ abstract class GeneralUtility
 
         $arguments = func_get_args();
         if (class_exists('Tx_Iresults')) {
-            call_user_func_array(array('Tx_Iresults', 'pd'), $arguments);
+            call_user_func_array(['Tx_Iresults', 'pd'], $arguments);
         } else {
             if (php_sapi_name() !== 'cli') {
                 echo '<pre>';
@@ -109,7 +109,7 @@ abstract class GeneralUtility
     /**
      * Print a profiling message.
      *
-     * @param    string $msg
+     * @param string $msg
      */
     public static function profile($msg = '')
     {

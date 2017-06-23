@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: daniel
- * Date: 24/02/16
- * Time: 21:46
- */
 
 namespace Cundd\Assetic\FileWatcher;
 
@@ -26,7 +20,7 @@ class FileWatcher implements FileWatcherInterface
      *
      * @var string[]
      */
-    private $watchedFilesCache = array();
+    private $watchedFilesCache = [];
 
     /**
      * Timestamp of the last directory scan
@@ -54,7 +48,7 @@ class FileWatcher implements FileWatcherInterface
      *
      * @var string[]
      */
-    private $watchPaths = array();
+    private $watchPaths = [];
 
     /**
      * Timestamp of the last re-compile
@@ -175,7 +169,7 @@ class FileWatcher implements FileWatcherInterface
     {
         $currentTime = time();
         if (($currentTime - $this->watchedFilesCacheTime) > $this->watchedFilesCacheLifetime) {
-            $foundFiles = array();
+            $foundFiles = [];
 
             foreach ($this->watchPaths as $currentWatchPath) {
                 $foundFilesForCurrentPath = $this->findFilesBySuffix($this->assetSuffixes, $currentWatchPath);

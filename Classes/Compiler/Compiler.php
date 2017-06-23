@@ -174,7 +174,7 @@ class Compiler implements CompilerInterface
     /**
      * Returns the right filter for the given file type
      *
-     * @param  string $type The file type
+     * @param string $type The file type
      * @throws \LogicException if the required filter class does not exist
      * @return Filter\FilterInterface       The filter
      */
@@ -308,9 +308,9 @@ class Compiler implements CompilerInterface
     /**
      * Invokes the functions of the filter
      *
-     * @param  Filter\FilterInterface $filter                  The filter to apply to
-     * @param  array                  $stylesheetConfiguration The stylesheet configuration
-     * @param  string                 $stylesheetType          The stylesheet type
+     * @param Filter\FilterInterface $filter                  The filter to apply to
+     * @param array                  $stylesheetConfiguration The stylesheet configuration
+     * @param string                 $stylesheetType          The stylesheet type
      * @throws \UnexpectedValueException if the given stylesheet type is invalid
      * @return Filter\FilterInterface                            Returns the filter
      */
@@ -423,7 +423,7 @@ class Compiler implements CompilerInterface
      *
      * I.e. expands paths to their absolute path.
      *
-     * @param  array $parameters Reference to the data array
+     * @param array $parameters Reference to the data array
      * @return void
      */
     protected function prepareFunctionParameters(&$parameters)
