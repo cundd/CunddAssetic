@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: daniel
- * Date: 24/02/16
- * Time: 21:55
- */
 
 namespace Cundd\Assetic\FileWatcher;
 

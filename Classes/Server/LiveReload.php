@@ -2,8 +2,8 @@
 
 namespace Cundd\Assetic\Server;
 
-use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
+use Ratchet\MessageComponentInterface;
 use Ratchet\Mock\Connection;
 use Ratchet\Wamp\WampConnection;
 

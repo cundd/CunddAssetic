@@ -1,9 +1,4 @@
 <?php
-/**
- * @author COD
- * Created 13.10.16 10:01
- */
-
 
 namespace Cundd\Assetic\Helper;
 
