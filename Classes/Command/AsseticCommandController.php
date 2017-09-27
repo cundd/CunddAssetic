@@ -21,8 +21,6 @@ Autoloader::register();
 
 /**
  * Command to compile, watch and start LiveReload
- *
- * @package Cundd\Assetic\Command
  */
 class AsseticCommandController extends CommandController implements ColorInterface
 {

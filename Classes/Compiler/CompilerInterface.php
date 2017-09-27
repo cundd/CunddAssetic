@@ -1,12 +1,6 @@
 <?php
 
 
-/**
- * @author COD
- * Created 08.05.15 16:57
- */
-
-
 namespace Cundd\Assetic\Compiler;
 
 use Assetic\Asset\AssetCollection;
@@ -14,8 +8,6 @@ use Assetic\Factory\AssetFactory;
 
 /**
  * Interface for the compiler
- *
- * @package Cundd\Assetic\Compiler
  */
 interface CompilerInterface
 {

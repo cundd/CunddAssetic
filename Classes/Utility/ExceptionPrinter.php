@@ -1,8 +1,5 @@
 <?php
-/**
- * @author COD
- * Created 09.02.16 12:06
- */
+
 
 namespace Cundd\Assetic\Utility;
 
@@ -10,8 +7,6 @@ use Assetic\Exception\FilterException;
 
 /**
  * Class to display exceptions
- *
- * @package Cundd\Assetic\Utility
  */
 class ExceptionPrinter
 {

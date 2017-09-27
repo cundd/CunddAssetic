@@ -10,8 +10,6 @@ use RegexIterator;
 
 /**
  * Class to test files for changes
- *
- * @package Cundd\Assetic\FileWatcher
  */
 class FileWatcher implements FileWatcherInterface
 {

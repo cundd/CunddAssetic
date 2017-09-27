@@ -8,18 +8,18 @@ if (TYPO3_MODE === 'BE') {
      * Registers a Backend Module
      */
     \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
-        'Cundd.'.$_EXTKEY,
+        'Cundd.' . $_EXTKEY,
         'web', // Make module a submodule of 'web'
         'cunddassetic', // Submodule key
         '', // Position
-        array(
+        [
             'Asset' => 'list, compile',
-        ),
-        array(
+        ],
+        [
             'access' => 'user,group',
-            'icon'   => 'EXT:'.$_EXTKEY.'/ext_icon.png',
-            'labels' => 'LLL:EXT:'.$_EXTKEY.'/Resources/Private/Language/locallang_cunddassetic.xlf',
-        )
+            'icon'   => 'EXT:' . $_EXTKEY . '/ext_icon.png',
+            'labels' => 'LLL:EXT:' . $_EXTKEY . '/Resources/Private/Language/locallang_cunddassetic.xlf',
+        ]
     );
 }
 

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: daniel
- * Date: 24/02/16
- * Time: 22:09
- */
 
 namespace Cundd\Assetic\Command;
 

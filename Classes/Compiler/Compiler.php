@@ -1,11 +1,6 @@
 <?php
 
 
-/**
- * @author COD
- * Created 08.05.15 16:21
- */
-
 namespace Cundd\Assetic\Compiler;
 
 use Assetic\Asset\AssetCollection;
@@ -25,8 +20,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * Compiler
  *
  * The class that builds the connection between Assetic and TYPO3
- *
- * @package Cundd\Assetic
  */
 class Compiler implements CompilerInterface
 {

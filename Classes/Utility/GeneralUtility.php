@@ -1,18 +1,10 @@
 <?php
 
 
-/**
- * @author COD
- * Created 08.05.15 16:14
- */
-
-
 namespace Cundd\Assetic\Utility;
 
 /**
  * General utility class for debugging and message printing
- *
- * @package Cundd\Assetic\Utility
  */
 abstract class GeneralUtility
 {

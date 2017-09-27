@@ -24,11 +24,6 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
 
-/**
- * @author COD
- * Created 18.08.14 14:13
- */
-
 
 namespace Cundd\Assetic\Utility;
 
@@ -37,8 +32,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility as TYPO3GeneralUtility;
 
 /**
  * Helper class to read configuration
- *
- * @package Cundd\Assetic\Utility
  */
 class ConfigurationUtility
 {

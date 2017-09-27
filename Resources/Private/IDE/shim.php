@@ -1,10 +1,7 @@
 <?php
 
 
-/**
- * @author COD
- * Created 26.01.15 16:22
- */
+
 class Tx_CunddComposer_Autoloader
 {
     public static function register()
