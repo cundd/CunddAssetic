@@ -103,14 +103,14 @@ class AsseticCommandController extends CommandController implements ColorInterfa
     /**
      * Start the LiveReload server and watch for changes
      *
-     * @param string  $address       IP to listen
-     * @param int     $port          Port to listen
-     * @param integer $interval      Interval between checks
-     * @param string  $path          Directory path(s) that should be watched (Multiple paths separated by comma ",")
-     * @param string  $suffixes      File suffixes to watch for changes (separated by comma ",")
-     * @param string  $domainContext Specify the domain of the current context [Only used in multidomain installations]
-     * @param int     $maxDepth      Maximum directory depth of file to watch
-     * @throws \React\Socket\ConnectionException
+     * @param string  $address           IP to listen
+     * @param int     $port              Port to listen
+     * @param integer $interval          Interval between checks
+     * @param string  $path              Directory path(s) that should be watched (Multiple paths separated by comma ",")
+     * @param string  $suffixes          File suffixes to watch for changes (separated by comma ",")
+     * @param string  $domainContext     Specify the domain of the current context [Only used in multidomain installations]
+     * @param int     $maxDepth          Maximum directory depth of file to watch
+     * @param float   $notificationDelay Number of seconds to wait before sending the reload command to the clients
      */
     public function liveReloadCommand(
         $address = '0.0.0.0',
@@ -119,7 +119,8 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         $path = 'fileadmin',
         $suffixes = '',
         $domainContext = null,
-        $maxDepth = 7
+        $maxDepth = 7,
+        $notificationDelay = 0.0
     ) {
         $interval = $interval < 0 ? 0.5 : $interval;
         $this->fileWatcher->setWatchPaths($this->prepareWatchPaths($path));
@@ -132,7 +133,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         $this->validateMultiDomainInstallation($domainContext);
 
         // Websocket server
-        $this->liveReloadServer = new LiveReload();
+        $this->liveReloadServer = new LiveReload($notificationDelay);
         $server = IoServer::factory(
             new HttpServer(
                 new WsServer(
@@ -144,7 +145,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
         );
 
         $server->loop->addPeriodicTimer($interval, [$this, 'recompileIfNeededAndInformLiveReloadServer']);
-
+        $this->liveReloadServer->setEventLoop($server->loop);
         $this->outputLine(
             ''
             . self::ESCAPE

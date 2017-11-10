@@ -6,6 +6,7 @@ use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use Ratchet\Mock\Connection;
 use Ratchet\Wamp\WampConnection;
+use React\EventLoop\LoopInterface;
 
 /**
  * LiveReload message component
@@ -110,7 +111,7 @@ class LiveReload implements MessageComponentInterface
     /**
      * All connected clients
      *
-     * @var \SplObjectStorage
+     * @var \SplObjectStorage|ConnectionInterface[]
      */
     protected $clients;
 
@@ -152,10 +153,31 @@ class LiveReload implements MessageComponentInterface
         'message' => 'Hy',
     ];
 
+    /**
+     * @var LoopInterface
+     */
+    private $eventLoop;
+    private $notificationDelay;
 
-    public function __construct()
+    /**
+     * LiveReload constructor.
+     *
+     * @param int|float $notificationDelay Number of seconds to wait before sending the reload command to the clients
+     */
+    public function __construct($notificationDelay)
     {
+        $this->notificationDelay = $notificationDelay;
         $this->clients = new \SplObjectStorage;
+    }
+
+    /**
+     * Attach the event loop to the server to allow sending delayed responses
+     *
+     * @param LoopInterface $loop
+     */
+    public function setEventLoop(LoopInterface $loop)
+    {
+        $this->eventLoop = $loop;
     }
 
     /**
@@ -168,9 +190,9 @@ class LiveReload implements MessageComponentInterface
     public function onMessage(ConnectionInterface $from, $msg)
     {
         /** @var WampConnection|Connection $from */
-        $this->debug(
+        $this->debugLine(
             sprintf(
-                'Received message "%s" from connection %d address %s' . PHP_EOL,
+                'Received message "%s" from connection %d address %s',
                 $msg,
                 $from->resourceId,
                 $from->remoteAddress
@@ -203,7 +225,72 @@ class LiveReload implements MessageComponentInterface
         $this->clients->attach($conn);
         $this->send($conn, $this->handshakeMessage);
 
-        $this->debug("New connection ({$conn->resourceId})\n", '+');
+        $this->debugLine("New connection ({$conn->resourceId})", '+');
+    }
+
+    /**
+     * This is called before or after a socket is closed (depends on how it's closed).  SendMessage to $conn will not result in an error if it has already been closed.
+     *
+     * @param ConnectionInterface $conn The socket/connection that is closing/closed
+     * @throws \Exception
+     */
+    public function onClose(ConnectionInterface $conn)
+    {
+        /** @var WampConnection|Connection $conn */
+        // The connection is closed, remove it, as we can no longer send it messages
+        $this->clients->detach($conn);
+        $this->debugLine("Connection {$conn->resourceId} has disconnected", '-');
+    }
+
+    /**
+     * If there is an error with one of the sockets, or somewhere in the application where an Exception is thrown,
+     * the Exception is sent back down the stack, handled by the Server and bubbled back up the application through this method
+     *
+     * @param ConnectionInterface $conn
+     * @param \Exception          $e
+     * @throws \Exception
+     */
+    public function onError(ConnectionInterface $conn, \Exception $e)
+    {
+        $this->debugLine("An error has occurred: {$e->getMessage()}", self::LOG_LEVEL_ERROR);
+        $conn->close();
+    }
+
+    /**
+     * Invoked when a file changed
+     *
+     * @param string $changedFile
+     * @param bool   $liveCss
+     */
+    public function fileDidChange($changedFile, $liveCss = true)
+    {
+        $this->debug("File '$changedFile' did change" . PHP_EOL, self::LOG_LEVEL_INFO);
+
+        $message = $this->reloadMessage;
+        $message['path'] = $changedFile;
+
+        if (!$liveCss) {
+            unset($message['liveCss']);
+        }
+
+        $this->debugLine(
+            sprintf(
+                'Notify %d clients%s',
+                count($this->clients),
+                ($this->notificationDelay > 0 ? " (with {$this->notificationDelay} seconds notification delay)" : '')
+            ),
+            self::LOG_LEVEL_DEBUG
+        );
+        $this->debugLine('Sending ' . (json_encode($message)) . ' ', self::LOG_LEVEL_DEBUG);
+
+        $this->eventLoop->addTimer(
+            $this->notificationDelay,
+            function () use ($message) {
+                foreach ($this->clients as $client) {
+                    $this->send($client, $message);
+                }
+            }
+        );
     }
 
     /**
@@ -229,60 +316,6 @@ class LiveReload implements MessageComponentInterface
     }
 
     /**
-     * This is called before or after a socket is closed (depends on how it's closed).  SendMessage to $conn will not result in an error if it has already been closed.
-     *
-     * @param ConnectionInterface $conn The socket/connection that is closing/closed
-     * @throws \Exception
-     */
-    public function onClose(ConnectionInterface $conn)
-    {
-        /** @var WampConnection|Connection $conn */
-        // The connection is closed, remove it, as we can no longer send it messages
-        $this->clients->detach($conn);
-        $this->debug("Connection {$conn->resourceId} has disconnected\n", '-');
-    }
-
-    /**
-     * If there is an error with one of the sockets, or somewhere in the application where an Exception is thrown,
-     * the Exception is sent back down the stack, handled by the Server and bubbled back up the application through this method
-     *
-     * @param ConnectionInterface $conn
-     * @param \Exception          $e
-     * @throws \Exception
-     */
-    public function onError(ConnectionInterface $conn, \Exception $e)
-    {
-        $this->debug("An error has occurred: {$e->getMessage()}\n", self::LOG_LEVEL_ERROR);
-        $conn->close();
-    }
-
-    /**
-     * Invoked when a file changed
-     *
-     * @param string $changedFile
-     * @param bool   $liveCss
-     */
-    public function fileDidChange($changedFile, $liveCss = true)
-    {
-        $this->debug("File '$changedFile' did change" . PHP_EOL, self::LOG_LEVEL_INFO);
-
-        $message = $this->reloadMessage;
-        $message['path'] = $changedFile;
-
-        if (!$liveCss) {
-            unset($message['liveCss']);
-        }
-
-        $this->debug('Notify ' . count($this->clients) . ' clients' . PHP_EOL, self::LOG_LEVEL_DEBUG);
-        $this->debug('Sending ' . (json_encode($message)) . ' ' . PHP_EOL, self::LOG_LEVEL_DEBUG);
-
-        /** @var \Ratchet\Server\IoConnection $client */
-        foreach ($this->clients as $client) {
-            $this->send($client, $message);
-        }
-    }
-
-    /**
      * Prints the given message to the console
      *
      * @param string $message
@@ -302,5 +335,16 @@ class LiveReload implements MessageComponentInterface
             }
         }
         fwrite(STDOUT, $message);
+    }
+
+    /**
+     * Prints the given message to the console
+     *
+     * @param string $message
+     * @param int    $logLevel
+     */
+    protected function debugLine($message, $logLevel = null)
+    {
+        $this->debug($message . PHP_EOL, $logLevel);
     }
 }
