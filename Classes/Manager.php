@@ -491,8 +491,10 @@ class Manager implements ManagerInterface
      */
     public function getSymlinkUri()
     {
-        return ConfigurationUtility::getOutputFileDir() . '_debug_' . $this->getCurrentOutputFilenameWithoutHash(
-            ) . '.css';
+        return ConfigurationUtility::getOutputFileDir()
+            . '_debug_'
+            . $this->getCurrentOutputFilenameWithoutHash()
+            . '.css';
     }
 
     /**
@@ -723,6 +725,12 @@ class Manager implements ManagerInterface
                 ? $this->getSymlinkUri()
                 : $renderedStylesheet;
         }
+
+        // TODO: Find a way to recover the browser after a compile run failed
+        // $isStrict = isset($this->configuration['strict']) && $this->configuration['strict'];
+        // if ($this->getExperimental() && AsseticGeneralUtility::isBackendUser() && !$isStrict) {
+        //     return $this->getSymlinkUri();
+        // }
 
         throw new OutputFileException('No output file compiled');
     }
