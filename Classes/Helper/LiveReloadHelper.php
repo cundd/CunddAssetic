@@ -58,7 +58,7 @@ JAVASCRIPT_CODE_TEMPLATE;
         }
 
         $port = $this->getPort();
-        if ($this->isServerRunning()) {
+        if ($this->isServerRunning($error)) {
             $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
             $resource = '/' . str_replace(PATH_site, '', GeneralUtility::getFileAbsFileName($resource));
             $code = sprintf(self::JAVASCRIPT_CODE_TEMPLATE, $resource, $port);
@@ -66,7 +66,14 @@ JAVASCRIPT_CODE_TEMPLATE;
             return "<script>$code</script>";
         }
 
-        return sprintf('<!-- Could not connect to LiveReload server at port %d -->', $port);
+        /** @var \Exception $error */
+
+        return sprintf(
+            '<!-- Could not connect to LiveReload server at port %d: Error %d: %s -->',
+            $port,
+            $error->getCode(),
+            $error->getMessage()
+        );
     }
 
     /**
@@ -76,14 +83,11 @@ JAVASCRIPT_CODE_TEMPLATE;
      */
     private function getPort()
     {
-        $port = 35729;
         if (isset($this->configuration['livereload.']) && isset($this->configuration['livereload.']['port'])) {
-            $port = intval($this->configuration['livereload.']['port']);
-
-            return $port;
+            return intval($this->configuration['livereload.']['port']);
         }
 
-        return $port;
+        return 35729;
     }
 
     /**
@@ -99,13 +103,19 @@ JAVASCRIPT_CODE_TEMPLATE;
     /**
      * Returns if the server is running
      *
+     * @param \Exception $error
      * @return bool
      */
-    private function isServerRunning()
+    private function isServerRunning(&$error = null)
     {
-        $connection = @fsockopen('localhost', $this->getPort());
+        $connection = @fsockopen('localhost', $this->getPort(), $errorNumber, $errorString, 1.0);
 
-        return is_resource($connection);
+        if (is_resource($connection)) {
+            return true;
+        }
+
+        $error = new \Exception($errorString, $errorNumber);
+
+        return false;
     }
-
 }
