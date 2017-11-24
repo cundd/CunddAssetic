@@ -47,14 +47,12 @@ abstract class GeneralUtility
         $arguments = func_get_args();
         if (class_exists('Tx_Iresults')) {
             call_user_func_array(['Tx_Iresults', 'pd'], $arguments);
-        } else {
-            if (php_sapi_name() !== 'cli') {
-                echo '<pre>';
-                foreach ($arguments as $argument) {
-                    var_dump($argument);
-                }
-                echo '</pre>';
+        } elseif (php_sapi_name() !== 'cli') {
+            echo '<pre>';
+            foreach ($arguments as $argument) {
+                var_dump($argument);
             }
+            echo '</pre>';
         }
     }
 
@@ -82,9 +80,6 @@ abstract class GeneralUtility
      */
     public static function profile($msg = '')
     {
-        if (class_exists('Tx_Iresults_Profiler')) {
-            \Tx_Iresults_Profiler::profile($msg);
-        }
     }
 
     /**

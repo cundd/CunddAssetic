@@ -81,8 +81,6 @@ class Compiler implements CompilerInterface
 
         // Loop through all configured stylesheets
         $stylesheets = isset($this->configuration['stylesheets.']) ? $this->configuration['stylesheets.'] : [];
-        if (0 === count($stylesheets)) {
-        }
         foreach ($stylesheets as $assetKey => $stylesheet) {
             if (!is_array($stylesheet)) {
                 $this->createAsset($assetKey, $stylesheet, $assetCollection, $factory);
@@ -90,8 +88,6 @@ class Compiler implements CompilerInterface
         }
 
         // Set the output file name
-        //AsseticGeneralUtility::profile('Set output file ' . $this->getCurrentOutputFilenameWithoutHash());
-        //$assetCollection->setTargetPath($this->getCurrentOutputFilenameWithoutHash());
         $assetManager->set('cundd_assetic', $assetCollection);
         AsseticGeneralUtility::profile('Did collect assets');
 

@@ -242,9 +242,8 @@ class Manager implements ManagerInterface
         if ($this->willCompile === -1) {
             // If no backend user is logged in, check if it is allowed
             if (!AsseticGeneralUtility::isBackendUser()) {
-                $this->willCompile = (bool)($this->isDevelopment() * intval(
-                        $this->configuration['allow_compile_without_login']
-                    ));
+                $this->willCompile = (bool)$this->isDevelopment()
+                    || (bool)intval($this->configuration['allow_compile_without_login']);
             } else {
                 $this->willCompile = $this->isDevelopment();
             }
@@ -344,7 +343,6 @@ class Manager implements ManagerInterface
         $this->outputFileName = $outputFileName;
     }
 
-
     /**
      * Returns the hash for the current asset version
      *
@@ -356,7 +354,7 @@ class Manager implements ManagerInterface
 
         // If $entry is null, it hasn't been cached. Calculate the value and store it in the cache:
         if ($this->willCompile() || !$entry) {
-            $entry = '';#time();
+            $entry = '';
 
             // Save value in cache
             $this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), $entry);
@@ -377,9 +375,9 @@ class Manager implements ManagerInterface
             $suffix = '.css';
             $filePath = ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
 
-            $previousHash = '' . $this->getCache(
-                    self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash()
-                );
+            $previousHash = (string)$this->getCache(
+                self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash()
+            );
             $previousHashFilePath = $filePath . '_' . $previousHash . $suffix;
 
             if (!$previousHash || !file_exists($previousHashFilePath)) {
