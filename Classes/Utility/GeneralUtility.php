@@ -8,7 +8,6 @@ namespace Cundd\Assetic\Utility;
  */
 abstract class GeneralUtility
 {
-
     /**
      * Defines if debugging is enabled
      *
@@ -80,6 +79,14 @@ abstract class GeneralUtility
      */
     public static function profile($msg = '')
     {
+        // $microTime = microtime(true);
+        // $requestTime = isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : 0;
+        // printf(
+        //     "[%s] %.4f %s" . PHP_EOL,
+        //     date('Y-m-d H:i:s'),
+        //     $microTime - $requestTime,
+        //     $msg
+        // );
     }
 
     /**
