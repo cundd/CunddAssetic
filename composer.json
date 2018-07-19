@@ -17,21 +17,13 @@
             "homepage": "https://cundd.net/"
         }
     ],
-    "require": {
-        "php": ">=5.6 || ^7.0",
-        "cundd/assetic_additions": "^1.0",
-        "kriswallsmith/assetic": "1.*"
-    },
-    "require-dev": {
-        "cboden/ratchet": "^0.3"
-    },
     "autoload": {
         "psr-4": {
             "Cundd\\Assetic\\": "Classes/"
         }
     },
-    "suggest": {
-        "leafo/lessphp": "Allows to compile LESS with PHP",
-        "leafo/scssphp": "Allows to compile SCSS 3.x with PHP"
+    "replace": {
+        "assetic": "self.version",
+        "typo3-ter/assetic": "self.version"
     }
 }
