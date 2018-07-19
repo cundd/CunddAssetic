@@ -10,32 +10,32 @@
  * writing. "version" and "dependencies" must not be touched!
  ***************************************************************/
 
-$EM_CONF[$_EXTKEY] = array(
-    'title' => 'Cundd Assetic',
-    'description' => 'Assetic for TYPO3 CMS (https://github.com/cundd/CunddAssetic)',
-    'category' => 'services',
-    'author' => 'Daniel Corn',
-    'author_email' => 'info@cundd.net',
-    'author_company' => 'cundd',
-    'shy' => '',
-    'priority' => '',
-    'module' => '',
-    'state' => 'stable',
-    'internal' => '',
-    'uploadfolder' => 0,
-    'createDirs' => '',
-    'modify_tables' => '',
+$EM_CONF[$_EXTKEY] = [
+    'title'            => 'Cundd Assetic',
+    'description'      => 'Assetic for TYPO3 CMS (https://github.com/cundd/CunddAssetic)',
+    'category'         => 'services',
+    'author'           => 'Daniel Corn',
+    'author_email'     => 'info@cundd.net',
+    'author_company'   => 'cundd',
+    'shy'              => '',
+    'priority'         => '',
+    'module'           => '',
+    'state'            => 'stable',
+    'internal'         => '',
+    'uploadfolder'     => 0,
+    'createDirs'       => '',
+    'modify_tables'    => '',
     'clearCacheOnLoad' => 0,
-    'lockType' => '',
-    'version' => '1.5.0',
-    'constraints' => array(
-        'depends' => array(
-            'typo3' => '6.2.0-8.7.99',
+    'lockType'         => '',
+    'version'          => '1.5.1-dev',
+    'constraints'      => [
+        'depends'   => [
+            'typo3'          => '6.2.0-8.7.99',
             'cundd_composer' => '3.0-4.99',
-        ),
-        'conflicts' => array(
-        ),
-        'suggests' => array(
-        ),
-    ),
-);
+        ],
+        'conflicts' => [
+        ],
+        'suggests'  => [
+        ],
+    ],
+];
