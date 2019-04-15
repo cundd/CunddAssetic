@@ -13,6 +13,7 @@ use Cundd\CunddComposer\Autoloader;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\CommandController;
@@ -292,7 +293,7 @@ class AsseticCommandController extends CommandController implements ColorInterfa
             $destination .= basename($source);
         }
 
-        $destination = PATH_site . $destination;
+        $destination = Environment::getPublicPath() . '/' . $destination;
         if (!file_exists(dirname($destination))) {
             mkdir(dirname($destination), 0775, true);
         }

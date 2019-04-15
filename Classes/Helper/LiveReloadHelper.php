@@ -4,6 +4,8 @@ namespace Cundd\Assetic\Helper;
 
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Exception;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -60,13 +62,17 @@ JAVASCRIPT_CODE_TEMPLATE;
         $port = $this->getPort();
         if ($this->isServerRunning($error)) {
             $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
-            $resource = '/' . str_replace(PATH_site, '', GeneralUtility::getFileAbsFileName($resource));
+            $resource = '/' . str_replace(
+                    Environment::getPublicPath() . '/',
+                    '',
+                    GeneralUtility::getFileAbsFileName($resource)
+                );
             $code = sprintf(self::JAVASCRIPT_CODE_TEMPLATE, $resource, $port);
 
             return "<script>$code</script>";
         }
 
-        /** @var \Exception $error */
+        /** @var Exception $error */
 
         return sprintf(
             '<!-- Could not connect to LiveReload server at port %d: Error %d: %s -->',
@@ -103,7 +109,7 @@ JAVASCRIPT_CODE_TEMPLATE;
     /**
      * Returns if the server is running
      *
-     * @param \Exception $error
+     * @param Exception $error
      * @return bool
      */
     private function isServerRunning(&$error = null)
@@ -114,7 +120,7 @@ JAVASCRIPT_CODE_TEMPLATE;
             return true;
         }
 
-        $error = new \Exception($errorString, $errorNumber);
+        $error = new Exception($errorString, $errorNumber);
 
         return false;
     }

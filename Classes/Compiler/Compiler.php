@@ -14,6 +14,12 @@ use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Exception as Exception;
+use LogicException;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
+use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -21,8 +27,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  *
  * The class that builds the connection between Assetic and TYPO3
  */
-class Compiler implements CompilerInterface
+class Compiler implements CompilerInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
 
     /**
      * Assetic asset manager
@@ -50,6 +57,10 @@ class Compiler implements CompilerInterface
      */
     protected $pluginLevelOptions = [];
 
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
     public function __construct($configuration)
     {
@@ -59,17 +70,18 @@ class Compiler implements CompilerInterface
     /**
      * Collects all the assets and adds them to the asset manager
      *
-     * @throws \LogicException if the assetic classes could not be found
-     * @return \Assetic\Asset\AssetCollection
+     * @return AssetCollection
+     * @throws LogicException if the assetic classes could not be found
      */
     public function collectAssets()
     {
+        $this->logException(new Exception('Ff'));
         AsseticGeneralUtility::profile('Will collect assets');
         $pathToWeb = ConfigurationUtility::getPathToWeb();
 
         // Check if the Assetic classes are available
-        if (!class_exists('Assetic\\Asset\\AssetCollection', true)) {
-            throw new \LogicException('The Assetic classes could not be found', 1356543545);
+        if (!class_exists(AssetCollection::class, true)) {
+            throw new LogicException('The Assetic classes could not be found', 1356543545);
         }
         $assetManager = $this->getAssetManager();
         $assetCollection = new AssetCollection();
@@ -97,8 +109,8 @@ class Compiler implements CompilerInterface
     /**
      * Collects the files and tells assetic to compile the files
      *
-     * @throws \Exception if an exception is thrown during rendering
      * @return bool Returns if the files have been compiled successfully
+     * @throws Exception if an exception is thrown during rendering
      */
     public function compile()
     {
@@ -114,7 +126,7 @@ class Compiler implements CompilerInterface
             $this->handleFilterException($exception);
 
             return false;
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             if ($this->isDevelopment()) {
                 if (is_a($exception, 'Exception_ScssException')) {
                     /** @var \Exception_ScssException $exception */
@@ -141,8 +153,8 @@ class Compiler implements CompilerInterface
      * Returns the right filter for the given file type
      *
      * @param string $type The file type
-     * @throws \LogicException if the required filter class does not exist
      * @return Filter\FilterInterface       The filter
+     * @throws LogicException if the required filter class does not exist
      */
     protected function getFilterForType($type)
     {
@@ -187,8 +199,8 @@ class Compiler implements CompilerInterface
      * Handles filter exceptions
      *
      * @param \Assetic\Exception\FilterException $exception
-     * @throws \Assetic\Exception\FilterException if run in CLI mode
      * @return string
+     * @throws \Assetic\Exception\FilterException if run in CLI mode
      */
     protected function handleFilterException(FilterException $exception)
     {
@@ -277,8 +289,8 @@ class Compiler implements CompilerInterface
      * @param Filter\FilterInterface $filter                  The filter to apply to
      * @param array                  $stylesheetConfiguration The stylesheet configuration
      * @param string                 $stylesheetType          The stylesheet type
-     * @throws \UnexpectedValueException if the given stylesheet type is invalid
      * @return Filter\FilterInterface                            Returns the filter
+     * @throws \UnexpectedValueException if the given stylesheet type is invalid
      */
     protected function applyFunctionsToFilterForType($filter, $stylesheetConfiguration, $stylesheetType)
     {
@@ -406,7 +418,7 @@ class Compiler implements CompilerInterface
      * @param string $filterClass
      * @return string
      */
-    private function getFilterBinaryPath($filterClass)
+    private function getFilterBinaryPath(string $filterClass)
     {
         $filterBinaryPath = null;
         $filterBinaries = $this->configuration['filter_binaries.'];
@@ -450,13 +462,13 @@ class Compiler implements CompilerInterface
     }
 
     /**
-     * @param \Exception $exception
+     * @param Exception $exception
      */
-    private function logException(\Exception $exception)
+    private function logException(Exception $exception)
     {
-        if (defined('TYPO3_DLOG') && TYPO3_DLOG) {
-            $output = 'Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage();
-            GeneralUtility::devLog($output, 'assetic');
+        if (!$this->logger) {
+            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
         }
+        $this->logger->error('Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage());
     }
 }

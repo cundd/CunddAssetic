@@ -10,16 +10,11 @@ use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
+use TYPO3\CMS\Extbase\Property\PropertyMapper;
+use TYPO3\CMS\Extbase\Property\PropertyMappingConfigurationBuilder;
 
 Autoloader::register();
 
-/**
- *
- *
- * @package assetic
- * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
- *
- */
 class AssetController extends ActionController
 {
     /**
@@ -32,18 +27,35 @@ class AssetController extends ActionController
     /**
      * The property mapper
      *
-     * @var \TYPO3\CMS\Extbase\Property\PropertyMapper
-     * @inject
+     * @var PropertyMapper
      */
     protected $propertyMapper;
 
     /**
      * The property mapping configuration builder
      *
-     * @var \TYPO3\CMS\Extbase\Property\PropertyMappingConfigurationBuilder
-     * @inject
+     * @var PropertyMappingConfigurationBuilder
      */
     protected $propertyMappingConfigurationBuilder;
+
+    /**
+     * AssetController constructor.
+     *
+     * @param PropertyMapper                      $propertyMapper
+     * @param PropertyMappingConfigurationBuilder $propertyMappingConfigurationBuilder
+     * @param ManagerInterface|null               $manager
+     */
+    public function __construct(
+        PropertyMapper $propertyMapper,
+        PropertyMappingConfigurationBuilder $propertyMappingConfigurationBuilder,
+        ManagerInterface $manager = null
+    ) {
+        parent::__construct();
+        $this->propertyMapper = $propertyMapper;
+        $this->propertyMappingConfigurationBuilder = $propertyMappingConfigurationBuilder;
+        $this->manager = $manager;
+    }
+
 
     /**
      * action list

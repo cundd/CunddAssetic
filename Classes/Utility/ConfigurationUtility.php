@@ -28,7 +28,9 @@
 namespace Cundd\Assetic\Utility;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility as TYPO3GeneralUtility;
+use UnexpectedValueException;
 
 /**
  * Helper class to read configuration
@@ -98,13 +100,13 @@ class ConfigurationUtility
      * Sets the domain for the current context
      *
      * @param string|int $domainContext Domain as string or the page UID to read the domain from
-     * @throws \UnexpectedValueException if the Backend Utility class was not found or can not be used
+     * @throws UnexpectedValueException if the Backend Utility class was not found or can not be used
      */
     public static function setDomainContext($domainContext)
     {
         if (is_numeric($domainContext)) {
-            if (!class_exists('TYPO3\\CMS\\Backend\\Utility\\BackendUtility')) {
-                throw new \UnexpectedValueException('Backend Utility class not found', 1408363869);
+            if (!class_exists(BackendUtility::class)) {
+                throw new UnexpectedValueException('Backend Utility class not found', 1408363869);
             }
             $domainContext = BackendUtility::getViewDomain($domainContext);
         }
@@ -190,7 +192,7 @@ class ConfigurationUtility
      */
     public static function getPathToWeb()
     {
-        return defined('PATH_site') ? PATH_site : '';
+        return Environment::getPublicPath() . '/';
     }
 
     /**

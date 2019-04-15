@@ -17,6 +17,9 @@
             "homepage": "https://cundd.net/"
         }
     ],
+    "require": {
+        "php": "^7.1"
+    },
     "autoload": {
         "psr-4": {
             "Cundd\\Assetic\\": "Classes/"
