@@ -7,8 +7,6 @@ use Cundd\Assetic\Compiler\CompilerInterface;
 
 /**
  * Assetic Manager interface
- *
- * @package Cundd_Assetic
  */
 interface ManagerInterface
 {

@@ -3,6 +3,7 @@
 namespace Cundd\Assetic;
 
 
+use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\Compiler\Compiler;
 use Cundd\Assetic\Compiler\CompilerInterface;
 use Cundd\Assetic\Exception\OutputFileException;
@@ -13,15 +14,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Assetic Manager
- *
- * @package Cundd_Assetic
  */
 class Manager implements ManagerInterface
 {
     /**
      * Cache identifier for the hash
      */
-    const CACHE_IDENTIFIER_HASH = 'cundd_assetic_cache_identifier_hash';
+    private const CACHE_IDENTIFIER_HASH = 'cundd_assetic_cache_identifier_hash';
 
     /**
      * Indicates if the assets will compile
@@ -86,7 +85,7 @@ class Manager implements ManagerInterface
      */
     protected $filesToRemove = [];
 
-    public function __construct($configuration)
+    public function __construct(array $configuration)
     {
         $this->configuration = $configuration;
     }
@@ -144,8 +143,8 @@ class Manager implements ManagerInterface
     /**
      * Collects all the assets and adds them to the asset manager
      *
+     * @return AssetCollection
      * @throws \LogicException if the assetic classes could not be found
-     * @return \Assetic\Asset\AssetCollection
      */
     public function collectAssets()
     {
@@ -155,7 +154,7 @@ class Manager implements ManagerInterface
     /**
      * Collect the assets and set the target path
      *
-     * @return \Assetic\Asset\AssetCollection
+     * @return AssetCollection
      */
     protected function collectAssetsAndSetTarget()
     {

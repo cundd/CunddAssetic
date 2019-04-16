@@ -6,19 +6,21 @@ namespace Cundd\Assetic;
 use Cundd\Assetic\Helper\LiveReloadHelper;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\CunddComposer\Autoloader;
+use LogicException;
+use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 /**
  * Assetic Plugin
- *
- * @package Cundd_Assetic
  */
 class Plugin
 {
     /**
      * Content object
      *
-     * @var AbstractContentObject
+     * @var AbstractContentObject|ContentObjectRenderer
      */
     public $cObj;
 
@@ -42,7 +44,6 @@ class Plugin
      * @param string $content
      * @param array  $conf
      * @return string
-     * @author Daniel Corn <info@cundd.net>
      */
     public function main($content, $conf)
     {
@@ -52,13 +53,20 @@ class Plugin
         $this->configuration = $conf;
         $this->manager = new Manager($conf);
 
+        // `force_on_top` only works if caching is enabled
+        // $forceOnTop = (bool)($conf['force_on_top'] ?? false);
+        $forceOnTop = false;
+
         try {
             $renderedStylesheet = $this->manager->collectAndCompile();
 
-            $content = '';
-            $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
-            $content .= $this->getLiveReloadCode();
-        } catch (\LogicException $exception) {
+            $content = $this->getLiveReloadCode();
+            if (!$forceOnTop) {
+                $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
+            } else {
+                $this->includeCss($renderedStylesheet);
+            }
+        } catch (LogicException $exception) {
             if ($exception->getCode() === 1356543545) {
                 return $exception->getMessage();
             }
@@ -68,12 +76,27 @@ class Plugin
         return $content;
     }
 
+    private function includeCss(string $renderedStylesheet)
+    {
+        $renderer = GeneralUtility::makeInstance(PageRenderer::class);
+        $renderer->addCssFile(
+            $renderedStylesheet,
+            'stylesheet',   // rel
+            'all',          // media
+            '',             // title
+            false,          // compress
+            true,           // forceOnTop
+            '',             // allWrap
+            true            // excludeFromConcatenation
+        );
+    }
+
     /**
      * Returns the code for "live reload"
      *
      * @return string
      */
-    protected function getLiveReloadCode()
+    private function getLiveReloadCode()
     {
         $helper = new LiveReloadHelper($this->manager, $this->configuration);
 
