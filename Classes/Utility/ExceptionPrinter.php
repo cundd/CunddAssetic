@@ -43,7 +43,6 @@ class ExceptionPrinter
             $traceFontStyle,
             $trace
         );
-        //echo '<div style="' . $style . '">' . $heading . PHP_EOL . '<code>' . $code . '</code></div>';
     }
 
     /**
@@ -103,6 +102,8 @@ class ExceptionPrinter
             'padding'    => '5px',
             'box-sizing' => 'border-box',
             'box-shadow' => 'inset 0 0 4px rgba(0, 0, 0, 0.3)',
+            'z-index'    => '1000',
+            'position'   => 'relative',
         ];
         array_walk(
             $boxStyles,
