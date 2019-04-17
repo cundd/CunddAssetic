@@ -10,6 +10,8 @@ use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Exception\SymlinkException;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Exception;
+use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -91,7 +93,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Collects and compiles assets and returns the relative path to the compiled stylesheet
+     * Collect and compile assets and return the relative path to the compiled stylesheet
      *
      * @return string
      */
@@ -126,7 +128,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the Compiler instance
+     * Return the Compiler instance
      *
      * @return CompilerInterface
      */
@@ -141,10 +143,10 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Collects all the assets and adds them to the asset manager
+     * Collect all the assets and add them to the Asset Manager
      *
      * @return AssetCollection
-     * @throws \LogicException if the assetic classes could not be found
+     * @throws \LogicException if the Assetic classes could not be found
      */
     public function collectAssets()
     {
@@ -167,7 +169,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Moves the filtered temporary file to the path with the hash in the name
+     * Move the filtered temporary file to the path with the hash in the name
      *
      * @return string Returns the new file name
      */
@@ -232,7 +234,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns if the files should be compiled
+     * Return if the files should be compiled
      *
      * @return boolean
      */
@@ -258,7 +260,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the configuration
+     * Return the configuration
      *
      * @return array
      */
@@ -268,7 +270,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the current output filename
+     * Return the current output filename
      *
      * @return string
      */
@@ -278,7 +280,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the current output filename without the hash
+     * Return the current output filename without the hash
      *
      * If an output file name is set in the configuration use it, otherwise create it by combining the file names of the
      * assets.
@@ -310,14 +312,14 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the current output filename
+     * Return the current output filename
      *
      * The current output filename may be changed if when the hash of the
      * filtered asset file is generated
      *
      * @return string
      */
-    public function getCurrentOutputFilename()
+    public function getCurrentOutputFilename(): string
     {
         if (!$this->outputFileName) {
             // Add a hash for caching
@@ -333,21 +335,21 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Sets the current output filename
+     * Set the current output filename
      *
      * @param string $outputFileName
      */
-    protected function _setCurrentOutputFilename($outputFileName)
+    protected function _setCurrentOutputFilename(string $outputFileName)
     {
         $this->outputFileName = $outputFileName;
     }
 
     /**
-     * Returns the hash for the current asset version
+     * Return the hash for the current asset version
      *
      * @return string
      */
-    protected function getHash()
+    protected function getHash(): string
     {
         $entry = $this->getPreviousHash();
 
@@ -364,11 +366,11 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the hash from the cache, or an empty string if it is not set
+     * Return the hash from the cache, or an empty string if it is not set
      *
      * @return string
      */
-    protected function getPreviousHash()
+    protected function getPreviousHash(): string
     {
         if (!$this->previousHash) {
             $suffix = '.css';
@@ -482,11 +484,11 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the symlink URI
+     * Return the symlink URI
      *
      * @return string
      */
-    public function getSymlinkUri()
+    public function getSymlinkUri(): string
     {
         return ConfigurationUtility::getOutputFileDir()
             . '_debug_'
@@ -495,11 +497,11 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the symlink path
+     * Return the symlink path
      *
      * @return string
      */
-    public function getSymlinkPath()
+    public function getSymlinkPath(): string
     {
         return ConfigurationUtility::getPathToWeb() . $this->getSymlinkUri();
     }
@@ -509,7 +511,7 @@ class Manager implements ManagerInterface
      *
      * @return boolean    Returns TRUE if the file was removed, otherwise FALSE
      */
-    public function removePreviousFilteredAssetFiles()
+    public function removePreviousFilteredAssetFiles(): bool
     {
         $success = true;
         $matchingFiles = $this->filesToRemove;
@@ -520,17 +522,17 @@ class Manager implements ManagerInterface
             $success *= unlink($oldFilteredAssetFile);
         }
 
-        return $success;
+        return (bool)$success;
     }
 
     /**
-     * Returns an array of previously filtered Asset files
+     * Return an array of previously filtered Asset files
      *
      * @param string $filePath
      * @param string $suffix
      * @return array
      */
-    protected function findPreviousFilteredAssetFiles($filePath, $suffix = '.css')
+    protected function findPreviousFilteredAssetFiles(string $filePath, string $suffix = '.css')
     {
         AsseticGeneralUtility::profile('Will call glob');
         $matchingFiles = glob($filePath . '_' . '*' . $suffix);
@@ -557,7 +559,7 @@ class Manager implements ManagerInterface
     // HELPERS
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
     /**
-     * Returns the "options" configuration from the TypoScript of the current page
+     * Return the "options" configuration from the TypoScript of the current page
      *
      * @return array
      */
@@ -578,7 +580,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns if development mode is on
+     * Return if development mode is on
      *
      * @return boolean
      */
@@ -588,7 +590,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns if experimental features are enabled
+     * Return if experimental features are enabled
      *
      * @return boolean
      */
@@ -607,7 +609,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Tries to detect the reason for the write failure
+     * Try to detect the reason for the write failure
      *
      * @param string $path
      * @return string
@@ -635,21 +637,26 @@ class Manager implements ManagerInterface
     // READING AND WRITING THE CACHE
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
     /**
-     * Returns the value for the given identifier in the cache
+     * Return the value for the given identifier in the cache
      *
      * @param string $identifier Identifier key
      * @return mixed
      */
-    protected function getCache($identifier)
+    protected function getCache(string $identifier)
     {
         $identifier = sha1(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
         AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
 
         if (is_callable('apc_fetch')) {
+            /** @noinspection PhpComposerExtensionStubsInspection */
             return apc_fetch($identifier);
         }
 
-        $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
+        try {
+            $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
+        } catch (NoSuchCacheException $e) {
+            return null;
+        }
         if (!$cacheInstance) {
             return null;
         }
@@ -663,19 +670,23 @@ class Manager implements ManagerInterface
      * @param string $identifier Identifier key
      * @param mixed  $value      Value to store
      */
-    protected function setCache($identifier, $value)
+    protected function setCache(string $identifier, $value)
     {
         $identifier = sha1(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
         AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
 
-        // AsseticGeneralUtility::pd('setCache', $identifier, $value);
         if (is_callable('apc_store')) {
+            /** @noinspection PhpComposerExtensionStubsInspection */
             apc_store($identifier, $value);
         } else {
             $tags = [];
             $lifetime = 60 * 60 * 24; // * 365 * 10;
 
-            $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
+            try {
+                $cacheInstance = $this->getCacheManager()->getCache('assetic_cache');
+            } catch (NoSuchCacheException $e) {
+                return;
+            }
             if (!$cacheInstance) {
                 return;
             }
@@ -684,7 +695,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Returns the Cache Manager
+     * Return the Cache Manager
      *
      * @return \TYPO3\CMS\Core\Cache\CacheManager
      */
@@ -709,18 +720,23 @@ class Manager implements ManagerInterface
 
     /**
      * @return string
+     * @throws OutputFileException
      */
     private function collectAssetsAndCompile()
     {
         $this->collectAssetsAndSetTarget();
         $this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
-        if ($this->compiler->compile()) {
-            $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->moveTempFileToFileWithHash();
-            AsseticGeneralUtility::pd('$renderedStylesheet', $renderedStylesheet);
+        try {
+            if ($this->compiler->compile()) {
+                $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->moveTempFileToFileWithHash();
+                AsseticGeneralUtility::pd('$renderedStylesheet', $renderedStylesheet);
 
-            return $this->getExperimental() && AsseticGeneralUtility::isBackendUser()
-                ? $this->getSymlinkUri()
-                : $renderedStylesheet;
+                return $this->getExperimental() && AsseticGeneralUtility::isBackendUser()
+                    ? $this->getSymlinkUri()
+                    : $renderedStylesheet;
+            }
+        } catch (Exception $exception) {
+            throw new OutputFileException('No output file compiled', 1555431572, $exception);
         }
 
         // TODO: Find a way to recover the browser after a compile run failed

@@ -21,6 +21,7 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use UnexpectedValueException;
 
 /**
  * Compiler
@@ -62,20 +63,19 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      */
     protected $logger;
 
-    public function __construct($configuration)
+    public function __construct(array $configuration)
     {
         $this->configuration = $configuration;
     }
 
     /**
-     * Collects all the assets and adds them to the asset manager
+     * Collect all the assets and add them to the Asset Manager
      *
      * @return AssetCollection
-     * @throws LogicException if the assetic classes could not be found
+     * @throws LogicException if the Assetic classes could not be found
      */
     public function collectAssets()
     {
-        $this->logException(new Exception('Ff'));
         AsseticGeneralUtility::profile('Will collect assets');
         $pathToWeb = ConfigurationUtility::getPathToWeb();
 
@@ -107,7 +107,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     }
 
     /**
-     * Collects the files and tells assetic to compile the files
+     * Collect the files and tell Assetic to compile the files
      *
      * @return bool Returns if the files have been compiled successfully
      * @throws Exception if an exception is thrown during rendering
@@ -156,7 +156,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * @return Filter\FilterInterface       The filter
      * @throws LogicException if the required filter class does not exist
      */
-    protected function getFilterForType($type)
+    protected function getFilterForType(string $type)
     {
         // If the filter manager has an according filter return it
         if ($this->filterManager->has($type)) {
@@ -199,7 +199,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * Handles filter exceptions
      *
      * @param \Assetic\Exception\FilterException $exception
-     * @return string
+     * @return void
      * @throws \Assetic\Exception\FilterException if run in CLI mode
      */
     protected function handleFilterException(FilterException $exception)
@@ -213,8 +213,6 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         } else {
             $this->logException($exception);
         }
-
-        return '';
     }
 
 
@@ -226,7 +224,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      *
      * @return array
      */
-    public function getConfiguration()
+    public function getConfiguration(): array
     {
         return $this->configuration;
     }
@@ -264,7 +262,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Returns the shared asset manager
      *
-     * @return \Assetic\AssetManager
+     * @return AssetManager
      */
     public function getAssetManager()
     {
@@ -284,18 +282,18 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     }
 
     /**
-     * Invokes the functions of the filter
+     * Invoke the functions of the filter
      *
      * @param Filter\FilterInterface $filter                  The filter to apply to
      * @param array                  $stylesheetConfiguration The stylesheet configuration
      * @param string                 $stylesheetType          The stylesheet type
      * @return Filter\FilterInterface                            Returns the filter
-     * @throws \UnexpectedValueException if the given stylesheet type is invalid
+     * @throws UnexpectedValueException if the given stylesheet type is invalid
      */
     protected function applyFunctionsToFilterForType($filter, $stylesheetConfiguration, $stylesheetType)
     {
         if (!$stylesheetType) {
-            throw new \UnexpectedValueException(
+            throw new UnexpectedValueException(
                 'The given stylesheet type is invalid "' . $stylesheetType . '"',
                 1355910725
             );
@@ -352,7 +350,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
         // Get the type to find the according filter
         if (isset($stylesheetConf['type'])) {
-            $stylesheetType = $stylesheetConf['type'] . '';
+            $stylesheetType = (string)$stylesheetConf['type'];
         } else {
             $stylesheetType = substr(strrchr($stylesheet, '.'), 1);
         }
@@ -397,9 +395,9 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     }
 
     /**
-     * Prepares the data to be passed to a filter function.
+     * Prepare the data to be passed to a filter function
      *
-     * I.e. expands paths to their absolute path.
+     * I.e. expands paths to their absolute path
      *
      * @param array $parameters Reference to the data array
      * @return void
@@ -448,14 +446,14 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * @return string
      */
-    private function getHomeDirectory()
+    private function getHomeDirectory(): string
     {
         $homeDirectory = getenv('HOME');
         if ($homeDirectory) {
-            return $homeDirectory;
+            return (string)$homeDirectory;
         }
         if (isset($_SERVER['HOME'])) {
-            return $_SERVER['HOME'];
+            return (string)$_SERVER['HOME'];
         }
 
         return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/..' : '';
