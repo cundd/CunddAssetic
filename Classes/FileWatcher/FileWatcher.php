@@ -130,7 +130,10 @@ class FileWatcher implements FileWatcherInterface
     public function setWatchPaths(array $watchPaths)
     {
         if ($watchPaths && 0 === count(array_filter($watchPaths, 'file_exists'))) {
-            throw new FilePathException(sprintf('None of the watch paths %s exist', implode(',', $watchPaths)));
+            $errorMessage = count($watchPaths) > 1
+                ? sprintf('None of the watch paths "%s" exist', implode('", "', $watchPaths))
+                : sprintf('Watch path "%s" does not exist', end($watchPaths));
+            throw new FilePathException($errorMessage, 1555493966);
         }
         $this->watchPaths = $watchPaths;
 
