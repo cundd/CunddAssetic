@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
@@ -516,7 +517,7 @@ class Manager implements ManagerInterface
         $success = true;
         $matchingFiles = $this->filesToRemove;
         if (!$matchingFiles) {
-            return '';
+            return false;
         }
         foreach ($matchingFiles as $oldFilteredAssetFile) {
             $success *= unlink($oldFilteredAssetFile);

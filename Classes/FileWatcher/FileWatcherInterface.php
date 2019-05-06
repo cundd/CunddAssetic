@@ -48,8 +48,8 @@ interface FileWatcherInterface
     public function collectFilesToWatch();
 
     /**
-     * @param int $interval
+     * @param float $interval
      * @return $this
      */
-    public function setInterval($interval);
+    public function setInterval(float $interval);
 }

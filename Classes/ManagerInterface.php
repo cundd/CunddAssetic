@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
@@ -13,8 +14,8 @@ interface ManagerInterface
     /**
      * Collects all the assets and adds them to the asset manager
      *
-     * @throws \LogicException if the assetic classes could not be found
      * @return \Assetic\Asset\AssetCollection
+     * @throws \LogicException if the assetic classes could not be found
      */
     public function collectAssets();
 

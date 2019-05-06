@@ -87,7 +87,7 @@ class FileWatcher implements FileWatcherInterface
      *
      * @param int $findFilesMaxDepth
      */
-    public function setFindFilesMaxDepth($findFilesMaxDepth)
+    public function setFindFilesMaxDepth(int $findFilesMaxDepth)
     {
         $this->findFilesMaxDepth = $findFilesMaxDepth;
     }
@@ -187,10 +187,10 @@ class FileWatcher implements FileWatcherInterface
     }
 
     /**
-     * @param int $interval
+     * @param float $interval
      * @return $this
      */
-    public function setInterval($interval)
+    public function setInterval(float $interval)
     {
         return $this;
     }
