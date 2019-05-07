@@ -520,7 +520,7 @@ class Manager implements ManagerInterface
             return false;
         }
         foreach ($matchingFiles as $oldFilteredAssetFile) {
-            $success *= unlink($oldFilteredAssetFile);
+            $success *= @unlink($oldFilteredAssetFile);
         }
 
         return (bool)$success;
