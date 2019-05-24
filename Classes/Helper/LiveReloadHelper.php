@@ -60,7 +60,7 @@ JAVASCRIPT_CODE_TEMPLATE;
         }
 
         $port = $this->getPort();
-        if ($this->isServerRunning($error)) {
+        if ($this->skipServerTest() || $this->isServerRunning($error)) {
             $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
             $resource = '/' . str_replace(
                     Environment::getPublicPath() . '/',
@@ -94,6 +94,24 @@ JAVASCRIPT_CODE_TEMPLATE;
         }
 
         return 35729;
+    }
+
+    /**
+     * Return if the livereload code should be inserted even if the server connection is not available
+     *
+     * @return int
+     */
+    private function skipServerTest()
+    {
+        if (!isset($this->configuration['livereload.'])) {
+            return false;
+        }
+        $livereloadConfiguration = $this->configuration['livereload.'];
+        if (isset($livereloadConfiguration['skip_server_test'])) {
+            return (bool)$livereloadConfiguration['skip_server_test'];
+        } else {
+            return false;
+        }
     }
 
     /**

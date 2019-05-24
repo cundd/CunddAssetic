@@ -26,6 +26,9 @@ module.tx_assetic {
 
             # cat=module.tx_assetic/livereload/b; type=int+; label=LiveReload port
             port = 35729
+
+            # cat=module.tx_assetic/livereload/c; type=boolean; label=Skip LiveReload test connection
+            skip_server_test = 0
         }
     }
 }

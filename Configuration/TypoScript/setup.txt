@@ -51,6 +51,7 @@ plugin.CunddAssetic {
     livereload {
         port = {$module.tx_assetic.settings.livereload.port}
         add_javascript = {$module.tx_assetic.settings.livereload.add_javascript}
+        skip_server_test = {$module.tx_assetic.settings.livereload.skip_server_test}
     }
 }
 
