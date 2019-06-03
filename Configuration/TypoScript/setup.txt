@@ -58,9 +58,10 @@ plugin.CunddAssetic {
 # If the TypoScript constant developmentMode is set, use CunddAssetic in
 # development mode too
 [globalVar = LIT:1 = {$developmentMode}]
+    # TODO: once TYPO3 8 support is dropped: [0 < {$developmentMode}]
     plugin.CunddAssetic = USER_INT
     plugin.CunddAssetic.development = {$developmentMode}
-[global]
+[end]
 
 # Mirror plugin configuration to the module configuration
 #module.CunddAssetic =< plugin.CunddAssetic
