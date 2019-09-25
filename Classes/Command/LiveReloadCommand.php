@@ -82,7 +82,6 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
                 'Number of seconds to wait before sending the reload command to the clients',
                 0.0
             );
-
     }
 
     public function execute(InputInterface $input, OutputInterface $output)

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Cundd\Assetic\Helper;
 
@@ -24,7 +25,6 @@ class LiveReloadHelper
     });
 })();
 JAVASCRIPT_CODE_TEMPLATE;
-
 
     /**
      * Asset manager

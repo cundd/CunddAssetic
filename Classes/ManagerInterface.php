@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
-
 use Cundd\Assetic\Compiler\CompilerInterface;
 
 /**

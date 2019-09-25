@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
-
 use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\Compiler\Compiler;
 use Cundd\Assetic\Compiler\CompilerInterface;

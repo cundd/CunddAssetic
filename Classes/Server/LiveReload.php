@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Cundd\Assetic\Server;
 
@@ -157,6 +158,7 @@ class LiveReload implements MessageComponentInterface
      * @var LoopInterface
      */
     private $eventLoop;
+
     private $notificationDelay;
 
     /**

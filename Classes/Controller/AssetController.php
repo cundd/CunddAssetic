@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Cundd\Assetic\Controller;
 
@@ -55,7 +56,6 @@ class AssetController extends ActionController
         $this->propertyMappingConfigurationBuilder = $propertyMappingConfigurationBuilder;
         $this->manager = $manager;
     }
-
 
     /**
      * action list

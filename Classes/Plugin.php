@@ -1,7 +1,7 @@
 <?php
+declare(strict_types=1);
 
 namespace Cundd\Assetic;
-
 
 use Cundd\Assetic\Helper\LiveReloadHelper;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;

@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 namespace Cundd\Assetic\Compiler;
 
@@ -310,7 +310,6 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
             if ($function[1] === '-' && is_numeric($function[0])) {
                 $function = substr($function, 2);
             }
-
 
             AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
             if (is_callable([$filter, $function])) {

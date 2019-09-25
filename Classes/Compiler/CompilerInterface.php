@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 namespace Cundd\Assetic\Compiler;
 
@@ -14,16 +14,16 @@ interface CompilerInterface
     /**
      * Collects all the assets and adds them to the asset manager
      *
-     * @throws \LogicException if the assetic classes could not be found
      * @return \Assetic\Asset\AssetCollection
+     * @throws \LogicException if the assetic classes could not be found
      */
     public function collectAssets();
 
     /**
      * Collects the files and tells assetic to compile the files
      *
-     * @throws \Exception if an exception is thrown during rendering
      * @return bool Returns if the files have been compiled successfully
+     * @throws \Exception if an exception is thrown during rendering
      */
     public function compile();
 
