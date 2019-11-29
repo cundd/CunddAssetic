@@ -6,6 +6,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility as TYPO3GeneralUtility;
 use UnexpectedValueException;
+use function class_exists;
 
 /**
  * Helper class to read configuration
@@ -167,7 +168,11 @@ class ConfigurationUtility
      */
     public static function getPathToWeb()
     {
-        return Environment::getPublicPath() . '/';
+        if (class_exists(Environment::class, false)) {
+            return Environment::getPublicPath() . '/';
+        } else {
+            return PATH_site;
+        }
     }
 
     /**

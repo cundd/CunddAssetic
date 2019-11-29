@@ -17,6 +17,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use UnexpectedValueException;
+use function class_exists;
 use function implode;
 
 /**
@@ -113,7 +114,7 @@ abstract class AbstractCommand extends Command implements ColorInterface
             $destination .= basename($source);
         }
 
-        $destination = Environment::getPublicPath() . '/' . $destination;
+        $destination = $this->getPublicPath() . '/' . $destination;
         if (!file_exists(dirname($destination))) {
             mkdir(dirname($destination), 0775, true);
         }
@@ -232,5 +233,17 @@ abstract class AbstractCommand extends Command implements ColorInterface
             },
             $watchPaths
         );
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getPublicPath()
+    {
+        if (class_exists(Environment::class, false)) {
+            return Environment::getPublicPath();
+        } else {
+            return PATH_site;
+        }
     }
 }
