@@ -7,6 +7,8 @@ use Cundd\CunddComposer\Autoloader;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function microtime;
+use function sprintf;
 
 /**
  * Command to compile assets
@@ -29,11 +31,14 @@ class CompileCommand extends AbstractCommand implements ColorInterface
         Autoloader::register();
         $destination = $input->getArgument('destination');
 
+        $compileStart = microtime(true);
         $usedPath = $sourcePath = $this->compile(false);
+        $compileEnd = microtime(true);
         if ($destination) {
             $usedPath = $this->copyToDestination($sourcePath, $destination);
         }
+        $compileTime = $compileEnd - $compileStart;
 
-        $output->writeln("Compiled assets and saved file to '$usedPath'");
+        $output->writeln(sprintf("Compiled assets and saved file to '%s' in %0.4fs", $usedPath, $compileTime));
     }
 }
