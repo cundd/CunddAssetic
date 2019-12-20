@@ -160,6 +160,10 @@ abstract class AbstractCommand extends Command implements ColorInterface
             . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
 
         fwrite(STDOUT, $coloredText);
+
+        if ($exception->getPrevious()) {
+            $this->handleException($exception->getPrevious());
+        }
     }
 
     /**
