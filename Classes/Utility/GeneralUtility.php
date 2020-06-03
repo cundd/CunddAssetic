@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Utility;
 
+use function fwrite;
+use function getenv;
+use function microtime;
+
 /**
  * General utility class for debugging and message printing
  */
@@ -79,14 +83,24 @@ abstract class GeneralUtility
      */
     public static function profile($msg = '')
     {
-        // $microTime = microtime(true);
-        // $requestTime = isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : 0;
-        // printf(
-        //     "[%s] %.4f %s" . PHP_EOL,
-        //     date('Y-m-d H:i:s'),
-        //     $microTime - $requestTime,
-        //     $msg
-        // );
+        if (getenv('CUNDD_ASSETIC_DEBUG')) {
+            static $lastCall = -1;
+            if ($lastCall === -1) {
+                $lastCall = microtime(true);
+            }
+            $currentTime = microtime(true);
+            $requestTime = isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : 0;
+            fwrite(
+                STDOUT,
+                sprintf(
+                    "[%s] %.4f %.4f %s" . PHP_EOL,
+                    date('Y-m-d H:i:s'),
+                    $currentTime - $requestTime,
+                    $currentTime - $lastCall,
+                    $msg
+                )
+            );
+        }
     }
 
     /**

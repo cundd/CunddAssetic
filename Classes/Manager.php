@@ -534,15 +534,16 @@ class Manager implements ManagerInterface
      */
     protected function findPreviousFilteredAssetFiles(string $filePath, string $suffix = '.css')
     {
-        AsseticGeneralUtility::profile('Will call glob');
+        AsseticGeneralUtility::profile('Will call glob for previous filtered Asset files');
         $matchingFiles = glob($filePath . '_' . '*' . $suffix);
-        AsseticGeneralUtility::profile('Did call glob');
+        AsseticGeneralUtility::profile('Did call glob for previous filtered Asset files');
 
         // Glob will not return invalid symlinks
         if (!$matchingFiles) {
             return [];
         }
 
+        AsseticGeneralUtility::profile('Will sort previous filtered Asset files by modification time');
         // Sort by mtime
         usort(
             $matchingFiles,
@@ -550,6 +551,7 @@ class Manager implements ManagerInterface
                 return filemtime($a) - filemtime($b);
             }
         );
+        AsseticGeneralUtility::profile('Did sort previous filtered Asset files by modification time');
 
         return $matchingFiles;
     }
