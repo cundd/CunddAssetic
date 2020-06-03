@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic;
 
 use Cundd\Assetic\Helper\LiveReloadHelper;
+use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\CunddComposer\Autoloader;
 use LogicException;
@@ -11,6 +12,8 @@ use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+use function microtime;
+use function sprintf;
 
 /**
  * Assetic Plugin
@@ -58,13 +61,16 @@ class Plugin
         $forceOnTop = false;
 
         try {
+            $collectAndCompileStart = microtime(true);
             $renderedStylesheet = $this->manager->collectAndCompile();
+            $collectAndCompileEnd = microtime(true);
 
             $content = $this->getLiveReloadCode();
-            if (!$forceOnTop) {
-                $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
-            } else {
+            $content .= $this->addDebugInformation($collectAndCompileEnd, $collectAndCompileStart);
+            if ($forceOnTop) {
                 $this->includeCss($renderedStylesheet);
+            } else {
+                $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
             }
         } catch (LogicException $exception) {
             if ($exception->getCode() === 1356543545) {
@@ -101,5 +107,25 @@ class Plugin
         $helper = new LiveReloadHelper($this->manager, $this->configuration);
 
         return $helper->getLiveReloadCodeIfEnabled();
+    }
+
+    /**
+     * @param        $collectAndCompileEnd
+     * @param        $collectAndCompileStart
+     * @return string
+     */
+    private function addDebugInformation(float $collectAndCompileEnd, float $collectAndCompileStart): string
+    {
+        $isDevelopmentEnabled = ConfigurationUtility::isDevelopment($this->configuration);
+        if (false === $isDevelopmentEnabled || false === AsseticGeneralUtility::isBackendUser()) {
+            return '';
+        }
+
+        $collectAndCompileTime = $collectAndCompileEnd - $collectAndCompileStart;
+        if ($this->manager->willCompile()) {
+            return sprintf("<!-- Compiled assets in %0.4fs -->", $collectAndCompileTime);
+        } else {
+            return sprintf("<!-- Use pre-compiled assets in %0.4fs -->", $collectAndCompileTime);
+        }
     }
 }
