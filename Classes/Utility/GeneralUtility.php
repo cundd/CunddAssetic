@@ -64,7 +64,7 @@ abstract class GeneralUtility
      *
      * @param string $message
      */
-    public static function say($message)
+    public static function say(string $message)
     {
         if (!self::willDebug()) {
             return;
@@ -81,7 +81,7 @@ abstract class GeneralUtility
      *
      * @param string $msg
      */
-    public static function profile($msg = '')
+    public static function profile(string $msg = '')
     {
         if (getenv('CUNDD_ASSETIC_DEBUG')) {
             static $lastCall = -1;
@@ -100,6 +100,7 @@ abstract class GeneralUtility
                     $msg
                 )
             );
+            $lastCall = microtime(true);
         }
     }
 
@@ -112,10 +113,8 @@ abstract class GeneralUtility
     {
         if (self::$willDebug === -1) {
             self::$willDebug = false;
-            if (
-                (isset($_GET['cundd_assetic_debug']) && $_GET['cundd_assetic_debug'])
-                || (isset($_POST['cundd_assetic_debug']) && $_POST['cundd_assetic_debug'])
-            ) {
+            $key = 'cundd_assetic_debug';
+            if ((bool)self::getRequestParameter($key)) {
                 self::$willDebug = true;
             }
 
@@ -125,5 +124,14 @@ abstract class GeneralUtility
         }
 
         return self::$willDebug;
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    protected static function getRequestParameter(string $key)
+    {
+        return $_GET[$key] ?? $_POST[$key] ?? null;
     }
 }
