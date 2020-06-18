@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Helper;
 
 use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Exception;
 use TYPO3\CMS\Core\Core\Environment;
@@ -63,7 +64,7 @@ JAVASCRIPT_CODE_TEMPLATE;
         if ($this->skipServerTest() || $this->isServerRunning($error)) {
             $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
             $resource = '/' . str_replace(
-                    Environment::getPublicPath() . '/',
+                    ConfigurationUtility::getPathToWeb(),
                     '',
                     GeneralUtility::getFileAbsFileName($resource)
                 );
