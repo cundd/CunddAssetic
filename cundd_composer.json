@@ -19,6 +19,7 @@
     ],
     "require": {
         "php": "^7.1",
+        "ext-ctype": "*",
         "cundd/assetic_additions": "^1.2.0",
         "kriswallsmith/assetic": "^1.4"
     },
