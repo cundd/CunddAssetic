@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
+use Cundd\Assetic\Configuration\ConfigurationProvider;
 use Cundd\Assetic\Helper\LiveReloadHelper;
-use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\CunddComposer\Autoloader;
 use LogicException;
@@ -36,8 +36,14 @@ class Plugin
 
     /**
      * @var array
+     * @deprecated
      */
     protected $configuration;
+
+    /**
+     * @var ConfigurationProvider
+     */
+    private $configurationProvider;
 
     /**
      * Output configured stylesheets as link tags
@@ -54,7 +60,8 @@ class Plugin
         Autoloader::register();
 
         $this->configuration = $conf;
-        $this->manager = new Manager($conf);
+        $this->configurationProvider = new ConfigurationProvider($conf);
+        $this->manager = new Manager($this->configurationProvider);
 
         // `force_on_top` only works if caching is enabled
         // $forceOnTop = (bool)($conf['force_on_top'] ?? false);
@@ -104,7 +111,7 @@ class Plugin
      */
     private function getLiveReloadCode()
     {
-        $helper = new LiveReloadHelper($this->manager, $this->configuration);
+        $helper = new LiveReloadHelper($this->configurationProvider);
 
         return $helper->getLiveReloadCodeIfEnabled();
     }
@@ -116,7 +123,7 @@ class Plugin
      */
     private function addDebugInformation(float $collectAndCompileEnd, float $collectAndCompileStart): string
     {
-        $isDevelopmentEnabled = ConfigurationUtility::isDevelopment($this->configuration);
+        $isDevelopmentEnabled = $this->configurationProvider->isDevelopment();
         if (false === $isDevelopmentEnabled || false === AsseticGeneralUtility::isBackendUser()) {
             return '';
         }

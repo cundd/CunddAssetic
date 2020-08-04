@@ -10,8 +10,8 @@ use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
 use Assetic\Filter;
 use Assetic\FilterManager;
+use Cundd\Assetic\Configuration\ConfigurationProvider;
 use Cundd\Assetic\Exception\FilePathException;
-use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Exception as Exception;
@@ -51,7 +51,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      *
      * @var array
      */
-    protected $configuration = [];
+    private $configuration = [];
 
     /**
      * @var array
@@ -63,9 +63,15 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      */
     protected $logger;
 
-    public function __construct(array $configuration)
+    /**
+     * @var ConfigurationProvider
+     */
+    private $configurationProvider;
+
+    public function __construct(ConfigurationProvider $configurationProvider, array $pluginLevelOptions)
     {
-        $this->configuration = $configuration;
+        $this->configurationProvider = $configurationProvider;
+        $this->pluginLevelOptions = $pluginLevelOptions;
     }
 
     /**
@@ -74,10 +80,10 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * @return AssetCollection
      * @throws LogicException if the Assetic classes could not be found
      */
-    public function collectAssets()
+    public function collectAssets(): AssetCollection
     {
         AsseticGeneralUtility::profile('Will collect assets');
-        $pathToWeb = ConfigurationUtility::getPathToWeb();
+        $pathToWeb = $this->configurationProvider->getPublicPath();
 
         // Check if the Assetic classes are available
         if (!class_exists(AssetCollection::class, true)) {
@@ -92,7 +98,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         $factory->setFilterManager($this->filterManager);
 
         // Loop through all configured stylesheets
-        $stylesheets = isset($this->configuration['stylesheets.']) ? $this->configuration['stylesheets.'] : [];
+        $stylesheets = $this->configurationProvider->getStylesheetConfigurations();
         foreach ($stylesheets as $assetKey => $stylesheet) {
             if (!is_array($stylesheet)) {
                 $this->createAsset($assetKey, $stylesheet, $assetCollection, $factory);
@@ -109,12 +115,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Collect the files and tell Assetic to compile the files
      *
-     * @return bool Returns if the files have been compiled successfully
+     * @return bool Return if the files have been compiled successfully
      * @throws Exception if an exception is thrown during rendering
      */
-    public function compile()
+    public function compile(): bool
     {
-        $outputDirectory = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
+        $outputDirectory = $this->configurationProvider->getPublicPath()
+            . $this->configurationProvider->getOutputFileDir();
         GeneralUtility::mkdir($outputDirectory);
 
         $writer = new AssetWriter($outputDirectory);
@@ -127,9 +134,12 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
             return false;
         } catch (Exception $exception) {
-            if ($this->isDevelopment()) {
+            if ($this->configurationProvider->isDevelopment()) {
                 if (is_a($exception, 'Exception_ScssException')) {
-                    /** @var \Exception_ScssException $exception */
+                    /**
+                     * @noinspection PhpFullyQualifiedNameUsageInspection
+                     * @var \Exception_ScssException $exception
+                     */
                     AsseticGeneralUtility::pd($exception->getUserInfo());
                 }
 
@@ -150,7 +160,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     // FILTERS
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
     /**
-     * Returns the right filter for the given file type
+     * Return the right filter for the given file type
      *
      * @param string $type The file type
      * @return Filter\FilterInterface       The filter
@@ -165,7 +175,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
         $filter = null;
         $filterClass = ucfirst($type) . 'Filter';
-        $filterForTypeDefinitions = $this->configuration['filter_for_type.'];
+        $filterForTypeDefinitions = $this->configurationProvider->getFilterForType();
 
         // Check which filter should be used for the given type. This allows the
         // user i.e. to use lessphp for LESS files.
@@ -198,13 +208,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Handles filter exceptions
      *
-     * @param \Assetic\Exception\FilterException $exception
+     * @param FilterException $exception
      * @return void
-     * @throws \Assetic\Exception\FilterException if run in CLI mode
+     * @throws FilterException if run in CLI mode
      */
     protected function handleFilterException(FilterException $exception)
     {
-        if ($this->isDevelopment()) {
+        if ($this->configurationProvider->isDevelopment()) {
             if (php_sapi_name() == 'cli') {
                 throw $exception;
             }
@@ -220,51 +230,11 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     // HELPERS
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
     /**
-     * Returns the configuration
-     *
-     * @return array
-     */
-    public function getConfiguration(): array
-    {
-        return $this->configuration;
-    }
-
-    /**
-     * Returns the "options" configuration from the TypoScript of the current page
-     *
-     * @return array
-     */
-    public function getPluginLevelOptions()
-    {
-        return $this->pluginLevelOptions;
-    }
-
-    /**
-     * Injects the "options" configuration from the TypoScript of the current page
-     *
-     * @param array $pluginLevelOptions
-     */
-    public function setPluginLevelOptions($pluginLevelOptions)
-    {
-        $this->pluginLevelOptions = $pluginLevelOptions;
-    }
-
-    /**
-     * Returns if development mode is on
-     *
-     * @return boolean
-     */
-    public function isDevelopment()
-    {
-        return ConfigurationUtility::isDevelopment($this->configuration);
-    }
-
-    /**
-     * Returns the shared asset manager
+     * Return the shared asset manager
      *
      * @return AssetManager
      */
-    public function getAssetManager()
+    public function getAssetManager(): AssetManager
     {
         if (!$this->assetManager) {
             $this->assetManager = new AssetManager();
@@ -274,24 +244,19 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     }
 
     /**
-     * @return bool
-     */
-    private function isStrict()
-    {
-        return isset($this->configuration['strict']) && $this->configuration['strict'];
-    }
-
-    /**
      * Invoke the functions of the filter
      *
      * @param Filter\FilterInterface $filter                  The filter to apply to
      * @param array                  $stylesheetConfiguration The stylesheet configuration
      * @param string                 $stylesheetType          The stylesheet type
-     * @return Filter\FilterInterface                            Returns the filter
+     * @return Filter\FilterInterface                            Return the filter
      * @throws UnexpectedValueException if the given stylesheet type is invalid
      */
-    protected function applyFunctionsToFilterForType($filter, $stylesheetConfiguration, $stylesheetType)
-    {
+    protected function applyFunctionsToFilterForType(
+        Filter\FilterInterface $filter,
+        array $stylesheetConfiguration,
+        string $stylesheetType
+    ) {
         if (!$stylesheetType) {
             throw new UnexpectedValueException(
                 'The given stylesheet type is invalid "' . $stylesheetType . '"',
@@ -314,7 +279,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
             AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
             if (is_callable([$filter, $function])) {
                 call_user_func_array([$filter, $function], $data);
-            } elseif ($this->isStrict()) {
+            } elseif ($this->configurationProvider->getStrictModeEnabled()) {
                 throw new FilterException(
                     sprintf('Filter "%s" does not implement method "%s"', get_class($filter), $function),
                     1447161985
@@ -339,13 +304,16 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * @param AssetFactory    $factory
      * @return AssetCollection|null
      */
-    public function createAsset($assetKey, $stylesheet, AssetCollection $assetCollection, AssetFactory $factory)
-    {
-        $pluginLevelOptions = $this->getPluginLevelOptions();
-
-        $stylesheetConf = is_array(
-            $this->configuration['stylesheets.'][$assetKey . '.']
-        ) ? $this->configuration['stylesheets.'][$assetKey . '.'] : [];
+    public function createAsset(
+        string $assetKey,
+        string $stylesheet,
+        AssetCollection $assetCollection,
+        AssetFactory $factory
+    ): ?AssetCollection {
+        $allStylesheetConfiguration = $this->configurationProvider->getStylesheetConfigurations();
+        $stylesheetConf = is_array($allStylesheetConfiguration[$assetKey . '.'])
+            ? $allStylesheetConfiguration[$assetKey . '.']
+            : [];
 
         // Get the type to find the according filter
         if (isset($stylesheetConf['type'])) {
@@ -379,7 +347,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         if (isset($stylesheetConf['options.'])) {
             $currentOptions = $stylesheetConf['options.'];
         } else {
-            $currentOptions = $pluginLevelOptions;
+            $currentOptions = $this->pluginLevelOptions;
         }
         AsseticGeneralUtility::pd($currentOptions);
 
@@ -418,7 +386,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     private function getFilterBinaryPath(string $filterClass)
     {
         $filterBinaryPath = null;
-        $filterBinaries = $this->configuration['filter_binaries.'];
+        $filterBinaries = $this->configurationProvider->getFilterBinaries();
 
         // Replace the backslash in the filter class with an underscore
         $filterClassIdentifier = strtolower(str_replace('\\', '_', $filterClass));

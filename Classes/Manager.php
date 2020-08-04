@@ -6,11 +6,14 @@ namespace Cundd\Assetic;
 use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\Compiler\Compiler;
 use Cundd\Assetic\Compiler\CompilerInterface;
+use Cundd\Assetic\Configuration\ConfigurationProvider;
 use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Exception\SymlinkException;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Exception;
+use LogicException;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -41,14 +44,14 @@ class Manager implements ManagerInterface
     /**
      * Cache manager
      *
-     * @var \TYPO3\CMS\Core\Cache\CacheManager
+     * @var CacheManager
      */
     protected $cacheManager;
 
     /**
-     * @var array
+     * @var ConfigurationProvider
      */
-    protected $configuration;
+    protected $configurationProvider;
 
     /**
      * The name of the output file
@@ -87,9 +90,9 @@ class Manager implements ManagerInterface
      */
     protected $filesToRemove = [];
 
-    public function __construct(array $configuration)
+    public function __construct(ConfigurationProvider $configurationProvider)
     {
-        $this->configuration = $configuration;
+        $this->configurationProvider = $configurationProvider;
     }
 
     /**
@@ -97,7 +100,7 @@ class Manager implements ManagerInterface
      *
      * @return string
      */
-    public function collectAndCompile()
+    public function collectAndCompile(): string
     {
         $renderedStylesheet = null;
 
@@ -106,21 +109,22 @@ class Manager implements ManagerInterface
             return $this->collectAssetsAndCompile();
         }
 
-        $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename();
+        $outputFileDir = $this->configurationProvider->getOutputFileDir();
+        $renderedStylesheet = $outputFileDir . $this->getCurrentOutputFilename();
 
         /*
          * Check if the expected output file exists. If it doesn't, set
          * willCompile to TRUE and call the main routine again
          */
-        $absolutePathToRenderedFile = ConfigurationUtility::getPathToWeb() . $renderedStylesheet;
+        $absolutePathToRenderedFile = $this->configurationProvider->getPublicPath() . $renderedStylesheet;
         if (!file_exists($absolutePathToRenderedFile)) {
             $this->forceCompile();
 
             return $this->collectAssetsAndCompile();
         }
         AsseticGeneralUtility::pd(
-            ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename(),
-            ConfigurationUtility::getOutputFileDir(),
+            $outputFileDir . $this->getCurrentOutputFilename(),
+            $outputFileDir,
             $this->getCurrentOutputFilename()
         );
 
@@ -132,11 +136,10 @@ class Manager implements ManagerInterface
      *
      * @return CompilerInterface
      */
-    public function getCompiler()
+    public function getCompiler(): \Cundd\Assetic\Compiler\CompilerInterface
     {
         if (!$this->compiler) {
-            $this->compiler = new Compiler($this->configuration);
-            $this->compiler->setPluginLevelOptions($this->getPluginLevelOptions());
+            $this->compiler = new Compiler($this->configurationProvider, $this->getPluginLevelOptions());
         }
 
         return $this->compiler;
@@ -146,9 +149,9 @@ class Manager implements ManagerInterface
      * Collect all the assets and add them to the Asset Manager
      *
      * @return AssetCollection
-     * @throws \LogicException if the Assetic classes could not be found
+     * @throws LogicException if the Assetic classes could not be found
      */
-    public function collectAssets()
+    public function collectAssets(): \Assetic\Asset\AssetCollection
     {
         return $this->collectAssetsAndSetTarget();
     }
@@ -180,7 +183,7 @@ class Manager implements ManagerInterface
         $hashAlgorithm = 'md5';
 
         $outputFilenameWithoutHash = $this->getCurrentOutputFilenameWithoutHash();
-        $outputFileDir = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
+        $outputFileDir = ConfigurationUtility::getPathToWeb() . $this->configurationProvider->getOutputFileDir();
         $outputFileTempPath = $outputFileDir . $outputFilenameWithoutHash;
 
         // Create the file hash and store it in the cache
@@ -228,7 +231,7 @@ class Manager implements ManagerInterface
      *
      * @return void
      */
-    public function forceCompile()
+    public function forceCompile(): void
     {
         $this->willCompile = true;
     }
@@ -238,21 +241,22 @@ class Manager implements ManagerInterface
      *
      * @return boolean
      */
-    public function willCompile()
+    public function willCompile(): bool
     {
         if ($this->willCompile === -1) {
             // If no backend user is logged in, check if it is allowed
+            $isDevelopment = $this->configurationProvider->isDevelopment();
             if (!AsseticGeneralUtility::isBackendUser()) {
-                $this->willCompile = (bool)$this->isDevelopment()
-                    || (bool)intval($this->configuration['allow_compile_without_login']);
+                $this->willCompile = $this->configurationProvider->isDevelopment()
+                    || $this->configurationProvider->getAllowCompileWithoutLogin();
             } else {
-                $this->willCompile = $this->isDevelopment();
+                $this->willCompile = $isDevelopment;
             }
 
             AsseticGeneralUtility::say(
                 'Backend user detected: ' . (AsseticGeneralUtility::isBackendUser() ? 'yes' : 'no')
             );
-            AsseticGeneralUtility::say('Development mode: ' . ($this->isDevelopment() ? 'on' : 'off'));
+            AsseticGeneralUtility::say('Development mode: ' . ($isDevelopment ? 'on' : 'off'));
             AsseticGeneralUtility::say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));
         }
 
@@ -260,23 +264,13 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Return the configuration
-     *
-     * @return array
-     */
-    public function getConfiguration()
-    {
-        return $this->configuration;
-    }
-
-    /**
      * Return the current output filename
      *
      * @return string
      */
-    public function getOutputFilePath()
+    public function getOutputFilePath(): string
     {
-        return ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilename();
+        return $this->configurationProvider->getOutputFileDir() . $this->getCurrentOutputFilename();
     }
 
     /**
@@ -290,14 +284,14 @@ class Manager implements ManagerInterface
     public function getCurrentOutputFilenameWithoutHash()
     {
         // Get the output name from the configuration
-        if (isset($this->configuration['output'])) {
-            return ConfigurationUtility::getDomainIdentifier() . $this->configuration['output'];
+        if ($this->configurationProvider->getOutputFileName()) {
+            return ConfigurationUtility::getDomainIdentifier() . $this->configurationProvider->getOutputFileName();
         }
 
         $outputFileNameParts = [];
 
         // Loop through all configured stylesheets
-        $stylesheets = $this->configuration['stylesheets.'];
+        $stylesheets = $this->configurationProvider->getStylesheetConfigurations();
         foreach ($stylesheets as $assetKey => $stylesheet) {
             // If the current value of $stylesheet is an array it's the detailed configuration of a stylesheet, not
             // the stylesheet path itself
@@ -374,7 +368,7 @@ class Manager implements ManagerInterface
     {
         if (!$this->previousHash) {
             $suffix = '.css';
-            $filePath = ConfigurationUtility::getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
+            $filePath = $this->configurationProvider->getOutputFileDir() . $this->getCurrentOutputFilenameWithoutHash();
 
             $previousHash = (string)$this->getCache(
                 self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash()
@@ -415,7 +409,7 @@ class Manager implements ManagerInterface
     public function collectPreviousFilteredAssetFiles()
     {
         $suffix = '.css';
-        $outputFileDir = ConfigurationUtility::getPathToWeb() . ConfigurationUtility::getOutputFileDir();
+        $outputFileDir = ConfigurationUtility::getPathToWeb() . $this->configurationProvider->getOutputFileDir();
         $filePath = $outputFileDir . $this->getCurrentOutputFilenameWithoutHash();
         $this->filesToRemove = $this->findPreviousFilteredAssetFiles($filePath, $suffix);
     }
@@ -427,7 +421,7 @@ class Manager implements ManagerInterface
      */
     public function createSymlinkToFinalPath($fileFinalPath)
     {
-        if (!$this->getExperimental()) {
+        if (!$this->configurationProvider->getCreateSymlink()) {
             return;
         }
         $symlinkPath = $this->getSymlinkPath();
@@ -460,7 +454,7 @@ class Manager implements ManagerInterface
      */
     public function removeSymlink()
     {
-        if (!$this->getExperimental()) {
+        if (!$this->configurationProvider->getCreateSymlink()) {
             return;
         }
         // Unlink the symlink
@@ -490,7 +484,7 @@ class Manager implements ManagerInterface
      */
     public function getSymlinkUri(): string
     {
-        return ConfigurationUtility::getOutputFileDir()
+        return $this->configurationProvider->getOutputFileDir()
             . '_debug_'
             . $this->getCurrentOutputFilenameWithoutHash()
             . '.css';
@@ -568,41 +562,26 @@ class Manager implements ManagerInterface
     public function getPluginLevelOptions()
     {
         // Get the options
-        $pluginLevelOptions = [
-            'output' => $this->getCurrentOutputFilename(),
-        ];
-        if (isset($this->configuration['options.'])) {
-            $pluginLevelOptions = $this->configuration['options.'];
-        }
+        $pluginLevelOptions = $this->configurationProvider->getOptions()
+            ?? ['output' => $this->getCurrentOutputFilename()];
 
         // Check for the development mode
-        $pluginLevelOptions['debug'] = $this->isDevelopment();
+        $pluginLevelOptions['debug'] = $this->configurationProvider->isDevelopment();
 
         return $pluginLevelOptions;
-    }
-
-    /**
-     * Return if development mode is on
-     *
-     * @return boolean
-     */
-    public function isDevelopment()
-    {
-        return ConfigurationUtility::isDevelopment($this->configuration);
     }
 
     /**
      * Return if experimental features are enabled
      *
      * @return boolean
+     * @deprecated
      */
-    public function getExperimental()
+    public function getExperimental(): bool
     {
         if ($this->experimental === -1) {
-            if (isset($this->configuration['livereload.']) && isset($this->configuration['livereload.']['add_javascript'])) {
-                $this->experimental = (bool)$this->configuration['livereload.']['add_javascript'];
-            }
-            if (isset($this->configuration['experimental']) && (bool)$this->configuration['experimental']) {
+            $this->experimental = $this->configurationProvider->getLiveReloadConfiguration()->getAddJavascript();
+            if ($this->configurationProvider->getEnableExperimentalFeatures()) {
                 $this->experimental = true;
             }
         }
@@ -699,12 +678,12 @@ class Manager implements ManagerInterface
     /**
      * Return the Cache Manager
      *
-     * @return \TYPO3\CMS\Core\Cache\CacheManager
+     * @return CacheManager
      */
     protected function getCacheManager()
     {
         if (!$this->cacheManager) {
-            $this->cacheManager = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Cache\\CacheManager');
+            $this->cacheManager = GeneralUtility::makeInstance(CacheManager::class);
         }
 
         return $this->cacheManager;
@@ -715,7 +694,7 @@ class Manager implements ManagerInterface
      *
      * @return void
      */
-    public function clearHashCache()
+    public function clearHashCache(): void
     {
         $this->setCache(self::CACHE_IDENTIFIER_HASH . '_' . $this->getCurrentOutputFilenameWithoutHash(), '');
     }
@@ -730,10 +709,11 @@ class Manager implements ManagerInterface
         $this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
         try {
             if ($this->compiler->compile()) {
-                $renderedStylesheet = ConfigurationUtility::getOutputFileDir() . $this->moveTempFileToFileWithHash();
+                $renderedStylesheet = $this->configurationProvider->getOutputFileDir(
+                    ) . $this->moveTempFileToFileWithHash();
                 AsseticGeneralUtility::pd('$renderedStylesheet', $renderedStylesheet);
 
-                return $this->getExperimental() && AsseticGeneralUtility::isBackendUser()
+                return $this->configurationProvider->getCreateSymlink() && AsseticGeneralUtility::isBackendUser()
                     ? $this->getSymlinkUri()
                     : $renderedStylesheet;
             }

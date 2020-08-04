@@ -4,7 +4,10 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Compiler;
 
 use Assetic\Asset\AssetCollection;
+use Assetic\AssetManager;
 use Assetic\Factory\AssetFactory;
+use Exception;
+use LogicException;
 
 /**
  * Interface for the compiler
@@ -12,27 +15,27 @@ use Assetic\Factory\AssetFactory;
 interface CompilerInterface
 {
     /**
-     * Collects all the assets and adds them to the asset manager
+     * Collect all the assets and adds them to the asset manager
      *
-     * @return \Assetic\Asset\AssetCollection
-     * @throws \LogicException if the assetic classes could not be found
+     * @return AssetCollection
+     * @throws LogicException if the assetic classes could not be found
      */
-    public function collectAssets();
+    public function collectAssets(): AssetCollection;
 
     /**
-     * Collects the files and tells assetic to compile the files
+     * Collect the files and tells assetic to compile the files
      *
-     * @return bool Returns if the files have been compiled successfully
-     * @throws \Exception if an exception is thrown during rendering
+     * @return bool Return if the files have been compiled successfully
+     * @throws Exception if an exception is thrown during compilation
      */
-    public function compile();
+    public function compile(): bool;
 
     /**
-     * Returns the shared asset manager
+     * Return the shared asset manager
      *
-     * @return \Assetic\AssetManager
+     * @return AssetManager
      */
-    public function getAssetManager();
+    public function getAssetManager(): AssetManager;
 
     /**
      * Create and collect the Asset with the given key and stylesheet
@@ -43,5 +46,10 @@ interface CompilerInterface
      * @param AssetFactory    $factory
      * @return AssetCollection|null
      */
-    public function createAsset($assetKey, $stylesheet, AssetCollection $assetCollection, AssetFactory $factory);
+    public function createAsset(
+        string $assetKey,
+        string $stylesheet,
+        AssetCollection $assetCollection,
+        AssetFactory $factory
+    ): ?AssetCollection;
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\Configuration\ConfigurationProvider;
 use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\FileWatcher\FileWatcher;
 use Cundd\Assetic\Manager;
@@ -12,12 +13,10 @@ use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use UnexpectedValueException;
-use function class_exists;
 use function implode;
 
 /**
@@ -26,19 +25,11 @@ use function implode;
 abstract class AbstractCommand extends Command implements ColorInterface
 {
     /**
-     * Compiler instance
+     * Compiler Manager instance
      *
      * @var ManagerInterface
      */
-    protected $manager;
-
-    /**
-     * The configuration manager
-     *
-     * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
-     * @inject
-     */
-    protected $configurationManager;
+    private $manager;
 
     /**
      * The file watcher
@@ -46,6 +37,11 @@ abstract class AbstractCommand extends Command implements ColorInterface
      * @var FileWatcher
      */
     private $fileWatcher;
+
+    /**
+     * @var ConfigurationProvider
+     */
+    private $configurationProvider;
 
     /**
      * @return FileWatcher
@@ -75,7 +71,7 @@ abstract class AbstractCommand extends Command implements ColorInterface
         }
         try {
             $outputFileLink = $manager->collectAndCompile();
-            if ($manager->getExperimental()) {
+            if ($this->getConfigurationProvider()->getCreateSymlink()) {
                 $outputFileLink = $manager->getSymlinkUri();
             }
             $manager->clearHashCache();
@@ -114,7 +110,7 @@ abstract class AbstractCommand extends Command implements ColorInterface
             $destination .= basename($source);
         }
 
-        $destination = $this->getPublicPath() . '/' . $destination;
+        $destination = $this->getConfigurationProvider()->getPublicPath() . '/' . $destination;
         if (!file_exists(dirname($destination))) {
             mkdir(dirname($destination), 0775, true);
         }
@@ -186,19 +182,7 @@ abstract class AbstractCommand extends Command implements ColorInterface
     public function getManager()
     {
         if (!$this->manager) {
-            $configurationManager = GeneralUtility::makeInstance(ObjectManager::class)->get(
-                ConfigurationManagerInterface::class
-            );
-
-            $allConfiguration = $configurationManager->getConfiguration(
-                ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
-            );
-            if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
-                $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
-                $this->manager = new Manager($configuration);
-            } else {
-                throw new UnexpectedValueException('Could not read configuration for "plugin.CunddAssetic"');
-            }
+            $this->manager = new Manager($this->getConfigurationProvider());
         }
 
         return $this->manager;
@@ -239,15 +223,24 @@ abstract class AbstractCommand extends Command implements ColorInterface
         );
     }
 
-    /**
-     * @return mixed
-     */
-    protected function getPublicPath()
+    protected function getConfigurationProvider(): ConfigurationProvider
     {
-        if (class_exists(Environment::class, false)) {
-            return Environment::getPublicPath();
-        } else {
-            return PATH_site;
+        if (!$this->configurationProvider) {
+            $configurationManager = GeneralUtility::makeInstance(ObjectManager::class)->get(
+                ConfigurationManagerInterface::class
+            );
+
+            $allConfiguration = $configurationManager->getConfiguration(
+                ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
+            );
+            if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
+                $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
+                $this->configurationProvider = new ConfigurationProvider($configuration);
+            } else {
+                throw new UnexpectedValueException('Could not read configuration for "plugin.CunddAssetic"');
+            }
         }
+
+        return $this->configurationProvider;
     }
 }

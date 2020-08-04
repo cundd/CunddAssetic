@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Cundd\Assetic\Utility;
 
@@ -165,6 +166,7 @@ class ConfigurationUtility
      * Returns the path to the web directory
      *
      * @return string
+     * @deprecated
      */
     public static function getPathToWeb()
     {
@@ -173,26 +175,6 @@ class ConfigurationUtility
         } else {
             return PATH_site;
         }
-    }
-
-    /**
-     * Returns the path to the output file directory
-     *
-     * @return string $outputFileDir
-     */
-    public static function getOutputFileDir()
-    {
-        return self::$outputFileDir;
-    }
-
-    /**
-     * Sets the path to the output file directory
-     *
-     * @param string $outputFileDir
-     */
-    public static function setOutputFileDir($outputFileDir)
-    {
-        self::$outputFileDir = $outputFileDir;
     }
 
     /**

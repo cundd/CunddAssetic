@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
+use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\Compiler\CompilerInterface;
+use LogicException;
 
 /**
  * Assetic Manager interface
@@ -11,83 +13,84 @@ use Cundd\Assetic\Compiler\CompilerInterface;
 interface ManagerInterface
 {
     /**
-     * Collects all the assets and adds them to the asset manager
+     * Collect all the assets and adds them to the asset manager
      *
-     * @return \Assetic\Asset\AssetCollection
-     * @throws \LogicException if the assetic classes could not be found
+     * @return AssetCollection
+     * @throws LogicException if the assetic classes could not be found
      */
-    public function collectAssets();
+    public function collectAssets(): AssetCollection;
 
     /**
-     * Collects and compiles assets and returns the relative path to the compiled stylesheet
+     * Collect and compiles assets and returns the relative path to the compiled stylesheet
      *
      * @return string
      */
-    public function collectAndCompile();
+    public function collectAndCompile(): string;
 
     /**
      * Force asset re-compilation
      *
      * @return void
      */
-    public function forceCompile();
+    public function forceCompile(): void;
 
     /**
-     * Returns if the files should be compiled
+     * Return if the files should be compiled
      *
      * @return boolean
      */
-    public function willCompile();
+    public function willCompile(): bool;
 
     /**
-     * Returns the current output filename
+     * Return the current output filename
      *
      * @return string
      */
-    public function getOutputFilePath();
+    public function getOutputFilePath(): string;
 
     /**
-     * Returns the current output filename
+     * Return the current output filename
      *
      * The current output filename may be changed if when the hash of the
      * filtered asset file is generated
      *
      * @return string
      */
-    public function getCurrentOutputFilename();
+    public function getCurrentOutputFilename(): string;
 
     /**
-     * Returns the symlink URI
+     * Return the symlink URI
      *
      * @return string
      */
-    public function getSymlinkUri();
+    public function getSymlinkUri(): string;
 
     /**
-     * Returns the symlink path
+     * Return the symlink path
      *
      * @return string
      */
-    public function getSymlinkPath();
+    public function getSymlinkPath(): string;
 
     /**
-     * Returns the Compiler instance
+     * Return the Compiler instance
      *
      * @return CompilerInterface
      */
-    public function getCompiler();
+    public function getCompiler(): CompilerInterface;
 
     /**
      * Remove the cached hash
      *
      * @return void
      */
-    public function clearHashCache();
+    public function clearHashCache(): void;
 
     /**
-     * Returns if experimental features are enabled
+     * Return if experimental features are enabled
      *
      * @return boolean
+     * @deprecated use \Cundd\Assetic\Configuration\ConfigurationProvider::getEnableExperimentalFeatures() instead
      */
-    public function getExperimental();
+    public function getExperimental(): bool;
 }

@@ -10,13 +10,15 @@ module.tx_assetic {
     }
 
     settings {
-        # cat=module.tx_assetic/enable; type=boolean; label=Strict mode: Throw exceptions on error
+        # cat=module.tx_assetic/enable/a; type=boolean; label=Strict mode: Throw exceptions on error
         strict = 0
 
-        # cat=module.tx_assetic/enable; type=boolean; label=Compile if no backend user is logged in
+        # cat=module.tx_assetic/enable/b; type=boolean; label=Symlink: Always create a symlink to the compiled file
+        create_symlink = 0
+
+        # cat=module.tx_assetic/enable/c; type=boolean; label=Compile if no backend user is logged in
         allow_compile_without_login = 0
 
-        ## cat=module.tx_assetic/enable; type=boolean; label=Force on top: Include the plugin stylesheet at the top of HEAD
         ## `force_on_top` only works if caching is enabled
         force_on_top = 1
 

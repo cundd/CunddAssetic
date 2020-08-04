@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Helper;
 
-use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Configuration\ConfigurationProvider;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Exception;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -28,27 +27,13 @@ class LiveReloadHelper
 JAVASCRIPT_CODE_TEMPLATE;
 
     /**
-     * Asset manager
-     *
-     * @var ManagerInterface
+     * @var ConfigurationProvider
      */
-    private $manager;
+    private $configurationProvider;
 
-    /**
-     * @var array
-     */
-    private $configuration;
-
-    /**
-     * LiveReloadHelper constructor
-     *
-     * @param ManagerInterface $manager
-     * @param array            $configuration
-     */
-    public function __construct(ManagerInterface $manager, array $configuration)
+    public function __construct(ConfigurationProvider $configurationProvider)
     {
-        $this->manager = $manager;
-        $this->configuration = $configuration;
+        $this->configurationProvider = $configurationProvider;
     }
 
     /**
@@ -60,11 +45,11 @@ JAVASCRIPT_CODE_TEMPLATE;
             return '';
         }
 
-        $port = $this->getPort();
+        $port = $this->configurationProvider->getLiveReloadConfiguration()->getPort();
         if ($this->skipServerTest() || $this->isServerRunning($error)) {
             $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
             $resource = '/' . str_replace(
-                    ConfigurationUtility::getPathToWeb(),
+                    $this->configurationProvider->getPublicPath(),
                     '',
                     GeneralUtility::getFileAbsFileName($resource)
                 );
@@ -84,17 +69,13 @@ JAVASCRIPT_CODE_TEMPLATE;
     }
 
     /**
-     * Returns the Live Reload server port
+     * Return the Live Reload server port
      *
      * @return int
      */
     private function getPort()
     {
-        if (isset($this->configuration['livereload.']) && isset($this->configuration['livereload.']['port'])) {
-            return intval($this->configuration['livereload.']['port']);
-        }
-
-        return 35729;
+        return $this->configurationProvider->getLiveReloadConfiguration()->getPort();
     }
 
     /**
@@ -104,31 +85,23 @@ JAVASCRIPT_CODE_TEMPLATE;
      */
     private function skipServerTest()
     {
-        if (!isset($this->configuration['livereload.'])) {
-            return false;
-        }
-        $livereloadConfiguration = $this->configuration['livereload.'];
-        if (isset($livereloadConfiguration['skip_server_test'])) {
-            return (bool)$livereloadConfiguration['skip_server_test'];
-        } else {
-            return false;
-        }
+        return $this->configurationProvider->getLiveReloadConfiguration()->getSkipServerTest();
     }
 
     /**
-     * Returns if Live Reload is enabled
+     * Return if Live Reload is enabled
      *
      * @return bool
      */
     private function isEnabled()
     {
-        return $this->manager->getExperimental() && AsseticGeneralUtility::isBackendUser();
+        return $this->configurationProvider->getEnableExperimentalFeatures() && AsseticGeneralUtility::isBackendUser();
     }
 
     /**
-     * Returns if the server is running
+     * Return if the server is running
      *
-     * @param Exception $error
+     * @param Exception|null $error
      * @return bool
      */
     private function isServerRunning(&$error = null)
