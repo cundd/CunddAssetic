@@ -124,6 +124,8 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
         );
 
         $server->run();
+
+        return 0;
     }
 
     /**

@@ -40,5 +40,7 @@ class CompileCommand extends AbstractCommand implements ColorInterface
         $compileTime = $compileEnd - $compileStart;
 
         $output->writeln(sprintf("Compiled assets and saved file to '%s' in %0.4fs", $usedPath, $compileTime));
+
+        return 0;
     }
 }
