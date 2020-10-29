@@ -13,6 +13,8 @@ use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Property\PropertyMapper;
 use TYPO3\CMS\Extbase\Property\PropertyMappingConfigurationBuilder;
+use function get_parent_class;
+use function method_exists;
 
 Autoloader::register();
 
@@ -51,7 +53,11 @@ class AssetController extends ActionController
         PropertyMappingConfigurationBuilder $propertyMappingConfigurationBuilder,
         ManagerInterface $manager = null
     ) {
-        parent::__construct();
+        // Call the parent constructor if it exists
+        if (method_exists(get_parent_class($this), '__construct')) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            parent::__construct();
+        }
         $this->propertyMapper = $propertyMapper;
         $this->propertyMappingConfigurationBuilder = $propertyMappingConfigurationBuilder;
         $this->manager = $manager;
