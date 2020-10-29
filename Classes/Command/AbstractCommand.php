@@ -8,7 +8,6 @@ use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\FileWatcher\FileWatcher;
 use Cundd\Assetic\Manager;
 use Cundd\Assetic\ManagerInterface;
-use Exception;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,7 +16,24 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use UnexpectedValueException;
+use function array_filter;
+use function array_map;
+use function basename;
+use function copy;
+use function count;
+use function dirname;
+use function explode;
+use function file_exists;
+use function fwrite;
 use function implode;
+use function intval;
+use function mkdir;
+use function str_replace;
+use function strrpos;
+use function substr;
+use function vsprintf;
+use const PHP_EOL;
+use const STDOUT;
 
 /**
  * Command to compile, watch and start LiveReload
@@ -77,7 +93,7 @@ abstract class AbstractCommand extends Command implements ColorInterface
             $manager->clearHashCache();
 
             return $outputFileLink;
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             $this->handleException($exception);
 
             if (!$graceful) {
