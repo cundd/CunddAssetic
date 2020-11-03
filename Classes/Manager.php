@@ -136,7 +136,7 @@ class Manager implements ManagerInterface
      *
      * @return CompilerInterface
      */
-    public function getCompiler(): \Cundd\Assetic\Compiler\CompilerInterface
+    public function getCompiler(): CompilerInterface
     {
         if (!$this->compiler) {
             $this->compiler = new Compiler($this->configurationProvider, $this->getPluginLevelOptions());
@@ -151,7 +151,7 @@ class Manager implements ManagerInterface
      * @return AssetCollection
      * @throws LogicException if the Assetic classes could not be found
      */
-    public function collectAssets(): \Assetic\Asset\AssetCollection
+    public function collectAssets(): AssetCollection
     {
         return $this->collectAssetsAndSetTarget();
     }
@@ -709,8 +709,8 @@ class Manager implements ManagerInterface
         $this->collectPreviousFilteredAssetFilesAndRemoveSymlink();
         try {
             if ($this->compiler->compile()) {
-                $renderedStylesheet = $this->configurationProvider->getOutputFileDir(
-                    ) . $this->moveTempFileToFileWithHash();
+                $renderedStylesheet = $this->configurationProvider->getOutputFileDir()
+                    . $this->moveTempFileToFileWithHash();
                 AsseticGeneralUtility::pd('$renderedStylesheet', $renderedStylesheet);
 
                 return $this->configurationProvider->getCreateSymlink() && AsseticGeneralUtility::isBackendUser()
