@@ -22,6 +22,7 @@ use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use UnexpectedValueException;
+use function preg_match;
 
 /**
  * Compiler
@@ -271,9 +272,9 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
             }
             $this->prepareFunctionParameters($data);
 
-            // Check if the function has a numerator as prefix strip that off
-            if ($function[1] === '-' && is_numeric($function[0])) {
-                $function = substr($function, 2);
+            // Check if the function has a numerator as prefix and strip that off
+            if (preg_match('/^\d+-(\w+)/', $function, $matches)) {
+                $function = $matches[1];
             }
 
             AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
@@ -369,7 +370,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * @param array $parameters Reference to the data array
      * @return void
      */
-    protected function prepareFunctionParameters(&$parameters)
+    protected function prepareFunctionParameters(array &$parameters)
     {
         foreach ($parameters as &$parameter) {
             if (strpos($parameter, '.') !== false || strpos($parameter, DIRECTORY_SEPARATOR) !== false) {
