@@ -207,9 +207,9 @@ abstract class AbstractCommand extends Command implements ColorInterface
     /**
      * If a file changed it's path will be returned, otherwise FALSE
      *
-     * @return string|bool
+     * @return string|null
      */
-    protected function needsRecompile()
+    protected function needsRecompile():?string
     {
         return $this->getFileWatcher()->getChangedFileSinceLastCheck();
     }

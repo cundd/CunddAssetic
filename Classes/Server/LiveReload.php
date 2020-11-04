@@ -3,11 +3,17 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Server;
 
+use Exception;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use Ratchet\Mock\Connection;
+use Ratchet\Server\IoConnection;
 use Ratchet\Wamp\WampConnection;
 use React\EventLoop\LoopInterface;
+use SplObjectStorage;
+use function json_encode;
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
 
 /**
  * LiveReload message component
@@ -112,7 +118,7 @@ class LiveReload implements MessageComponentInterface
     /**
      * All connected clients
      *
-     * @var \SplObjectStorage|ConnectionInterface[]
+     * @var SplObjectStorage|ConnectionInterface[]
      */
     protected $clients;
 
@@ -169,7 +175,7 @@ class LiveReload implements MessageComponentInterface
     public function __construct($notificationDelay)
     {
         $this->notificationDelay = $notificationDelay;
-        $this->clients = new \SplObjectStorage;
+        $this->clients = new SplObjectStorage;
     }
 
     /**
@@ -185,9 +191,9 @@ class LiveReload implements MessageComponentInterface
     /**
      * Triggered when a client sends data through the socket
      *
-     * @param \Ratchet\ConnectionInterface $from The socket/connection that sent the message to your application
-     * @param string                       $msg  The message received
-     * @throws \Exception
+     * @param ConnectionInterface $from The socket/connection that sent the message to your application
+     * @param string              $msg  The message received
+     * @throws Exception
      */
     public function onMessage(ConnectionInterface $from, $msg)
     {
@@ -204,7 +210,7 @@ class LiveReload implements MessageComponentInterface
 
         // If the sender is the current host, pass the message to the clients
         if ($from->remoteAddress === '127.0.0.1') {
-            /** @var \Ratchet\Server\IoConnection $client */
+            /** @var IoConnection $client */
             foreach ($this->clients as $client) {
                 if ($from !== $client) {
                     // The sender is not the receiver, send to each client connected
@@ -218,7 +224,7 @@ class LiveReload implements MessageComponentInterface
      * When a new connection is opened it will be passed to this method
      *
      * @param ConnectionInterface $conn The socket/connection that just connected to your application
-     * @throws \Exception
+     * @throws Exception
      */
     public function onOpen(ConnectionInterface $conn)
     {
@@ -234,7 +240,7 @@ class LiveReload implements MessageComponentInterface
      * This is called before or after a socket is closed (depends on how it's closed).  SendMessage to $conn will not result in an error if it has already been closed.
      *
      * @param ConnectionInterface $conn The socket/connection that is closing/closed
-     * @throws \Exception
+     * @throws Exception
      */
     public function onClose(ConnectionInterface $conn)
     {
@@ -249,10 +255,10 @@ class LiveReload implements MessageComponentInterface
      * the Exception is sent back down the stack, handled by the Server and bubbled back up the application through this method
      *
      * @param ConnectionInterface $conn
-     * @param \Exception          $e
-     * @throws \Exception
+     * @param Exception           $e
+     * @throws Exception
      */
-    public function onError(ConnectionInterface $conn, \Exception $e)
+    public function onError(ConnectionInterface $conn, Exception $e)
     {
         $this->debugLine("An error has occurred: {$e->getMessage()}", self::LOG_LEVEL_ERROR);
         $conn->close();
@@ -264,7 +270,7 @@ class LiveReload implements MessageComponentInterface
      * @param string $changedFile
      * @param bool   $liveCss
      */
-    public function fileDidChange($changedFile, $liveCss = true)
+    public function fileDidChange(string $changedFile, $liveCss = true): void
     {
         $this->debug("File '$changedFile' did change" . PHP_EOL, self::LOG_LEVEL_INFO);
 
@@ -283,7 +289,7 @@ class LiveReload implements MessageComponentInterface
             ),
             self::LOG_LEVEL_DEBUG
         );
-        $this->debugLine('Sending ' . (json_encode($message)) . ' ', self::LOG_LEVEL_DEBUG);
+        $this->debugLine('Sending ' . (json_encode($message, JSON_UNESCAPED_SLASHES)) . ' ', self::LOG_LEVEL_DEBUG);
 
         $this->eventLoop->addTimer(
             $this->notificationDelay,
@@ -299,19 +305,14 @@ class LiveReload implements MessageComponentInterface
      * @param ConnectionInterface $connection
      * @param mixed               $message
      */
-    protected function send($connection, $message)
+    protected function send(ConnectionInterface $connection, $message): void
     {
         if (is_string($message)) {
             if (substr($message, -strlen(self::MESSAGE_END)) !== self::MESSAGE_END) {
                 $message .= self::MESSAGE_END;
             }
         } else {
-            if (defined('JSON_UNESCAPED_SLASHES')) {
-                $message = json_encode($message, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-            } else {
-                $message = str_replace('\\/', '/', json_encode($message));
-            }
-            $message .= self::MESSAGE_END;
+            $message = json_encode($message, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . self::MESSAGE_END;
         }
 
         $connection->send($message);
@@ -320,10 +321,10 @@ class LiveReload implements MessageComponentInterface
     /**
      * Prints the given message to the console
      *
-     * @param string $message
-     * @param int    $logLevel
+     * @param string   $message
+     * @param int|null $logLevel
      */
-    protected function debug($message, $logLevel = null)
+    protected function debug(string $message, $logLevel = null): void
     {
         if ($logLevel !== null) {
             $messagePrefix = null;
@@ -342,10 +343,10 @@ class LiveReload implements MessageComponentInterface
     /**
      * Prints the given message to the console
      *
-     * @param string $message
-     * @param int    $logLevel
+     * @param string   $message
+     * @param int|null $logLevel
      */
-    protected function debugLine($message, $logLevel = null)
+    protected function debugLine(string $message, $logLevel = null): void
     {
         $this->debug($message . PHP_EOL, $logLevel);
     }
