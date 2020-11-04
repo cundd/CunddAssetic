@@ -4,10 +4,13 @@ declare(strict_types=1);
 namespace Cundd\Assetic\FileWatcher;
 
 use Cundd\Assetic\Exception\FilePathException;
+use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RecursiveRegexIterator;
 use RegexIterator;
+use function is_dir;
+use function sprintf;
 
 /**
  * Class to test files for changes
@@ -205,6 +208,10 @@ class FileWatcher implements FileWatcherInterface
      */
     private function findFilesBySuffix($suffix, string $startDirectory): array
     {
+        if (!is_dir($startDirectory)) {
+            throw new InvalidArgumentException(sprintf('Start-directory "%s" is not a directory', $startDirectory));
+        }
+
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($startDirectory));
         $regexIterator = new RegexIterator(
             $directoryIterator,
