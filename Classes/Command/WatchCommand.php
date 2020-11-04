@@ -35,7 +35,7 @@ class WatchCommand extends AbstractCommand implements ColorInterface
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'Directory path(s) that should be watched (separated by comma ",")',
-                'fileadmin'
+                'fileadmin,EXT:client'
             )
             ->addOption(
                 'suffixes',
