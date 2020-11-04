@@ -23,11 +23,5 @@ call_user_func(
                 ]
             );
         }
-
-        TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile(
-            'assetic',
-            'Configuration/TypoScript',
-            'Cundd Assetic'
-        );
     }
 );
