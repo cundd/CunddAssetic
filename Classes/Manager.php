@@ -183,7 +183,7 @@ class Manager implements ManagerInterface
         $hashAlgorithm = 'md5';
 
         $outputFilenameWithoutHash = $this->getCurrentOutputFilenameWithoutHash();
-        $outputFileDir = ConfigurationUtility::getPathToWeb() . $this->configurationProvider->getOutputFileDir();
+        $outputFileDir = $this->configurationProvider->getAbsoluteOutputFileDir();
         $outputFileTempPath = $outputFileDir . $outputFilenameWithoutHash;
 
         // Create the file hash and store it in the cache
@@ -409,7 +409,7 @@ class Manager implements ManagerInterface
     public function collectPreviousFilteredAssetFiles()
     {
         $suffix = '.css';
-        $outputFileDir = ConfigurationUtility::getPathToWeb() . $this->configurationProvider->getOutputFileDir();
+        $outputFileDir = $this->configurationProvider->getAbsoluteOutputFileDir();
         $filePath = $outputFileDir . $this->getCurrentOutputFilenameWithoutHash();
         $this->filesToRemove = $this->findPreviousFilteredAssetFiles($filePath, $suffix);
     }
@@ -497,7 +497,7 @@ class Manager implements ManagerInterface
      */
     public function getSymlinkPath(): string
     {
-        return ConfigurationUtility::getPathToWeb() . $this->getSymlinkUri();
+        return $this->configurationProvider->getPublicPath() . $this->getSymlinkUri();
     }
 
     /**

@@ -121,8 +121,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      */
     public function compile(): bool
     {
-        $outputDirectory = $this->configurationProvider->getPublicPath()
-            . $this->configurationProvider->getOutputFileDir();
+        $outputDirectory = $this->configurationProvider->getAbsoluteOutputFileDir();
         GeneralUtility::mkdir($outputDirectory);
 
         $writer = new AssetWriter($outputDirectory);

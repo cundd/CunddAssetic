@@ -76,6 +76,16 @@ class ConfigurationProvider
     }
 
     /**
+     * Return the absolute path to the output file directory
+     *
+     * @return string $outputFileDir
+     */
+    public function getAbsoluteOutputFileDir(): string
+    {
+        return $this->getPublicPath() . $this->getOutputFileDir();
+    }
+
+    /**
      * Return if development mode is enabled
      *
      * @return bool
