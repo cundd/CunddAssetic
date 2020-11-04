@@ -3,7 +3,6 @@ includeLibs.CunddAssetic = EXT:assetic/Classes/Plugin.php
 
 plugin.CunddAssetic = USER
 plugin.CunddAssetic {
-    #    userFunc = Tx_Cundd_Assetic_Plugin->main
     userFunc = Cundd\Assetic\Plugin->main
 
     # Enable development mode to always compile files
@@ -56,10 +55,8 @@ plugin.CunddAssetic {
     }
 }
 
-# If the TypoScript constant developmentMode is set, use CunddAssetic in
-# development mode too
-[globalVar = LIT:1 = {$developmentMode}]
-    # TODO: once TYPO3 8 support is dropped: [0 < {$developmentMode}]
+# If the TypoScript constant `developmentMode` is set, use CunddAssetic in development mode too
+[0 < {$developmentMode}]
     plugin.CunddAssetic = USER_INT
     plugin.CunddAssetic.development = {$developmentMode}
 [end]
