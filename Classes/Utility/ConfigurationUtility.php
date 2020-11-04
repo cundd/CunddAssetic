@@ -170,11 +170,7 @@ class ConfigurationUtility
      */
     public static function getPathToWeb()
     {
-        if (class_exists(Environment::class, false)) {
-            return Environment::getPublicPath() . '/';
-        } else {
-            return PATH_site;
-        }
+        return Environment::getPublicPath() . '/';
     }
 
     /**

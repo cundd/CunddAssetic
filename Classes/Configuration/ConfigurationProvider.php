@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Configuration;
 
 use TYPO3\CMS\Core\Core\Environment;
-use function class_exists;
 use function php_sapi_name;
 
 class ConfigurationProvider
@@ -63,11 +62,7 @@ class ConfigurationProvider
      */
     public function getPublicPath(): string
     {
-        if (class_exists(Environment::class, false)) {
-            return Environment::getPublicPath() . '/';
-        } else {
-            return PATH_site;
-        }
+        return Environment::getPublicPath() . '/';
     }
 
     /**
