@@ -59,7 +59,7 @@ class FileWatcher implements FileWatcherInterface
     /**
      * @var string[]
      */
-    private $assetSuffixes = [];
+    private $assetSuffixes;
 
     /**
      * FileWatcher constructor
@@ -78,7 +78,7 @@ class FileWatcher implements FileWatcherInterface
      *
      * @return int
      */
-    public function getFindFilesMaxDepth()
+    public function getFindFilesMaxDepth(): int
     {
         return $this->findFilesMaxDepth;
     }
@@ -88,7 +88,7 @@ class FileWatcher implements FileWatcherInterface
      *
      * @param int $findFilesMaxDepth
      */
-    public function setFindFilesMaxDepth(int $findFilesMaxDepth)
+    public function setFindFilesMaxDepth(int $findFilesMaxDepth): void
     {
         $this->findFilesMaxDepth = $findFilesMaxDepth;
     }
@@ -98,7 +98,7 @@ class FileWatcher implements FileWatcherInterface
      *
      * @return string[]
      */
-    public function getAssetSuffixes()
+    public function getAssetSuffixes(): array
     {
         return $this->assetSuffixes;
     }
@@ -109,7 +109,7 @@ class FileWatcher implements FileWatcherInterface
      * @param string[] $assetSuffixes
      * @return $this
      */
-    public function setAssetSuffixes(array $assetSuffixes)
+    public function setAssetSuffixes(array $assetSuffixes): FileWatcherInterface
     {
         $this->assetSuffixes = $assetSuffixes;
 
@@ -119,7 +119,7 @@ class FileWatcher implements FileWatcherInterface
     /**
      * @return string[]
      */
-    public function getWatchPaths()
+    public function getWatchPaths(): array
     {
         return $this->watchPaths;
     }
@@ -128,7 +128,7 @@ class FileWatcher implements FileWatcherInterface
      * @param string[] $watchPaths
      * @return $this
      */
-    public function setWatchPaths(array $watchPaths)
+    public function setWatchPaths(array $watchPaths): FileWatcherInterface
     {
         if ($watchPaths && 0 === count(array_filter($watchPaths, 'file_exists'))) {
             $errorMessage = count($watchPaths) > 1
@@ -142,11 +142,11 @@ class FileWatcher implements FileWatcherInterface
     }
 
     /**
-     * If a file changed it's path will be returned, otherwise FALSE
+     * If a file changed it's path will be returned, otherwise NULL
      *
-     * @return string|bool
+     * @return string|null
      */
-    public function getChangedFileSinceLastCheck()
+    public function getChangedFileSinceLastCheck(): ?string
     {
         $lastCompileTime = $this->lastChangeTime;
         $foundFiles = $this->collectFilesToWatch();
@@ -159,7 +159,7 @@ class FileWatcher implements FileWatcherInterface
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -167,7 +167,7 @@ class FileWatcher implements FileWatcherInterface
      *
      * @return string[]
      */
-    public function collectFilesToWatch()
+    public function collectFilesToWatch(): array
     {
         $currentTime = time();
         if (($currentTime - $this->watchedFilesCacheTime) > $this->watchedFilesCacheLifetime) {
@@ -191,7 +191,7 @@ class FileWatcher implements FileWatcherInterface
      * @param float $interval
      * @return $this
      */
-    public function setInterval(float $interval)
+    public function setInterval(float $interval): FileWatcherInterface
     {
         return $this;
     }
@@ -203,7 +203,7 @@ class FileWatcher implements FileWatcherInterface
      * @param string          $startDirectory
      * @return string[]
      */
-    private function findFilesBySuffix($suffix, $startDirectory)
+    private function findFilesBySuffix($suffix, string $startDirectory): array
     {
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($startDirectory));
         $regexIterator = new RegexIterator(
