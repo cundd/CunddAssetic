@@ -28,7 +28,7 @@ use function fwrite;
 use function implode;
 use function intval;
 use function mkdir;
-use function str_replace;
+use function rtrim;
 use function strrpos;
 use function substr;
 use function vsprintf;
@@ -209,7 +209,7 @@ abstract class AbstractCommand extends Command implements ColorInterface
      *
      * @return string|null
      */
-    protected function needsRecompile():?string
+    protected function needsRecompile(): ?string
     {
         return $this->getFileWatcher()->getChangedFileSinceLastCheck();
     }
@@ -220,20 +220,11 @@ abstract class AbstractCommand extends Command implements ColorInterface
      */
     protected function prepareWatchPaths($path)
     {
-        // "Escape" the colon in "EXT:"
-        $path = str_replace('EXT:', 'EXT;', $path);
-
-        // Replace the colon with a comma
-        $path = str_replace(':', ',', $path);
         $watchPaths = array_filter(explode(',', $path));
 
         return array_map(
             function ($path) {
-                if (substr($path, 0, 4) === 'EXT;') {
-                    return GeneralUtility::getFileAbsFileName('typo3conf/ext/' . substr($path, 4));
-                }
-
-                return $path;
+                return dirname(GeneralUtility::getFileAbsFileName(rtrim($path, '/') . '/fake-file'));
             },
             $watchPaths
         );
