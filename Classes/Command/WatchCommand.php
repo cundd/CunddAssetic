@@ -45,7 +45,7 @@ class WatchCommand extends AbstractCommand implements ColorInterface
                 ''
             )
             ->addOption(
-                'maxDepth',
+                'max-depth',
                 'm',
                 InputOption::VALUE_REQUIRED,
                 'Maximum directory depth of file to watch',
@@ -60,7 +60,7 @@ class WatchCommand extends AbstractCommand implements ColorInterface
         $interval = max((int)$input->getOption('interval'), 1);
         $path = $input->getOption('path');
         $suffixes = $input->getOption('suffixes');
-        $maxDepth = (int)$input->getOption('maxDepth');
+        $maxDepth = (int)$input->getOption('max-depth');
 
         $fileWatcher = $this->getFileWatcher();
         $fileWatcher->setWatchPaths($this->prepareWatchPaths($path));

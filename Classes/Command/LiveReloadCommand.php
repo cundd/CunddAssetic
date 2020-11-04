@@ -69,14 +69,14 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
                 ''
             )
             ->addOption(
-                'maxDepth',
+                'max-depth',
                 'd',
                 InputOption::VALUE_REQUIRED,
                 'Maximum directory depth of file to watch',
                 7
             )
             ->addOption(
-                'notificationDelay',
+                'notification-delay',
                 'o',
                 InputOption::VALUE_REQUIRED,
                 'Number of seconds to wait before sending the reload command to the clients',
@@ -92,8 +92,8 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
         $port = $input->getOption('port');
         $path = $input->getOption('path');
         $suffixes = $input->getOption('suffixes');
-        $maxDepth = (int)$input->getOption('maxDepth');
-        $notificationDelay = (float)$input->getOption('notificationDelay');
+        $maxDepth = (int)$input->getOption('max-depth');
+        $notificationDelay = (float)$input->getOption('notification-delay');
 
         $interval = max((float)$input->getOption('interval'), .5);
         $fileWatcher = $this->getFileWatcher();
