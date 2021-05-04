@@ -4,13 +4,15 @@
  * ```js
  (function() {
         const loaderTag = document.createElement('script');
-        loaderTag.src = '/Autoreload.js';
+        loaderTag.src = '/Autoreload.js?' + (+ new Date);
         loaderTag.crossOrigin="anonymous";
         loaderTag.async = true;
+        loaderTag.dataset.autostart = true
         loaderTag.onload = function() {
             // do something
         };
         document.getElementsByTagName('head')[0].appendChild(loaderTag);
+        return loaderTag;
     })()
  * ```
  */
@@ -18,11 +20,12 @@
     const tempAssetic = window.Assetic || {};
     const asseticConfiguration = {};
 
-    asseticConfiguration.reloadInterval = tempAssetic.reloadInterval || 1750;
-    asseticConfiguration.monitor = tempAssetic.monitor || ['cundd_assetic', 'js', 'css'];
-    asseticConfiguration.sleepInterval = tempAssetic.sleepInterval || 10000;
-    asseticConfiguration.autostart = tempAssetic.autostart || false;
-    asseticConfiguration.replace = tempAssetic.replace || {};
+    const currentScriptDataset = document.currentScript && document.currentScript.dataset || {}
+    asseticConfiguration.reloadInterval = tempAssetic.reloadInterval || currentScriptDataset.reloadInterval || 1750;
+    asseticConfiguration.monitor = tempAssetic.monitor || currentScriptDataset.monitor || ['cundd_assetic', 'js', 'css'];
+    asseticConfiguration.sleepInterval = tempAssetic.sleepInterval || currentScriptDataset.sleepInterval || 10000;
+    asseticConfiguration.autostart = tempAssetic.autostart || currentScriptDataset.autostart || false;
+    asseticConfiguration.replace = tempAssetic.replace || currentScriptDataset.replace || {};
 
     class Autoreload {
         constructor(configuration) {
@@ -240,8 +243,7 @@
                 const responseHeaderKey = 'Last-Modified'; /* Or "Etag" */
                 const responseHeaderValue = response.headers.get(responseHeaderKey);
                 if (responseHeaderValue !== this.lastIds[originalUrl]) {
-                    const date = (new Date);
-                    const dateString = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+                    const dateString = this._getCurrentDateString();
                     this.lastIds[originalUrl] = responseHeaderValue;
                     this.log('Reload at ' + dateString + ' -> ' + originalUrl);
                     asset.href = newUrl;
@@ -251,6 +253,13 @@
                     }
                 }
             });
+        }
+
+        _getCurrentDateString() {
+            const leadingZero = value => (value < 10 ? '0' + value : value);
+            const date = new Date;
+
+            return leadingZero(date.getHours()) + ':' + leadingZero(date.getMinutes()) + ':' + leadingZero(date.getSeconds());
         }
 
         /**
@@ -291,7 +300,6 @@
             }
         }
     }
-
 
     const load = function (url) {
         return fetch(url, {
