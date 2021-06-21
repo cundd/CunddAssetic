@@ -18,10 +18,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use function array_merge;
+use function class_exists;
 use function explode;
 use function file_exists;
 use function in_array;
-use function interface_exists;
 use function is_readable;
 use function pathinfo;
 use function sprintf;
@@ -126,7 +126,7 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
         }
         $this->printWatchedPaths($output);
 
-        if (!interface_exists(HttpServer::class)) {
+        if (!class_exists(HttpServer::class)) {
             throw new LogicException('The Ratchet classes could not be found', 1356543545);
         }
 
