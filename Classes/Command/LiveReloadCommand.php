@@ -7,6 +7,7 @@ use Cundd\Assetic\FileWatcher\FileCategories;
 use Cundd\Assetic\Server\LiveReload;
 use Cundd\CunddComposer\Autoloader;
 use InvalidArgumentException;
+use LogicException;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
@@ -20,6 +21,7 @@ use function array_merge;
 use function explode;
 use function file_exists;
 use function in_array;
+use function interface_exists;
 use function is_readable;
 use function pathinfo;
 use function sprintf;
@@ -123,6 +125,10 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
             $fileWatcher->setAssetSuffixes(explode(',', $suffixes));
         }
         $this->printWatchedPaths($output);
+
+        if (!interface_exists(HttpServer::class)) {
+            throw new LogicException('The Ratchet classes could not be found', 1356543545);
+        }
 
         // LiveReload server
         $this->liveReloadServer = new LiveReload($notificationDelay);
