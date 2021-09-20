@@ -11,9 +11,9 @@ use LogicException;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
-use React\EventLoop\Factory;
+use React\EventLoop\Loop;
 use React\Socket\SecureServer;
-use React\Socket\Server;
+use React\Socket\SocketServer;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -239,10 +239,10 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
                 $address
             );
         } else {
-            $loop = Factory::create();
+            $loop = Loop::get();
 
             $server = new SecureServer(
-                new Server($address . ':' . $port, $loop),
+                new SocketServer($address . ':' . $port),
                 $loop,
                 $this->buildSecureServerContext($input)
             );
