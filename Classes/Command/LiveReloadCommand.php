@@ -24,7 +24,9 @@ use function file_exists;
 use function in_array;
 use function is_readable;
 use function pathinfo;
+use function rtrim;
 use function sprintf;
+use function substr;
 use const PATHINFO_EXTENSION;
 use const PHP_VERSION;
 
@@ -117,49 +119,11 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
         $notificationDelay = (float)$input->getOption('notification-delay');
 
         $interval = max((float)$input->getOption('interval'), .5);
-        $fileWatcher = $this->getFileWatcher();
-        $fileWatcher->setWatchPaths($this->prepareWatchPaths($path));
-        $fileWatcher->setFindFilesMaxDepth($maxDepth);
-        $fileWatcher->setInterval($interval);
-        if ($suffixes) {
-            $fileWatcher->setAssetSuffixes(explode(',', $suffixes));
-        }
+        $this->buildFileWatcher($path, $maxDepth, $suffixes);
         $this->printWatchedPaths($output);
 
-        if (!class_exists(HttpServer::class)) {
-            throw new LogicException('The Ratchet classes could not be found', 1356543545);
-        }
-
-        // LiveReload server
-        $this->liveReloadServer = new LiveReload($notificationDelay);
-
-        $component = new HttpServer(
-            new WsServer(
-                $this->liveReloadServer
-            )
-        );
-
         $useTLS = (bool)$input->getOption('tls-certificate');
-        if (!$useTLS) {
-            $server = IoServer::factory(
-                $component,
-                $port,
-                $address
-            );
-        } else {
-            $loop = Factory::create();
-
-            $server = new SecureServer(
-                new Server($address . ':' . $port, $loop),
-                $loop,
-                $this->buildSecureServerContext($input)
-            );
-
-            $server = new IoServer($component, $server, $loop);
-        }
-
-        $server->loop->addPeriodicTimer($interval, [$this, 'recompileIfNeededAndInformLiveReloadServer']);
-        $this->liveReloadServer->setEventLoop($server->loop);
+        $server = $this->buildServer($input, $address, $port, $notificationDelay, $useTLS, $interval);
         $prefix = $useTLS ? 'Secure ' : '';
         $output->writeln(
             "<info>{$prefix}Websocket server listening on $address:$port running under PHP version " . PHP_VERSION . "</info>"
@@ -209,8 +173,13 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
     private function assertTlsFilePath(InputInterface $input, string $optionName): string
     {
         $path = $input->getOption($optionName);
-        if (null === $path) {
+        if (!$path) {
             throw new InvalidArgumentException(sprintf('Option "%s" is not given', $optionName));
+        }
+
+        $homeDirectory = $this->getHomeDirectory();
+        if (substr($path, 0, 2) === '~/' && $homeDirectory) {
+            $path = rtrim($homeDirectory, '/') . '/' . substr($path, 2);
         }
 
         if (is_readable($path)) {
@@ -225,6 +194,80 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
             throw new InvalidArgumentException(
                 sprintf('File "%s" for configuration %s does not exist', $path, $optionName)
             );
+        }
+    }
+
+    private function getHomeDirectory(): string
+    {
+        return $_SERVER['HOME'] ?? '';
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param string         $address
+     * @param int|string     $port
+     * @param float          $notificationDelay
+     * @param bool           $useTLS
+     * @param int|float      $interval The number of seconds to wait before execution.
+     * @return IoServer
+     */
+    private function buildServer(
+        InputInterface $input,
+        string $address,
+        $port,
+        float $notificationDelay,
+        bool $useTLS,
+        $interval
+    ): IoServer {
+        if (!class_exists(HttpServer::class)) {
+            throw new LogicException('The Ratchet classes could not be found', 1356543545);
+        }
+
+        // LiveReload server
+        $this->liveReloadServer = new LiveReload($notificationDelay);
+
+        $component = new HttpServer(
+            new WsServer(
+                $this->liveReloadServer
+            )
+        );
+
+        if (!$useTLS) {
+            $server = IoServer::factory(
+                $component,
+                $port,
+                $address
+            );
+        } else {
+            $loop = Factory::create();
+
+            $server = new SecureServer(
+                new Server($address . ':' . $port, $loop),
+                $loop,
+                $this->buildSecureServerContext($input)
+            );
+
+            $server = new IoServer($component, $server, $loop);
+        }
+
+        $server->loop->addPeriodicTimer($interval, [$this, 'recompileIfNeededAndInformLiveReloadServer']);
+        $this->liveReloadServer->setEventLoop($server->loop);
+
+        return $server;
+    }
+
+    /**
+     * @param     $path
+     * @param int $maxDepth
+     * @param     $suffixes
+     */
+    private function buildFileWatcher($path, int $maxDepth, $suffixes): void
+    {
+        $fileWatcher = $this->getFileWatcher();
+        $fileWatcher->setWatchPaths($this->prepareWatchPaths($path));
+        $fileWatcher->setFindFilesMaxDepth($maxDepth);
+        if ($suffixes) {
+            $fileWatcher->setAssetSuffixes(explode(',', $suffixes));
         }
     }
 }
