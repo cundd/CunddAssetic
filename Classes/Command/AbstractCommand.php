@@ -8,6 +8,7 @@ use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\FileWatcher\FileWatcher;
 use Cundd\Assetic\Manager;
 use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Utility\PathUtility;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,7 +29,6 @@ use function fwrite;
 use function implode;
 use function intval;
 use function mkdir;
-use function rtrim;
 use function strrpos;
 use function substr;
 use function vsprintf;
@@ -218,14 +218,12 @@ abstract class AbstractCommand extends Command implements ColorInterface
      * @param $path
      * @return array
      */
-    protected function prepareWatchPaths($path)
+    protected function prepareWatchPaths(string $path): array
     {
         $watchPaths = array_filter(explode(',', $path));
 
         return array_map(
-            function ($path) {
-                return dirname(GeneralUtility::getFileAbsFileName(rtrim($path, '/') . '/fake-file'));
-            },
+            [PathUtility::class, 'getAbsolutePath'],
             $watchPaths
         );
     }
