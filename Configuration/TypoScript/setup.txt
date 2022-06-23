@@ -27,15 +27,11 @@ plugin.CunddAssetic {
     }
 
     filter_for_type {
-        sass = Assetic\Filter\Sass\SassFilter
-        scss = Assetic\Filter\Sass\ScssFilter
+        sass = AsseticAdditions\Filter\DartSassFilter
+        scss = AsseticAdditions\Filter\DartSassFilter
 
         # Use no filter for CSS files
         css = none
-
-        # ### Example
-        # ### Use the PHP Sass compiler for scss files
-        # scss = Assetic\Filter\ScssphpFilter
     }
 
     filter_binaries {
