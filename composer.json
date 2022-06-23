@@ -40,7 +40,7 @@
             "extension-key": "assetic"
         },
         "cundd/composer": {
-            "install": true
+            "install": false
         }
     }
 }
