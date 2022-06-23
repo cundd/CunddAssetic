@@ -38,7 +38,7 @@ JAVASCRIPT_CODE_TEMPLATE;
     /**
      * @return string
      */
-    public function getLiveReloadCodeIfEnabled()
+    public function getLiveReloadCodeIfEnabled(): string
     {
         if (!$this->isEnabled()) {
             return '';
@@ -72,7 +72,7 @@ JAVASCRIPT_CODE_TEMPLATE;
      *
      * @return int
      */
-    private function getPort()
+    private function getPort(): int
     {
         return $this->configurationProvider->getLiveReloadConfiguration()->getPort();
     }
@@ -80,9 +80,9 @@ JAVASCRIPT_CODE_TEMPLATE;
     /**
      * Return if the livereload code should be inserted even if the server connection is not available
      *
-     * @return int
+     * @return bool
      */
-    private function skipServerTest()
+    private function skipServerTest(): bool
     {
         return $this->configurationProvider->getLiveReloadConfiguration()->getSkipServerTest();
     }
@@ -92,7 +92,7 @@ JAVASCRIPT_CODE_TEMPLATE;
      *
      * @return bool
      */
-    private function isEnabled()
+    private function isEnabled(): bool
     {
         return $this->configurationProvider->getEnableExperimentalFeatures() && AsseticGeneralUtility::isBackendUser();
     }
@@ -103,7 +103,7 @@ JAVASCRIPT_CODE_TEMPLATE;
      * @param Exception|null $error
      * @return bool
      */
-    private function isServerRunning(&$error = null)
+    private function isServerRunning(Exception &$error = null): bool
     {
         $connection = @fsockopen('localhost', $this->getPort(), $errorNumber, $errorString, 1.0);
 
