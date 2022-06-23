@@ -3,15 +3,23 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
-use Cundd\Assetic\Configuration\ConfigurationProvider;
+use Assetic\Exception\FilterException;
+use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
+use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
+use Cundd\Assetic\Exception\MissingConfigurationException;
+use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Helper\LiveReloadHelper;
+use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\CunddComposer\Autoloader;
-use LogicException;
+use Psr\Log\LoggerInterface;
+use Throwable;
+use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\ContentObject\AbstractContentObject;
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+use function count;
 use function microtime;
 use function sprintf;
 
@@ -20,70 +28,66 @@ use function sprintf;
  */
 class Plugin
 {
-    /**
-     * Content object
-     *
-     * @var AbstractContentObject|ContentObjectRenderer
-     */
-    public $cObj;
+    private ManagerInterface $manager;
 
-    /**
-     * Asset manager
-     *
-     * @var ManagerInterface
-     */
-    protected $manager;
+    private ConfigurationProviderInterface $configurationProvider;
 
-    /**
-     * @var array
-     * @deprecated
-     */
-    protected $configuration;
+    private LoggerInterface $logger;
 
-    /**
-     * @var ConfigurationProvider
-     */
-    private $configurationProvider;
+    public function __construct(
+        ?ManagerInterface $manager = null,
+        ?ConfigurationProviderFactory $configurationProviderFactory = null,
+        ?LoggerInterface $logger = null
+    ) {
+        $configurationProviderFactory = $configurationProviderFactory ?? new ConfigurationProviderFactory();
+        $this->manager = $manager ?? GeneralUtility::makeInstance(Manager::class);
+        $this->configurationProvider = $configurationProviderFactory->build();
+        $this->logger = $logger ?? GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
+    }
 
     /**
      * Output configured stylesheets as link tags
      *
      * Some processing will be done according to the TypoScript setup of the stylesheets.
      *
-     * @param string $content
-     * @param array  $conf
      * @return string
      */
-    public function main($content, $conf)
+    public function main(): string
     {
         AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
         Autoloader::register();
-
-        $this->configuration = $conf;
-        $this->configurationProvider = new ConfigurationProvider($conf);
-        $this->manager = new Manager($this->configurationProvider);
 
         // `force_on_top` only works if caching is enabled
         // $forceOnTop = (bool)($conf['force_on_top'] ?? false);
         $forceOnTop = false;
 
-        try {
-            $collectAndCompileStart = microtime(true);
-            $renderedStylesheet = $this->manager->collectAndCompile();
-            $collectAndCompileEnd = microtime(true);
-
-            $content = $this->getLiveReloadCode();
-            $content .= $this->addDebugInformation($collectAndCompileEnd, $collectAndCompileStart);
-            if ($forceOnTop) {
-                $this->includeCss($renderedStylesheet);
-            } else {
-                $content .= '<link rel="stylesheet" type="text/css" href="' . $renderedStylesheet . '" media="all">';
-            }
-        } catch (LogicException $exception) {
-            if ($exception->getCode() === 1356543545) {
-                return $exception->getMessage();
-            }
+        if (0 === count($this->manager->collectAssets()->all())) {
+            throw new MissingConfigurationException('No assets have been defined');
         }
+
+        $collectAndCompileStart = microtime(true);
+        $result = $this->manager->collectAndCompile();
+        $collectAndCompileEnd = microtime(true);
+
+        if ($result->isErr()) {
+            $exception = $result->unwrapErr();
+
+            return $this->handleBuildError($exception);
+        }
+
+        /** @var FilePath $filePath */
+        $filePath = $result->unwrap();
+        $content = $this->getLiveReloadCode();
+        $content .= $this->addDebugInformation($collectAndCompileEnd, $collectAndCompileStart);
+        if ($forceOnTop) {
+            $this->includeCss($filePath->getPublicUri());
+        } else {
+            $content .= sprintf(
+                '<link rel="stylesheet" type="text/css" href="%s" media="all" data-action="fsdfs">',
+                $filePath->getPublicUri()
+            );
+        }
+
         AsseticGeneralUtility::profile('Cundd Assetic plugin end');
 
         return $content;
@@ -109,7 +113,7 @@ class Plugin
      *
      * @return string
      */
-    private function getLiveReloadCode()
+    private function getLiveReloadCode(): string
     {
         $helper = new LiveReloadHelper($this->configurationProvider);
 
@@ -117,10 +121,33 @@ class Plugin
     }
 
     /**
-     * @param        $collectAndCompileEnd
-     * @param        $collectAndCompileStart
-     * @return string
+     * Handle exceptions
+     *
+     * @param FilterException|OutputFileException $exception
+     * @return void
      */
+    private function handleBuildError(Throwable $exception): string
+    {
+        /** @var TypoScriptFrontendController $typoScriptFrontendController */
+        $typoScriptFrontendController = $GLOBALS['TSFE'];
+        $typoScriptFrontendController->set_no_cache();
+
+        $this->logger->error('Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage());
+
+        if ($this->configurationProvider->isDevelopment()) {
+            $exceptionPrinter = new ExceptionPrinter();
+
+            return $exceptionPrinter->printException($exception);
+        }
+
+        // Always output the exception message if the Assetic classes could not be found (identified by code 1356543545)
+        if ($exception->getCode() === 1356543545) {
+            return $exception->getMessage();
+        }
+
+        return '<!-- Assetic error -->';
+    }
+
     private function addDebugInformation(float $collectAndCompileEnd, float $collectAndCompileStart): string
     {
         $isDevelopmentEnabled = $this->configurationProvider->isDevelopment();

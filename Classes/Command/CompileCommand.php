@@ -26,7 +26,7 @@ class CompileCommand extends AbstractCommand implements ColorInterface
             );
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         Autoloader::register();
         $destination = $input->getArgument('destination');

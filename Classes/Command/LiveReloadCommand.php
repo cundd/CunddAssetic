@@ -107,7 +107,7 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
             );
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         Autoloader::register();
 

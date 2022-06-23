@@ -53,7 +53,7 @@ class WatchCommand extends AbstractCommand implements ColorInterface
             );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         Autoloader::register();
 

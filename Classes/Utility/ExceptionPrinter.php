@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Utility;
 
 use Assetic\Exception\FilterException;
+use Throwable;
 
 /**
  * Class to display exceptions
@@ -15,7 +16,7 @@ class ExceptionPrinter
      *
      * @param FilterException|\Exception $exception
      */
-    public function printException(FilterException $exception)
+    public function printException(Throwable $exception):string
     {
         $i = 0;
         $trace = '';
@@ -35,7 +36,7 @@ class ExceptionPrinter
         $fontStyle = $this->getFontStyle();
         $traceFontStyle = $this->getTraceFontStyle();
 
-        printf(
+        return sprintf(
             "<div style='%s'><div style='%s'>%s</div><code style='%s'>%s</code></div>",
             $boxStyles,
             $fontStyle,
@@ -48,7 +49,7 @@ class ExceptionPrinter
     /**
      * @return string
      */
-    private function getFontStyle()
+    private function getFontStyle(): string
     {
         $fontStyle = [
             'font-family' => 'Hack, Meslo, Menlo, monospace',
@@ -70,7 +71,7 @@ class ExceptionPrinter
     /**
      * @return string
      */
-    private function getTraceFontStyle()
+    private function getTraceFontStyle(): string
     {
         $fontStyle = [
             'font-family' => 'Hack, Meslo, Menlo, monospace',
@@ -92,7 +93,7 @@ class ExceptionPrinter
     /**
      * @return string
      */
-    private function getBoxStyle()
+    private function getBoxStyle(): string
     {
         $boxStyles = [
             'width'      => '100%',

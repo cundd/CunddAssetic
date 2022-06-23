@@ -6,7 +6,7 @@ namespace Cundd\Assetic\Compiler;
 use Assetic\Asset\AssetCollection;
 use Assetic\AssetManager;
 use Assetic\Factory\AssetFactory;
-use Exception;
+use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 
 /**
@@ -25,10 +25,9 @@ interface CompilerInterface
     /**
      * Collect the files and tells assetic to compile the files
      *
-     * @return bool Return if the files have been compiled successfully
-     * @throws Exception if an exception is thrown during compilation
+     * @return Result Return `Ok<NULL>` if the files have been compiled successfully, otherwise an `Err<Exception>` containing the exception
      */
-    public function compile(): bool;
+    public function compile(): Result;
 
     /**
      * Return the shared asset manager

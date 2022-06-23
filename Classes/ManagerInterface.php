@@ -5,6 +5,8 @@ namespace Cundd\Assetic;
 
 use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\Compiler\CompilerInterface;
+use Cundd\Assetic\ValueObject\FilePath;
+use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 
 /**
@@ -21,18 +23,18 @@ interface ManagerInterface
     public function collectAssets(): AssetCollection;
 
     /**
-     * Collect and compiles assets and returns the relative path to the compiled stylesheet
+     * Collect and compile Assets and return a Result with the path to the compiled stylesheet
      *
-     * @return string
+     * @return Result<FilePath>
      */
-    public function collectAndCompile(): string;
+    public function collectAndCompile(): Result;
 
     /**
      * Force asset re-compilation
      *
-     * @return void
+     * @return self
      */
-    public function forceCompile(): void;
+    public function forceCompile(): self;
 
     /**
      * Return if the files should be compiled
@@ -42,35 +44,11 @@ interface ManagerInterface
     public function willCompile(): bool;
 
     /**
-     * Return the current output filename
-     *
-     * @return string
-     */
-    public function getOutputFilePath(): string;
-
-    /**
-     * Return the current output filename
-     *
-     * The current output filename may be changed if when the hash of the
-     * filtered asset file is generated
-     *
-     * @return string
-     */
-    public function getCurrentOutputFilename(): string;
-
-    /**
      * Return the symlink URI
      *
      * @return string
      */
     public function getSymlinkUri(): string;
-
-    /**
-     * Return the symlink path
-     *
-     * @return string
-     */
-    public function getSymlinkPath(): string;
 
     /**
      * Return the Compiler instance
@@ -83,14 +61,7 @@ interface ManagerInterface
      * Remove the cached hash
      *
      * @return void
+     * @deprecated
      */
     public function clearHashCache(): void;
-
-    /**
-     * Return if experimental features are enabled
-     *
-     * @return boolean
-     * @deprecated use \Cundd\Assetic\Configuration\ConfigurationProvider::getEnableExperimentalFeatures() instead
-     */
-    public function getExperimental(): bool;
 }

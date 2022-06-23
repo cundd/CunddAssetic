@@ -10,16 +10,15 @@ use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
 use Assetic\Filter;
 use Assetic\FilterManager;
-use Cundd\Assetic\Configuration\ConfigurationProvider;
+use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\FilePathException;
-use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
-use Exception as Exception;
+use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
-use TYPO3\CMS\Core\Log\LogManager;
+use Throwable;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use UnexpectedValueException;
 use function preg_match;
@@ -65,11 +64,11 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     protected $logger;
 
     /**
-     * @var ConfigurationProvider
+     * @var ConfigurationProviderInterface
      */
     private $configurationProvider;
 
-    public function __construct(ConfigurationProvider $configurationProvider, array $pluginLevelOptions)
+    public function __construct(ConfigurationProviderInterface $configurationProvider, array $pluginLevelOptions)
     {
         $this->configurationProvider = $configurationProvider;
         $this->pluginLevelOptions = $pluginLevelOptions;
@@ -113,13 +112,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         return $assetCollection;
     }
 
-    /**
-     * Collect the files and tell Assetic to compile the files
-     *
-     * @return bool Return if the files have been compiled successfully
-     * @throws Exception if an exception is thrown during rendering
-     */
-    public function compile(): bool
+    public function compile(): Result
     {
         $outputDirectory = $this->configurationProvider->getAbsoluteOutputFileDir();
         GeneralUtility::mkdir($outputDirectory);
@@ -129,31 +122,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         AsseticGeneralUtility::profile('Will compile asset');
         try {
             $writer->writeManagerAssets($this->getAssetManager());
-        } catch (FilterException $exception) {
-            $this->handleFilterException($exception);
-
-            return false;
-        } catch (Exception $exception) {
-            if ($this->configurationProvider->isDevelopment()) {
-                if (is_a($exception, 'Exception_ScssException')) {
-                    /**
-                     * @noinspection PhpFullyQualifiedNameUsageInspection
-                     * @var \Exception_ScssException $exception
-                     */
-                    AsseticGeneralUtility::pd($exception->getUserInfo());
-                }
-
-                throw $exception;
-            } else {
-                $this->logException($exception);
-            }
-
-            return false;
+        } catch (Throwable $exception) {
+            return new Result\Err($exception);
         }
 
         AsseticGeneralUtility::profile('Did compile asset');
 
-        return true;
+        return new Result\Ok(null);
     }
 
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
@@ -166,14 +141,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * @return Filter\FilterInterface       The filter
      * @throws LogicException if the required filter class does not exist
      */
-    protected function getFilterForType(string $type)
+    protected function getFilterForType(string $type): ?Filter\FilterInterface
     {
         // If the filter manager has an according filter return it
         if ($this->filterManager->has($type)) {
             return $this->filterManager->get($type);
         }
 
-        $filter = null;
         $filterClass = ucfirst($type) . 'Filter';
         $filterForTypeDefinitions = $this->configurationProvider->getFilterForType();
 
@@ -205,27 +179,6 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         return $filter;
     }
 
-    /**
-     * Handles filter exceptions
-     *
-     * @param FilterException $exception
-     * @return void
-     * @throws FilterException if run in CLI mode
-     */
-    protected function handleFilterException(FilterException $exception)
-    {
-        if ($this->configurationProvider->isDevelopment()) {
-            if (php_sapi_name() == 'cli') {
-                throw $exception;
-            }
-            $exceptionPrinter = new ExceptionPrinter();
-            $exceptionPrinter->printException($exception);
-        } else {
-            $this->logException($exception);
-        }
-    }
-
-
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
     // HELPERS
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
@@ -256,7 +209,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         Filter\FilterInterface $filter,
         array $stylesheetConfiguration,
         string $stylesheetType
-    ) {
+    ): Filter\FilterInterface {
         if (!$stylesheetType) {
             throw new UnexpectedValueException(
                 'The given stylesheet type is invalid "' . $stylesheetType . '"',
@@ -379,13 +332,8 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
     }
 
-    /**
-     * @param string $filterClass
-     * @return string
-     */
-    private function getFilterBinaryPath(string $filterClass)
+    private function getFilterBinaryPath(string $filterClass): ?string
     {
-        $filterBinaryPath = null;
         $filterBinaries = $this->configurationProvider->getFilterBinaries();
 
         // Replace the backslash in the filter class with an underscore
@@ -395,11 +343,6 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         $filterBinaryPath = $filterBinaries[$filterClassIdentifier];
-        if (!is_string($filterBinaryPath)) {
-            // @TODO: Check if this can/should happen
-            return $filterBinaryPath;
-        }
-
         if ($filterBinaryPath[0] === '~') {
             $homeDirectory = $this->getHomeDirectory();
             $filterBinaryPath = $homeDirectory . substr($filterBinaryPath, 1);
@@ -410,9 +353,6 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         return $filterBinaryPath;
     }
 
-    /**
-     * @return string
-     */
     private function getHomeDirectory(): string
     {
         $homeDirectory = getenv('HOME');
@@ -424,16 +364,5 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/..' : '';
-    }
-
-    /**
-     * @param Exception $exception
-     */
-    private function logException(Exception $exception)
-    {
-        if (!$this->logger) {
-            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        }
-        $this->logger->error('Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage());
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Helper;
 
 use Cundd\Assetic\Configuration\ConfigurationProvider;
+use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Exception;
@@ -27,11 +28,11 @@ class LiveReloadHelper
 JAVASCRIPT_CODE_TEMPLATE;
 
     /**
-     * @var ConfigurationProvider
+     * @var ConfigurationProviderInterface
      */
     private $configurationProvider;
 
-    public function __construct(ConfigurationProvider $configurationProvider)
+    public function __construct(ConfigurationProviderInterface $configurationProvider)
     {
         $this->configurationProvider = $configurationProvider;
     }

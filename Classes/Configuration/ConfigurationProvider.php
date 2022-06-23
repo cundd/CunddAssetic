@@ -6,7 +6,7 @@ namespace Cundd\Assetic\Configuration;
 use TYPO3\CMS\Core\Core\Environment;
 use function php_sapi_name;
 
-class ConfigurationProvider
+class ConfigurationProvider implements ConfigurationProviderInterface
 {
     /**
      * @var array
@@ -65,21 +65,11 @@ class ConfigurationProvider
         return Environment::getPublicPath() . '/';
     }
 
-    /**
-     * Return the path to the output file directory
-     *
-     * @return string $outputFileDir
-     */
     public function getOutputFileDir(): string
     {
         return $this->outputFileDir;
     }
 
-    /**
-     * Return the absolute path to the output file directory
-     *
-     * @return string $outputFileDir
-     */
     public function getAbsoluteOutputFileDir(): string
     {
         return $this->getPublicPath() . $this->getOutputFileDir();
@@ -106,7 +96,7 @@ class ConfigurationProvider
      */
     public function getOptions()
     {
-        return $this->configuration['options.'];
+        return $this->configuration['options.']??null;
     }
 
     /**

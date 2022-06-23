@@ -3,20 +3,16 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
-use Cundd\Assetic\Configuration\ConfigurationProvider;
+use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
+use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\FileWatcher\FileWatcher;
-use Cundd\Assetic\Manager;
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Utility\PathUtility;
-use RuntimeException;
+use Cundd\Assetic\ValueObject\FilePath;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
-use UnexpectedValueException;
 use function array_filter;
 use function array_map;
 use function basename;
@@ -25,15 +21,11 @@ use function count;
 use function dirname;
 use function explode;
 use function file_exists;
-use function fwrite;
 use function implode;
 use function intval;
 use function mkdir;
 use function strrpos;
 use function substr;
-use function vsprintf;
-use const PHP_EOL;
-use const STDOUT;
 
 /**
  * Command to compile, watch and start LiveReload
@@ -55,9 +47,25 @@ abstract class AbstractCommand extends Command implements ColorInterface
     private $fileWatcher;
 
     /**
-     * @var ConfigurationProvider
+     * @var ConfigurationProviderInterface
      */
     private $configurationProvider;
+
+    /**
+     * @param ManagerInterface             $manager
+     * @param FileWatcher                  $fileWatcher
+     * @param ConfigurationProviderFactory $configurationProviderFactory
+     */
+    public function __construct(
+        ManagerInterface $manager,
+        FileWatcher $fileWatcher,
+        ConfigurationProviderFactory $configurationProviderFactory
+    ) {
+        parent::__construct();
+        $this->manager = $manager;
+        $this->fileWatcher = $fileWatcher;
+        $this->configurationProvider = $configurationProviderFactory->build();
+    }
 
     /**
      * @return FileWatcher
@@ -76,42 +84,44 @@ abstract class AbstractCommand extends Command implements ColorInterface
      *
      * @param bool $graceful
      * @return string
+     * @throws Throwable if an error occurred and `$graceful` is FALSE
      */
     protected function compile(bool $graceful): string
     {
-        $manager = $this->getManager();
-        $manager->forceCompile();
+        $this->manager->forceCompile();
 
-        if (0 === count($manager->collectAssets()->all())) {
+        if (0 === count($this->manager->collectAssets()->all())) {
             throw new MissingConfigurationException('No assets have been found');
         }
-        try {
-            $outputFileLink = $manager->collectAndCompile();
-            if ($this->getConfigurationProvider()->getCreateSymlink()) {
-                $outputFileLink = $manager->getSymlinkUri();
-            }
-            $manager->clearHashCache();
-
-            return $outputFileLink;
-        } catch (Throwable $exception) {
-            $this->handleException($exception);
-
+        $outputFileLinkResult = $this->manager->forceCompile()->collectAndCompile();
+        $this->manager->clearHashCache();
+        if ($outputFileLinkResult->isErr()) {
+            $exception = $outputFileLinkResult->unwrapErr();
             if (!$graceful) {
-                throw new RuntimeException($exception->getMessage(), $exception->getCode(), $exception);
+                throw $exception;
             }
+
+            return '';
         }
 
-        return '';
+        if ($this->getConfigurationProvider()->getCreateSymlink()) {
+            return $this->manager->getSymlinkUri();
+        }
+
+        /** @var FilePath $filePath */
+        $filePath = $outputFileLinkResult->unwrap();
+
+        return $filePath->getPublicUri();
     }
 
     /**
-     * Copies the source to the destination
+     * Copy the source to the destination
      *
      * @param string $source
      * @param string $destination
      * @return string Returns the used path
      */
-    protected function copyToDestination($source, $destination)
+    protected function copyToDestination(string $source, string $destination): string
     {
         if (!$destination) {
             return $source;
@@ -138,48 +148,30 @@ abstract class AbstractCommand extends Command implements ColorInterface
     }
 
     /**
-     * Outputs specified text to the console window
-     *
-     * You can specify arguments that will be passed to the text via sprintf
-     *
-     * @see http://www.php.net/sprintf
-     * @param string $text      Text to output
-     * @param array  $arguments Optional arguments to use for sprintf
-     * @return void
-     */
-    protected function output($text, array $arguments = [])
-    {
-        if ($arguments !== []) {
-            $text = vsprintf($text, $arguments);
-        }
-        fwrite(STDOUT, $text);
-    }
-
-    /**
-     * Outputs the specified text with color to the console window
+     * Output the specified text with color to the console window
      *
      * @param Throwable $exception
      */
     protected function handleException(Throwable $exception)
     {
-        $heading = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
-        $exceptionPosition = 'in ' . $exception->getFile() . ' at line ' . $exception->getLine();
-
-        $coloredText = self::SIGNAL . self::REVERSE . self::SIGNAL . self::BOLD_RED . $heading . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
-        $coloredText .= self::SIGNAL . self::BOLD_RED . $exceptionPosition . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
-        $coloredText .= self::SIGNAL . self::RED
-            . $exception->getTraceAsString()
-            . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
-
-        fwrite(STDOUT, $coloredText);
-
-        if ($exception->getPrevious()) {
-            $this->handleException($exception->getPrevious());
-        }
+        //$heading = 'Exception: #' . $exception->getCode() . ':' . $exception->getMessage();
+        //$exceptionPosition = 'in ' . $exception->getFile() . ' at line ' . $exception->getLine();
+        //
+        //$coloredText = self::SIGNAL . self::REVERSE . self::SIGNAL . self::BOLD_RED . $heading . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
+        //$coloredText .= self::SIGNAL . self::BOLD_RED . $exceptionPosition . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
+        //$coloredText .= self::SIGNAL . self::RED
+        //    . $exception->getTraceAsString()
+        //    . self::SIGNAL_ATTRIBUTES_OFF . PHP_EOL;
+        //
+        //fwrite(STDOUT, $coloredText);
+        //
+        //if ($exception->getPrevious()) {
+        //    $this->handleException($exception->getPrevious());
+        //}
     }
 
     /**
-     * Prints the watched paths
+     * Print the watched paths
      *
      * @param OutputInterface $output
      */
@@ -188,20 +180,6 @@ abstract class AbstractCommand extends Command implements ColorInterface
         $output->writeln(
             '<info>' . 'Watching path(s): ' . implode(', ', $this->fileWatcher->getWatchPaths()) . '</info>'
         );
-    }
-
-    /**
-     * Returns a compiler instance with the configuration
-     *
-     * @return ManagerInterface
-     */
-    public function getManager()
-    {
-        if (!$this->manager) {
-            $this->manager = new Manager($this->getConfigurationProvider());
-        }
-
-        return $this->manager;
     }
 
     /**
@@ -215,8 +193,8 @@ abstract class AbstractCommand extends Command implements ColorInterface
     }
 
     /**
-     * @param $path
-     * @return array
+     * @param string $path
+     * @return string[]
      */
     protected function prepareWatchPaths(string $path): array
     {
@@ -228,24 +206,8 @@ abstract class AbstractCommand extends Command implements ColorInterface
         );
     }
 
-    protected function getConfigurationProvider(): ConfigurationProvider
+    protected function getConfigurationProvider(): ConfigurationProviderInterface
     {
-        if (!$this->configurationProvider) {
-            $configurationManager = GeneralUtility::makeInstance(ObjectManager::class)->get(
-                ConfigurationManagerInterface::class
-            );
-
-            $allConfiguration = $configurationManager->getConfiguration(
-                ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
-            );
-            if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
-                $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
-                $this->configurationProvider = new ConfigurationProvider($configuration);
-            } else {
-                throw new UnexpectedValueException('Could not read configuration for "plugin.CunddAssetic"');
-            }
-        }
-
         return $this->configurationProvider;
     }
 }
