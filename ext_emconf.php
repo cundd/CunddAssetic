@@ -30,7 +30,7 @@ $EM_CONF[$_EXTKEY] = [
     'version'          => '3.0.0-dev',
     'constraints'      => [
         'depends'   => [
-            'typo3'          => '9.5-10.4.99',
+            'typo3'          => '10.4-11.5.99',
             'cundd_composer' => '3.0-5.99',
         ],
         'conflicts' => [
