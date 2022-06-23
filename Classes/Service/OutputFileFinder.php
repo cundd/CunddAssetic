@@ -8,7 +8,7 @@ use function filemtime;
 use function glob;
 use function usort;
 
-class OutputFileFinder
+class OutputFileFinder implements OutputFileFinderInterface
 {
     /**
      * Return an array of previously filtered Asset files

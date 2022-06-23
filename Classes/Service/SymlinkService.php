@@ -15,7 +15,7 @@ use function sprintf;
 use function symlink;
 use function unlink;
 
-class SymlinkService
+class SymlinkService implements SymlinkServiceInterface
 {
     /**
      * Defines if this instance is the owner of the symlink

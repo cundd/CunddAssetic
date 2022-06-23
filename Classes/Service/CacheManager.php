@@ -12,7 +12,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use function is_callable;
 use function sha1;
 
-class CacheManager
+class CacheManager implements CacheManagerInterface
 {
     /**
      * Cache identifier for the hash

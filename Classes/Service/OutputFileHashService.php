@@ -29,9 +29,9 @@ class OutputFileHashService
     private OutputFileFinder $outputFileFinder;
 
     public function __construct(
-        CacheManager $cacheManager,
+        CacheManagerInterface $cacheManager,
         ConfigurationProviderFactory $configurationProviderFactory,
-        OutputFileFinder $outputFileFinder
+        OutputFileFinderInterface $outputFileFinder
     ) {
         $this->cacheManager = $cacheManager;
         $this->configurationProvider = $configurationProviderFactory->build();

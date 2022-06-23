@@ -13,7 +13,7 @@ use function implode;
 use function is_array;
 use function str_replace;
 
-class OutputFileService
+class OutputFileService implements OutputFileServiceInterface
 {
     private ConfigurationProviderInterface $configurationProvider;
 

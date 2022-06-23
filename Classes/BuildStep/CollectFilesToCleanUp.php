@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\BuildStep;
 
 use Cundd\Assetic\Service\OutputFileFinder;
+use Cundd\Assetic\Service\OutputFileFinderInterface;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
 
@@ -11,7 +12,7 @@ class CollectFilesToCleanUp implements BuildStepInterface
 {
     private OutputFileFinder $outputFileFinder;
 
-    public function __construct(OutputFileFinder $outputFileFinder)
+    public function __construct(OutputFileFinderInterface $outputFileFinder)
     {
         $this->outputFileFinder = $outputFileFinder;
     }

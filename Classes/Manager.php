@@ -10,10 +10,14 @@ use Cundd\Assetic\Compiler\CompilerInterface;
 use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Service\CacheManager;
+use Cundd\Assetic\Service\CacheManagerInterface;
 use Cundd\Assetic\Service\OutputFileFinder;
+use Cundd\Assetic\Service\OutputFileFinderInterface;
 use Cundd\Assetic\Service\OutputFileHashService;
 use Cundd\Assetic\Service\OutputFileService;
+use Cundd\Assetic\Service\OutputFileServiceInterface;
 use Cundd\Assetic\Service\SymlinkService;
+use Cundd\Assetic\Service\SymlinkServiceInterface;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\FilePath;
@@ -57,11 +61,11 @@ class Manager implements ManagerInterface
 
     public function __construct(
         ConfigurationProviderFactory $configurationProviderFactory,
-        CacheManager $cacheManager,
+        CacheManagerInterface $cacheManager,
         OutputFileHashService $outputFileHashService,
-        OutputFileService $outputFileService,
-        SymlinkService $symlinkService,
-        OutputFileFinder $outputFileFinder
+        OutputFileServiceInterface $outputFileService,
+        SymlinkServiceInterface $symlinkService,
+        OutputFileFinderInterface $outputFileFinder
     ) {
         $this->configurationProvider = $configurationProviderFactory->build();
         $this->cacheManager = $cacheManager;
