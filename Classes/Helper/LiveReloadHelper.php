@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Helper;
 
-use Cundd\Assetic\Configuration\ConfigurationProvider;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
-use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;

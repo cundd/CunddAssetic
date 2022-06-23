@@ -96,7 +96,7 @@ class ConfigurationProvider implements ConfigurationProviderInterface
      */
     public function getOptions()
     {
-        return $this->configuration['options.']??null;
+        return $this->configuration['options.'] ?? null;
     }
 
     /**

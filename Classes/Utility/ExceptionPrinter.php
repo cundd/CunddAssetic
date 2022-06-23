@@ -16,7 +16,7 @@ class ExceptionPrinter
      *
      * @param FilterException|\Exception $exception
      */
-    public function printException(Throwable $exception):string
+    public function printException(Throwable $exception): string
     {
         $i = 0;
         $trace = '';

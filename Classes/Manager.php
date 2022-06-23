@@ -21,7 +21,6 @@ use Cundd\Assetic\ValueObject\PathWoHash;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 use function file_exists;
-use function var_dump;
 
 /**
  * Assetic Manager
