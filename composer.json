@@ -20,8 +20,8 @@
     "require": {
         "php": "^7.1",
         "ext-ctype": "*",
-        "cundd/assetic_additions": "^1.2.0",
-        "kriswallsmith/assetic": "^1.4"
+        "cundd/assetic_additions": "^2.0.0",
+        "assetic/framework": "^3.0.1"
     },
     "require-dev": {
         "cboden/ratchet": "^0.4.3"
