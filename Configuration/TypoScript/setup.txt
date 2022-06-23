@@ -58,7 +58,6 @@ plugin.CunddAssetic {
 [end]
 
 # Mirror plugin configuration to the module configuration
-#module.CunddAssetic =< plugin.CunddAssetic
 plugin.tx_assetic =< plugin.CunddAssetic
 
 # Include Assetic in page header
