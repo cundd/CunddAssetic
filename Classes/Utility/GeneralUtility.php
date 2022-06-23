@@ -20,11 +20,11 @@ abstract class GeneralUtility
     protected static $willDebug = -1;
 
     /**
-     * Returns if a backend user is logged in
+     * Return if a backend user is logged in
      *
      * @return bool
      */
-    public static function isBackendUser()
+    public static function isBackendUser(): bool
     {
         if (!isset($GLOBALS['BE_USER'])
             || !isset($GLOBALS['BE_USER']->user)
@@ -37,7 +37,7 @@ abstract class GeneralUtility
     }
 
     /**
-     * Dumps a given variable (or the given variables) wrapped into a 'pre' tag.
+     * Dump a given variable (or the given variables) wrapped into a 'pre' tag.
      *
      * @param mixed $var1
      */
@@ -60,7 +60,7 @@ abstract class GeneralUtility
     }
 
     /**
-     * Prints the given message if debugging is enabled
+     * Print the given message if debugging is enabled
      *
      * @param string $message
      */
@@ -77,7 +77,7 @@ abstract class GeneralUtility
     }
 
     /**
-     * Print a profiling message.
+     * Print a profiling message
      *
      * @param string $msg
      */
@@ -89,7 +89,7 @@ abstract class GeneralUtility
                 $lastCall = microtime(true);
             }
             $currentTime = microtime(true);
-            $requestTime = isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : 0;
+            $requestTime = $_SERVER['REQUEST_TIME_FLOAT'] ?? 0;
             fwrite(
                 STDOUT,
                 sprintf(
@@ -109,18 +109,11 @@ abstract class GeneralUtility
      *
      * @return bool
      */
-    protected static function willDebug()
+    private static function willDebug()
     {
         if (self::$willDebug === -1) {
-            self::$willDebug = false;
             $key = 'cundd_assetic_debug';
-            if ((bool)self::getRequestParameter($key)) {
-                self::$willDebug = true;
-            }
-
-            if (!self::isBackendUser()) {
-                self::$willDebug = false;
-            }
+            self::$willDebug = self::getRequestParameter($key) && self::isBackendUser();
         }
 
         return self::$willDebug;
@@ -130,7 +123,7 @@ abstract class GeneralUtility
      * @param string $key
      * @return mixed
      */
-    protected static function getRequestParameter(string $key)
+    private static function getRequestParameter(string $key)
     {
         return $_GET[$key] ?? $_POST[$key] ?? null;
     }
