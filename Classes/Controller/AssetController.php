@@ -4,13 +4,11 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Controller;
 
 use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Utility\Autoloader;
 use Cundd\Assetic\ValueObject\FilePath;
-use Cundd\CunddComposer\Autoloader;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
-
-Autoloader::register();
 
 class AssetController extends ActionController
 {
@@ -22,6 +20,7 @@ class AssetController extends ActionController
         ManagerInterface $manager,
         CacheManager $cacheManager
     ) {
+        Autoloader::register();
         $this->manager = $manager;
         $this->cacheManager = $cacheManager;
     }

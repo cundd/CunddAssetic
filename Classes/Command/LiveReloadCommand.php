@@ -5,7 +5,7 @@ namespace Cundd\Assetic\Command;
 
 use Cundd\Assetic\FileWatcher\FileCategories;
 use Cundd\Assetic\Server\LiveReload;
-use Cundd\CunddComposer\Autoloader;
+use Cundd\Assetic\Utility\Autoloader;
 use InvalidArgumentException;
 use LogicException;
 use Ratchet\Http\HttpServer;
