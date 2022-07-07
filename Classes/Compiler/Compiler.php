@@ -13,6 +13,7 @@ use Assetic\FilterManager;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 use Psr\Log\LoggerAwareInterface;
@@ -276,7 +277,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         $originalStylesheet = $stylesheet;
-        $stylesheet = GeneralUtility::getFileAbsFileName($stylesheet);
+        $stylesheet = PathUtility::getAbsolutePath($stylesheet);
         if (!$stylesheet) {
             throw new FilePathException(
                 sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet)
@@ -326,7 +327,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     {
         foreach ($parameters as &$parameter) {
             if (strpos($parameter, '.') !== false || strpos($parameter, DIRECTORY_SEPARATOR) !== false) {
-                $path = GeneralUtility::getFileAbsFileName($parameter);
+                $path = PathUtility::getAbsolutePath($parameter);
                 $parameter = realpath($path) ?: $path;
             }
         }
@@ -347,7 +348,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
             $homeDirectory = $this->getHomeDirectory();
             $filterBinaryPath = $homeDirectory . substr($filterBinaryPath, 1);
         } elseif (substr($filterBinaryPath, 0, 4) === 'EXT:') {
-            $filterBinaryPath = GeneralUtility::getFileAbsFileName($filterBinaryPath);
+            $filterBinaryPath = PathUtility::getAbsolutePath($filterBinaryPath);
         }
 
         return $filterBinaryPath;

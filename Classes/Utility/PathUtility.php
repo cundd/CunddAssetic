@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Utility;
 
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use function clearstatcache;
 use function dirname;
@@ -23,6 +24,9 @@ class PathUtility
 
         if (substr($path, 0, 4) === 'EXT:') {
             return dirname(GeneralUtility::getFileAbsFileName(rtrim($path, '/') . '/fake-file'));
+        }
+        if (substr($path, 0, 12) === 'ProjectPath:') {
+            return Environment::getProjectPath() . substr($path, 12);
         }
 
         return realpath($path) ?: $path;

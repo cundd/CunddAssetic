@@ -5,6 +5,7 @@ namespace Cundd\Assetic\Helper;
 
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Cundd\Assetic\Utility\PathUtility;
 use Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -50,7 +51,7 @@ JAVASCRIPT_CODE_TEMPLATE;
             $resource = '/' . str_replace(
                     $this->configurationProvider->getPublicPath(),
                     '',
-                    GeneralUtility::getFileAbsFileName($resource)
+                    PathUtility::getAbsolutePath($resource)
                 );
             $code = sprintf(self::JAVASCRIPT_CODE_TEMPLATE, $resource, $port);
 
