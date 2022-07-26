@@ -83,7 +83,7 @@ class Plugin
             $this->includeCss($filePath->getPublicUri());
         } else {
             $content .= sprintf(
-                '<link rel="stylesheet" type="text/css" href="%s" media="all" data-action="fsdfs">',
+                '<link rel="stylesheet" type="text/css" href="%s" media="all">',
                 $filePath->getPublicUri()
             );
         }
