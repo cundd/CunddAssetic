@@ -5,9 +5,9 @@ namespace Cundd\Assetic\Helper;
 
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
-use Cundd\Assetic\Utility\PathUtility;
 use Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\PathUtility as Typo3PathUtility;
 
 /**
  * Helper class to generate the Live Reload code
@@ -47,12 +47,7 @@ JAVASCRIPT_CODE_TEMPLATE;
 
         $port = $this->configurationProvider->getLiveReloadConfiguration()->getPort();
         if ($this->skipServerTest() || $this->isServerRunning($error)) {
-            $resource = 'EXT:assetic/Resources/Public/Library/livereload.js';
-            $resource = '/' . str_replace(
-                    $this->configurationProvider->getPublicPath(),
-                    '',
-                    PathUtility::getAbsolutePath($resource)
-                );
+            $resource = $this->getJavaScriptFileUri();
             $code = sprintf(self::JAVASCRIPT_CODE_TEMPLATE, $resource, $port);
 
             return "<script>$code</script>";
@@ -115,5 +110,16 @@ JAVASCRIPT_CODE_TEMPLATE;
         $error = new Exception($errorString, $errorNumber);
 
         return false;
+    }
+
+    private function getJavaScriptFileUri(): string
+    {
+        $file = Typo3PathUtility::getAbsoluteWebPath(
+            GeneralUtility::getFileAbsFileName(
+                'EXT:assetic/Resources/Public/Library/livereload.js'
+            )
+        );
+
+        return GeneralUtility::createVersionNumberedFilename($file);
     }
 }
