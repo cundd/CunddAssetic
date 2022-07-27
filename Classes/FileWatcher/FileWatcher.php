@@ -22,47 +22,47 @@ class FileWatcher implements FileWatcherInterface
      *
      * @var string[]
      */
-    private $watchedFilesCache = [];
+    private array $watchedFilesCache = [];
 
     /**
      * Timestamp of the last directory scan
      *
      * @var int
      */
-    private $watchedFilesCacheTime = 0;
+    private int $watchedFilesCacheTime = 0;
 
     /**
      * Lifetime of the directory scan cache
      *
      * @var int
      */
-    private $watchedFilesCacheLifetime = 5;
+    private int $watchedFilesCacheLifetime = 5;
 
     /**
      * Max depth to collect files for
      *
      * @var int
      */
-    private $findFilesMaxDepth = 7;
+    private int $findFilesMaxDepth = 7;
 
     /**
      * Array of paths to watch for changes
      *
      * @var string[]
      */
-    private $watchPaths = [];
+    private array $watchPaths = [];
 
     /**
      * Timestamp of the last re-compile
      *
-     * @var integer
+     * @var int
      */
-    private $lastChangeTime;
+    private int $lastChangeTime = 0;
 
     /**
      * @var string[]
      */
-    private $assetSuffixes;
+    private array $assetSuffixes;
 
     /**
      * FileWatcher constructor
