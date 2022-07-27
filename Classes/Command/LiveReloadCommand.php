@@ -19,7 +19,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use function array_merge;
 use function class_exists;
-use function explode;
 use function file_exists;
 use function in_array;
 use function is_readable;
@@ -33,74 +32,53 @@ use const PHP_VERSION;
 /**
  * Command to start the LiveReload server
  */
-class LiveReloadCommand extends AbstractCommand implements ColorInterface
+class LiveReloadCommand extends AbstractWatchCommand
 {
+    private const OPTION_ADDRESS = 'address';
+    private const OPTION_PORT = 'port';
+    private const OPTION_NOTIFICATION_DELAY = 'notification-delay';
+    private const OPTION_TLS_CERTIFICATE = 'tls-certificate';
+    private const OPTION_TLS_PRIVATE_KEY = 'tls-private-key';
+
     /**
      * @var LiveReload
      */
-    private $liveReloadServer;
+    private LiveReload $liveReloadServer;
 
     protected function configure()
     {
+        $this->setDescription('Start a LiveReload server');
+        $this->registerDefaultArgumentsAndOptions();
         $this
-            ->setDescription('Start a LiveReload server')
             ->addOption(
-                'address',
+                self::OPTION_ADDRESS,
                 'A',
                 InputOption::VALUE_REQUIRED,
                 'IP to listen',
                 '0.0.0.0'
             )
             ->addOption(
-                'port',
+                self::OPTION_PORT,
                 'P',
                 InputOption::VALUE_REQUIRED,
                 'Port to listen',
                 35729
             )
             ->addOption(
-                'interval',
-                'i',
-                InputOption::VALUE_REQUIRED,
-                'Interval between checks',
-                .5
-            )
-            ->addOption(
-                'path',
-                'p',
-                InputOption::VALUE_REQUIRED,
-                'Directory path(s) that should be watched (separated by comma ",")',
-                'fileadmin,EXT:client'
-            )
-            ->addOption(
-                'suffixes',
-                's',
-                InputOption::VALUE_REQUIRED,
-                'File suffixes to watch for changes (separated by comma ",")',
-                ''
-            )
-            ->addOption(
-                'max-depth',
-                'd',
-                InputOption::VALUE_REQUIRED,
-                'Maximum directory depth of file to watch',
-                7
-            )
-            ->addOption(
-                'notification-delay',
+                self::OPTION_NOTIFICATION_DELAY,
                 'o',
                 InputOption::VALUE_REQUIRED,
                 'Number of seconds to wait before sending the reload command to the clients',
                 0.0
             )
             ->addOption(
-                'tls-certificate',
+                self::OPTION_TLS_CERTIFICATE,
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Path to the TLS certificate in a PEM file (php.net/manual/context.ssl.php#context.ssl.local-cert)'
             )
             ->addOption(
-                'tls-private-key',
+                self::OPTION_TLS_PRIVATE_KEY,
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Path to the private key file (php.net/manual/context.ssl.php#context.ssl.local-pk)'
@@ -111,23 +89,10 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
     {
         Autoloader::register();
 
-        $address = $input->getOption('address');
-        $port = $input->getOption('port');
-        $path = $input->getOption('path');
-        $suffixes = $input->getOption('suffixes');
-        $maxDepth = (int)$input->getOption('max-depth');
-        $notificationDelay = (float)$input->getOption('notification-delay');
+        $fileWatcher = $this->getFileWatcher();
+        $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
 
-        $interval = max((float)$input->getOption('interval'), .5);
-        $this->buildFileWatcher($path, $maxDepth, $suffixes);
-        $this->printWatchedPaths($output);
-
-        $useTLS = (bool)$input->getOption('tls-certificate');
-        $server = $this->buildServer($input, $address, $port, $notificationDelay, $useTLS, $interval);
-        $prefix = $useTLS ? 'Secure ' : '';
-        $output->writeln(
-            "<info>{$prefix}Websocket server listening on $address:$port running under PHP version " . PHP_VERSION . "</info>"
-        );
+        $server = $this->buildServerFromInput($input, $output);
 
         $server->run();
 
@@ -139,7 +104,7 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
      */
     public function recompileIfNeededAndInformLiveReloadServer()
     {
-        $fileNeedsRecompile = $this->needsRecompile();
+        $fileNeedsRecompile = $this->needsRecompile($this->getFileWatcher());
         if (!$fileNeedsRecompile) {
             return;
         }
@@ -163,8 +128,8 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
     private function buildSecureServerContext(InputInterface $input): array
     {
         return [
-            'local_cert'        => $this->assertTlsFilePath($input, 'tls-certificate'),
-            'local_pk'          => $this->assertTlsFilePath($input, 'tls-private-key'),
+            'local_cert'        => $this->assertTlsFilePath($input, self::OPTION_TLS_CERTIFICATE),
+            'local_pk'          => $this->assertTlsFilePath($input, self::OPTION_TLS_PRIVATE_KEY),
             'allow_self_signed' => true,
             'verify_peer'       => false,
         ];
@@ -200,6 +165,28 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
     private function getHomeDirectory(): string
     {
         return $_SERVER['HOME'] ?? '';
+    }
+
+    /**
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     * @return IoServer
+     */
+    private function buildServerFromInput(InputInterface $input, OutputInterface $output): IoServer
+    {
+        $address = $input->getOption(self::OPTION_ADDRESS);
+        $port = $input->getOption(self::OPTION_PORT);
+        $notificationDelay = (float)$input->getOption(self::OPTION_NOTIFICATION_DELAY);
+        $interval = $this->getInterval($input, 0.5);
+
+        $useTLS = (bool)$input->getOption(self::OPTION_TLS_CERTIFICATE);
+        $server = $this->buildServer($input, $address, $port, $notificationDelay, $useTLS, $interval);
+        $prefix = $useTLS ? 'Secure ' : '';
+        $output->writeln(
+            "<info>{$prefix}Websocket server listening on $address:$port running under PHP version " . PHP_VERSION . "</info>"
+        );
+
+        return $server;
     }
 
     /**
@@ -254,20 +241,5 @@ class LiveReloadCommand extends AbstractCommand implements ColorInterface
         $this->liveReloadServer->setEventLoop($server->loop);
 
         return $server;
-    }
-
-    /**
-     * @param     $path
-     * @param int $maxDepth
-     * @param     $suffixes
-     */
-    private function buildFileWatcher($path, int $maxDepth, $suffixes): void
-    {
-        $fileWatcher = $this->getFileWatcher();
-        $fileWatcher->setWatchPaths($this->prepareWatchPaths($path));
-        $fileWatcher->setFindFilesMaxDepth($maxDepth);
-        if ($suffixes) {
-            $fileWatcher->setAssetSuffixes(explode(',', $suffixes));
-        }
     }
 }

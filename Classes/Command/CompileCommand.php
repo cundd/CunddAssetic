@@ -13,7 +13,7 @@ use function sprintf;
 /**
  * Command to compile assets
  */
-class CompileCommand extends AbstractCommand implements ColorInterface
+class CompileCommand extends AbstractCommand
 {
     public function configure()
     {
