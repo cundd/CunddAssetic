@@ -226,12 +226,13 @@ class LiveReloadCommand extends AbstractWatchCommand
                 $address
             );
         } else {
+            $context = $this->buildSecureServerContext($input);
             $loop = Loop::get();
 
             $server = new SecureServer(
                 new SocketServer($address . ':' . $port),
                 $loop,
-                $this->buildSecureServerContext($input)
+                $context
             );
 
             $server = new IoServer($component, $server, $loop);
