@@ -17,14 +17,7 @@ $EM_CONF[$_EXTKEY] = [
     'author'           => 'Daniel Corn',
     'author_email'     => 'info@cundd.net',
     'author_company'   => 'cundd',
-    'shy'              => '',
-    'priority'         => '',
-    'module'           => '',
     'state'            => 'stable',
-    'internal'         => '',
-    'uploadfolder'     => 0,
-    'createDirs'       => '',
-    'modify_tables'    => '',
     'clearCacheOnLoad' => 0,
     'lockType'         => '',
     'version'          => '3.0.0-dev',
@@ -32,10 +25,6 @@ $EM_CONF[$_EXTKEY] = [
         'depends'   => [
             'typo3'          => '10.4-11.5.99',
             'cundd_composer' => '3.0-5.99',
-        ],
-        'conflicts' => [
-        ],
-        'suggests'  => [
         ],
     ],
 ];
