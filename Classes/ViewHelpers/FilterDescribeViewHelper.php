@@ -41,9 +41,10 @@ class FilterDescribeViewHelper extends AbstractViewHelper
     {
         try {
             $reflectionProperty = new ReflectionProperty($filter, 'binaryPath');
-        } catch (ReflectionException $e) {
+        } catch (ReflectionException $_) {
             return null;
         }
+        $reflectionProperty->setAccessible(true);
         $value = $reflectionProperty->getValue($filter);
 
         return $value ? (string)$value : null;
