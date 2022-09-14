@@ -19,9 +19,9 @@ $EM_CONF[$_EXTKEY] = [
     'author_company'   => 'cundd',
     'state'            => 'stable',
     'clearCacheOnLoad' => 0,
-    'version'          => '3.0.0',
+    'version'          => '3.0.1',
     'constraints'      => [
-        'depends'   => [
+        'depends' => [
             'typo3'          => '10.4-11.5.99',
             'cundd_composer' => '3.0-5.99',
         ],
