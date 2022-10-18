@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Command;
 
 use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
+use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\FileWatcher\FileWatcher;
 use Cundd\Assetic\FileWatcher\FileWatcherInterface;
 use Cundd\Assetic\ManagerInterface;
@@ -17,6 +18,7 @@ use function array_map;
 use function explode;
 use function implode;
 use function max;
+use function sprintf;
 
 /**
  * Command to compile, watch and start LiveReload
@@ -169,7 +171,14 @@ abstract class AbstractWatchCommand extends AbstractCommand
     private function prepareWatchPaths(array $paths): array
     {
         return array_map(
-            [PathUtility::class, 'getAbsolutePath'],
+            function (string $inputPath) {
+                $resolvedPath = PathUtility::getAbsolutePath($inputPath);
+                if ('' === $resolvedPath) {
+                    throw new FilePathException(sprintf('Watch path "%s" could not be resolved', $inputPath));
+                }
+
+                return $resolvedPath;
+            },
             array_filter($paths)
         );
     }
