@@ -3,22 +3,18 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\Command\Input\ArrayUtility;
+use Cundd\Assetic\Command\Input\WatchPathsBuilder;
 use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
-use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\FileWatcher\FileWatcher;
 use Cundd\Assetic\FileWatcher\FileWatcherInterface;
 use Cundd\Assetic\ManagerInterface;
-use Cundd\Assetic\Utility\PathUtility;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use function array_filter;
-use function array_map;
-use function explode;
 use function implode;
 use function max;
-use function sprintf;
 
 /**
  * Command to compile, watch and start LiveReload
@@ -30,7 +26,7 @@ abstract class AbstractWatchCommand extends AbstractCommand
     private const OPTION_SUFFIXES = 'suffixes';
     private const OPTION_MAX_DEPTH = 'max-depth';
 
-    private FileWatcher $fileWatcher;
+    private FileWatcherInterface $fileWatcher;
 
     /**
      * @param ManagerInterface             $manager
@@ -64,16 +60,15 @@ abstract class AbstractWatchCommand extends AbstractCommand
             ->addOption(
                 self::PATHS,
                 'p',
-                InputOption::VALUE_REQUIRED,
-                'Directory path(s) that should be watched (separated by comma ",")',
-                'fileadmin,EXT:client'
+                InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED,
+                'Directory path(s) that should be watched',
+                ['EXT:client']
             )
             ->addOption(
                 self::OPTION_SUFFIXES,
                 's',
-                InputOption::VALUE_REQUIRED,
-                'File suffixes to watch for changes (separated by comma ",")',
-                ''
+                InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED,
+                'File suffixes to watch for changes'
             )
             ->addOption(
                 self::OPTION_MAX_DEPTH,
@@ -84,10 +79,7 @@ abstract class AbstractWatchCommand extends AbstractCommand
             );
     }
 
-    /**
-     * @return FileWatcher
-     */
-    protected function getFileWatcher(): FileWatcher
+    protected function getFileWatcher(): FileWatcherInterface
     {
         return $this->fileWatcher;
     }
@@ -102,7 +94,7 @@ abstract class AbstractWatchCommand extends AbstractCommand
         OutputInterface $output,
         FileWatcherInterface $fileWatcher
     ): FileWatcherInterface {
-        $paths = $this->getPaths($input);
+        $paths = (new WatchPathsBuilder())->buildPathsFromInput($input, self::PATHS);
         $suffixes = $input->getOption(self::OPTION_SUFFIXES);
         $maxDepth = (int)$input->getOption(self::OPTION_MAX_DEPTH);
 
@@ -116,29 +108,15 @@ abstract class AbstractWatchCommand extends AbstractCommand
         FileWatcherInterface $fileWatcher,
         array $paths,
         int $maxDepth,
-        mixed $suffixes
+        array $suffixes
     ): FileWatcherInterface {
-        $fileWatcher->setWatchPaths($this->prepareWatchPaths($paths));
+        $fileWatcher->setWatchPaths($paths);
         $fileWatcher->setFindFilesMaxDepth($maxDepth);
         if ($suffixes) {
-            $fileWatcher->setAssetSuffixes(explode(',', $suffixes));
+            $fileWatcher->setAssetSuffixes(ArrayUtility::normalizeInput($suffixes));
         }
 
         return $fileWatcher;
-    }
-
-    /**
-     * @param InputInterface $input
-     * @return string[]
-     */
-    private function getPaths(InputInterface $input): array
-    {
-        $argument = $input->getArgument(self::PATHS);
-        if ($argument) {
-            return $argument;
-        }
-
-        return explode(',', $input->getOption(self::PATHS));
     }
 
     /**
@@ -157,29 +135,11 @@ abstract class AbstractWatchCommand extends AbstractCommand
     /**
      * If a file changed its path will be returned, otherwise FALSE
      *
+     * @param FileWatcherInterface $fileWatcher
      * @return string|null
      */
     protected function needsRecompile(FileWatcherInterface $fileWatcher): ?string
     {
         return $fileWatcher->getChangedFileSinceLastCheck();
-    }
-
-    /**
-     * @param string[] $paths
-     * @return string[]
-     */
-    private function prepareWatchPaths(array $paths): array
-    {
-        return array_map(
-            function (string $inputPath) {
-                $resolvedPath = PathUtility::getAbsolutePath($inputPath);
-                if ('' === $resolvedPath) {
-                    throw new FilePathException(sprintf('Watch path "%s" could not be resolved', $inputPath));
-                }
-
-                return $resolvedPath;
-            },
-            array_filter($paths)
-        );
     }
 }
