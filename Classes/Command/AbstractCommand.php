@@ -43,10 +43,10 @@ abstract class AbstractCommand extends Command
      * Compile the assets
      *
      * @param bool $graceful
-     * @return string
+     * @return string|null
      * @throws Throwable if an error occurred and `$graceful` is FALSE
      */
-    protected function compile(bool $graceful): string
+    protected function compile(bool $graceful): ?string
     {
         $this->manager->forceCompile();
 
@@ -61,7 +61,7 @@ abstract class AbstractCommand extends Command
                 throw $exception;
             }
 
-            return '';
+            return null;
         }
 
         if ($this->getConfigurationProvider()->getCreateSymlink()) {

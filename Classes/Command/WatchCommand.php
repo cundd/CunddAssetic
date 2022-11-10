@@ -51,7 +51,8 @@ class WatchCommand extends AbstractWatchCommand
         if (!$changedFile) {
             return;
         }
-        $compiledFile = $this->compile(true);
+        // TODO: Handle the error
+        $compiledFile = (string)$this->compile(true);
 
         $output->writeln("<info>File $changedFile has changed. Assets have been compiled into $compiledFile </info>");
     }

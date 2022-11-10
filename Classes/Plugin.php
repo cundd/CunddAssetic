@@ -72,7 +72,7 @@ class Plugin
         if ($result->isErr()) {
             $exception = $result->unwrapErr();
 
-            return $this->handleBuildError($exception);
+            return $this->handleBuildError($exception) . $this->getLiveReloadCode();
         }
 
         /** @var FilePath $filePath */

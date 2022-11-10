@@ -32,10 +32,10 @@ class CompileCommand extends AbstractCommand
         $destination = $input->getArgument('destination');
 
         $compileStart = microtime(true);
-        $usedPath = $sourcePath = $this->compile(false);
+        $usedPath = (string)$this->compile(false);
         $compileEnd = microtime(true);
         if ($destination) {
-            $usedPath = $this->copyToDestination($sourcePath, $destination);
+            $usedPath = $this->copyToDestination($usedPath, $destination);
         }
         $compileTime = $compileEnd - $compileStart;
 

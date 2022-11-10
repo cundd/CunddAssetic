@@ -40,10 +40,9 @@ class LiveReloadCommand extends AbstractWatchCommand
     private const OPTION_TLS_CERTIFICATE = 'tls-certificate';
     private const OPTION_TLS_PRIVATE_KEY = 'tls-private-key';
 
-    /**
-     * @var LiveReload
-     */
     private LiveReload $liveReloadServer;
+
+    private bool $lastCompilationFailed = false;
 
     protected function configure()
     {
@@ -109,15 +108,17 @@ class LiveReloadCommand extends AbstractWatchCommand
             return;
         }
 
-        $needFullPageReload = in_array(
-            pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION),
-            array_merge(FileCategories::$scriptAssetSuffixes, FileCategories::$otherAssetSuffixes)
-        );
+        $needFullPageReload = $this->needsFullPageReload($fileNeedsRecompile);
         if ($needFullPageReload) {
             $this->liveReloadServer->fileDidChange($fileNeedsRecompile, false);
         } else {
             $changedFile = $this->compile(true);
-            $this->liveReloadServer->fileDidChange($changedFile, true);
+            if (null !== $changedFile && !$this->lastCompilationFailed) {
+                $this->liveReloadServer->fileDidChange($changedFile, true);
+            } else {
+                $this->liveReloadServer->fileDidChange('', false);
+            }
+            $this->lastCompilationFailed = null === $changedFile;
         }
     }
 
@@ -242,5 +243,17 @@ class LiveReloadCommand extends AbstractWatchCommand
         $this->liveReloadServer->setEventLoop($server->loop);
 
         return $server;
+    }
+
+    /**
+     * @param string $fileNeedsRecompile
+     * @return bool
+     */
+    private function needsFullPageReload(string $fileNeedsRecompile): bool
+    {
+        return in_array(
+            pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION),
+            array_merge(FileCategories::$scriptAssetSuffixes, FileCategories::$otherAssetSuffixes)
+        );
     }
 }
