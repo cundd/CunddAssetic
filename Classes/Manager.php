@@ -47,17 +47,17 @@ class Manager implements ManagerInterface
 
     private CompilerInterface $compiler;
 
-    private CacheManager $cacheManager;
+    private CacheManagerInterface $cacheManager;
 
     private ConfigurationProviderInterface $configurationProvider;
 
     private OutputFileHashService $outputFileHashService;
 
-    private OutputFileService $outputFileService;
+    private OutputFileServiceInterface $outputFileService;
 
-    private SymlinkService $symlinkService;
+    private SymlinkServiceInterface $symlinkService;
 
-    private OutputFileFinder $outputFileFinder;
+    private OutputFileFinderInterface $outputFileFinder;
 
     public function __construct(
         ConfigurationProviderFactory $configurationProviderFactory,
