@@ -57,10 +57,6 @@ class Plugin
         AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
         Autoloader::register();
 
-        // `force_on_top` only works if caching is enabled
-        // $forceOnTop = (bool)($conf['force_on_top'] ?? false);
-        $forceOnTop = false;
-
         if (0 === count($this->manager->collectAssets()->all())) {
             throw new MissingConfigurationException('No assets have been defined');
         }
@@ -79,14 +75,10 @@ class Plugin
         $filePath = $result->unwrap();
         $content = $this->getLiveReloadCode();
         $content .= $this->addDebugInformation($collectAndCompileEnd, $collectAndCompileStart);
-        if ($forceOnTop) {
-            $this->includeCss($filePath->getPublicUri());
-        } else {
-            $content .= sprintf(
-                '<link rel="stylesheet" type="text/css" href="%s" media="all">',
-                $filePath->getPublicUri()
-            );
-        }
+        $content .= sprintf(
+            '<link rel="stylesheet" type="text/css" href="%s" media="all">',
+            $filePath->getPublicUri()
+        );
 
         AsseticGeneralUtility::profile('Cundd Assetic plugin end');
 

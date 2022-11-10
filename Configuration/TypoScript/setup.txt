@@ -41,7 +41,6 @@ plugin.CunddAssetic {
     }
 
     allow_compile_without_login = {$module.tx_assetic.settings.allow_compile_without_login}
-    force_on_top = {$module.tx_assetic.settings.force_on_top}
     strict = {$module.tx_assetic.settings.strict}
     create_symlink = {$module.tx_assetic.settings.create_symlink}
     livereload {
