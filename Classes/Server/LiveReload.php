@@ -28,7 +28,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var integer
      */
-    const LOG_LEVEL_EMERGENCY = 0;
+    private const LOG_LEVEL_EMERGENCY = 0;
 
     /**
      * Alert: action must be taken immediately
@@ -37,7 +37,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var integer
      */
-    const LOG_LEVEL_ALERT = 1;
+    private const LOG_LEVEL_ALERT = 1;
 
     /**
      * Critical: critical conditions
@@ -46,7 +46,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var integer
      */
-    const LOG_LEVEL_CRITICAL = 2;
+    private const LOG_LEVEL_CRITICAL = 2;
 
     /**
      * Error: error conditions
@@ -55,7 +55,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var integer
      */
-    const LOG_LEVEL_ERROR = 3;
+    private const LOG_LEVEL_ERROR = 3;
 
     /**
      * Warning: warning conditions
@@ -65,7 +65,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var integer
      */
-    const LOG_LEVEL_WARNING = 4;
+    private const LOG_LEVEL_WARNING = 4;
 
     /**
      * Notice: normal but significant condition
@@ -74,7 +74,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var integer
      */
-    const LOG_LEVEL_NOTICE = 5;
+    private const LOG_LEVEL_NOTICE = 5;
 
     /**
      * Informational: informational messages
@@ -83,7 +83,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var integer
      */
-    const LOG_LEVEL_INFO = 6;
+    private const LOG_LEVEL_INFO = 6;
 
     /**
      * Debug: debug-level messages
@@ -92,14 +92,14 @@ class LiveReload implements MessageComponentInterface
      *
      * @var integer
      */
-    const LOG_LEVEL_DEBUG = 7;
+    private const LOG_LEVEL_DEBUG = 7;
 
     /**
      * Reverse look up of log level to level name.
      *
      * @var array
      */
-    protected static $logLevelPrefix = [
+    protected static array $logLevelPrefix = [
         self::LOG_LEVEL_EMERGENCY => '!!!',
         self::LOG_LEVEL_ALERT     => '!!',
         self::LOG_LEVEL_CRITICAL  => '!',
@@ -113,7 +113,7 @@ class LiveReload implements MessageComponentInterface
     /**
      * End of a message
      */
-    const MESSAGE_END = "\r\n";
+    private const MESSAGE_END = "\r\n";
 
     /**
      * All connected clients
@@ -127,7 +127,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var array
      */
-    protected $handshakeMessage = [
+    protected array $handshakeMessage = [
         'command'    => 'hello',
         'protocols'  => [
             'http://livereload.com/protocols/official-7',
@@ -144,7 +144,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @var array
      */
-    protected $reloadMessage = [
+    protected array $reloadMessage = [
         'command' => 'reload',
         'path'    => 'path/to/file.ext',
         'liveCss' => true,
@@ -155,21 +155,16 @@ class LiveReload implements MessageComponentInterface
      *
      * @var array
      */
-    protected $alertMessage = [
+    protected array $alertMessage = [
         'command' => 'alert',
         'message' => 'Hy',
     ];
 
-    /**
-     * @var LoopInterface
-     */
-    private $eventLoop;
+    private LoopInterface $eventLoop;
 
     private $notificationDelay;
 
     /**
-     * LiveReload constructor.
-     *
      * @param int|float $notificationDelay Number of seconds to wait before sending the reload command to the clients
      */
     public function __construct($notificationDelay)
@@ -270,7 +265,7 @@ class LiveReload implements MessageComponentInterface
      * @param string $changedFile
      * @param bool   $liveCss
      */
-    public function fileDidChange(string $changedFile, $liveCss = true): void
+    public function fileDidChange(string $changedFile, bool $liveCss): void
     {
         $this->debug("File '$changedFile' did change" . PHP_EOL, self::LOG_LEVEL_INFO);
 
@@ -319,17 +314,17 @@ class LiveReload implements MessageComponentInterface
     }
 
     /**
-     * Prints the given message to the console
+     * Print the given message to the console
      *
-     * @param string   $message
-     * @param int|null $logLevel
+     * @param string          $message
+     * @param string|int|null $logLevel Log Level or symbol
      */
     protected function debug(string $message, $logLevel = null): void
     {
         if ($logLevel !== null) {
             $messagePrefix = null;
             if (is_int($logLevel)) {
-                $messagePrefix = isset(self::$logLevelPrefix[$logLevel]) ? self::$logLevelPrefix[$logLevel] : '';
+                $messagePrefix = self::$logLevelPrefix[$logLevel] ?? '';
             } elseif (is_string($logLevel)) {
                 $messagePrefix = "($logLevel)";
             }
@@ -341,10 +336,10 @@ class LiveReload implements MessageComponentInterface
     }
 
     /**
-     * Prints the given message to the console
+     * Print the given message to the console
      *
-     * @param string   $message
-     * @param int|null $logLevel
+     * @param string          $message
+     * @param string|int|null $logLevel Log Level or symbol
      */
     protected function debugLine(string $message, $logLevel = null): void
     {
