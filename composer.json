@@ -27,7 +27,6 @@
         }
     },
     "replace": {
-        "assetic": "self.version",
         "typo3-ter/assetic": "self.version"
     }
 }
