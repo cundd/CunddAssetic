@@ -8,10 +8,13 @@ use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\ValueObject\FinalOutputFilePath;
 use Cundd\Assetic\ValueObject\PathWoHash;
+use Cundd\Assetic\ValueObject\Result;
 use LogicException;
+use UnexpectedValueException;
 use function end;
 use function file_exists;
 use function hash_file;
+use function is_readable;
 use function sprintf;
 use function strlen;
 use function substr;
@@ -41,23 +44,30 @@ class OutputFileHashService
     /**
      * @param PathWoHash $outputFilenameWithoutHash
      * @param string     $hashAlgorithm
-     * @return FinalOutputFilePath
+     * @return Result<FinalOutputFilePath,UnexpectedValueException>
      */
     public function buildAndStoreFileHash(
         PathWoHash $outputFilenameWithoutHash,
         string $hashAlgorithm = 'md5'
-    ): FinalOutputFilePath {
+    ): Result {
         // $hashAlgorithm = 'crc32';
         // $hashAlgorithm = 'sha1';
         // $hashAlgorithm = 'md5';
         $compileDestinationPath = $outputFilenameWithoutHash->getAbsoluteUri();
+        if (!is_readable($compileDestinationPath)) {
+            return Result::err(new UnexpectedValueException('Compiled destination path can not be read'));
+        }
         $fileHash = hash_file($hashAlgorithm, $compileDestinationPath);
+        if (false === $fileHash) {
+            return Result::err(new UnexpectedValueException('Could not create hash of compiled destination path'));
+        }
+
         AsseticGeneralUtility::profile('Did create file hash');
         $this->storeHash($outputFilenameWithoutHash, $fileHash);
 
         $finalFileName = $outputFilenameWithoutHash->getFileName() . '_' . $fileHash . '.css';
 
-        return FinalOutputFilePath::fromFileName($finalFileName, $this->configurationProvider);
+        return Result::ok(FinalOutputFilePath::fromFileName($finalFileName, $this->configurationProvider));
     }
 
     /**
