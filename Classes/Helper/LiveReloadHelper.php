@@ -90,7 +90,10 @@ JAVASCRIPT_CODE_TEMPLATE;
      */
     private function isEnabled(): bool
     {
-        return $this->configurationProvider->getEnableExperimentalFeatures() && AsseticGeneralUtility::isBackendUser();
+        $isEnabled = $this->configurationProvider->getLiveReloadConfiguration()->isEnabled()
+            || $this->configurationProvider->getEnableExperimentalFeatures();
+
+        return $isEnabled && AsseticGeneralUtility::isBackendUser();
     }
 
     /**

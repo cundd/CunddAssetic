@@ -116,8 +116,8 @@ class ConfigurationProvider implements ConfigurationProviderInterface
      */
     public function getEnableExperimentalFeatures(): bool
     {
-        return $this->getLiveReloadConfiguration()->getAddJavascript()
-            || (bool)($this->configuration['experimental'] ?? false);
+        return $this->getLiveReloadConfiguration()->isEnabled()
+            || ($this->configuration['experimental'] ?? false);
     }
 
     /**
@@ -147,7 +147,9 @@ class ConfigurationProvider implements ConfigurationProviderInterface
      */
     public function getCreateSymlink(): bool
     {
-        return $this->configuration['create_symlink'] || $this->getEnableExperimentalFeatures();
+        return $this->configuration['create_symlink']
+            || $this->getLiveReloadConfiguration()->isEnabled()
+            || $this->getEnableExperimentalFeatures();
     }
 
     /**

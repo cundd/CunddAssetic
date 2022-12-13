@@ -35,6 +35,16 @@ class LiveReloadConfiguration
     }
 
     /**
+     * Return if the LiveReload support is generally enabled
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->getAddJavascript();
+    }
+
+    /**
      * Return the LiveReload server port
      *
      * @return int
