@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Controller;
 
 use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Service\SessionServiceInterface;
 use Cundd\Assetic\Utility\Autoloader;
 use Cundd\Assetic\ValueObject\FilePath;
 use TYPO3\CMS\Core\Cache\CacheManager;
@@ -16,13 +17,17 @@ class AssetController extends ActionController
 
     private CacheManager $cacheManager;
 
+    private SessionServiceInterface $sessionService;
+
     public function __construct(
         ManagerInterface $manager,
-        CacheManager $cacheManager
+        CacheManager $cacheManager,
+        SessionServiceInterface $sessionService
     ) {
         Autoloader::register();
         $this->manager = $manager;
         $this->cacheManager = $cacheManager;
+        $this->sessionService = $sessionService;
     }
 
     /**
@@ -42,6 +47,7 @@ class AssetController extends ActionController
         } else {
             $this->addFlashMessage('No assets found');
         }
+        $this->view->assign('lastBuildError', $this->sessionService->getErrorFromSession());
     }
 
     /**
@@ -67,14 +73,18 @@ class AssetController extends ActionController
             /** @var FilePath $outputFilePath */
             $outputFilePath = $result->unwrap();
             $this->addFlashMessage('Stylesheets have been compiled to ' . $outputFilePath->getPublicUri());
+            $this->sessionService->clearErrorInSession();
 
             if ($clearPageCache) {
                 $this->cacheManager->flushCachesInGroup('pages');
             }
         } else {
             $exception = $result->unwrapErr();
+            $this->sessionService->storeErrorInSession($exception->getMessage());
+
+            $message = 'Could not compile files' . ($exception->getCode() > 0 ? ': #' . $exception->getCode() : '');
             $this->addFlashMessage(
-                'Could not compile files: #' . $exception->getCode() . ': ' . $exception->getMessage(),
+                $message,
                 '',
                 AbstractMessage::ERROR
             );

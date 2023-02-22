@@ -5,7 +5,7 @@
 <f:layout name="Default"/>
 
 <f:section name="content">
-    <style type="text/css">
+    <style>
         .assetic {
             padding: 10px;
         }
@@ -18,11 +18,12 @@
             cursor: pointer;
             padding: 2px 4px;
 
-            font-size: 13px;
+            /*font-size: 13px;*/
             line-height: 16px;
             margin: 0 10px 0 0;
         }
 
+        .assetic .button:focus ,
         .assetic .button:hover {
             background-color: #C8C8C8;
             border: 1px solid #737F91;
@@ -47,6 +48,29 @@
 
         .assetic .no-wrap {
             white-space: nowrap;
+        }
+
+        .assetic .build-error {
+            margin-top: 20px;
+        }
+
+        .assetic .build-error .button {
+            background: #c83c3c;
+            border-color: #77142e;
+            color: white;
+        }
+        .assetic .build-error .button::after {
+            content: "\f0da";
+            display: inline-block;
+            font: normal normal normal 14px/1 FontAwesome;
+            font-size: inherit;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .assetic .build-error .button[aria-expanded=true]::after {
+            content: "\f0d7";
         }
     </style>
 
@@ -85,13 +109,33 @@
             </f:for>
         </table>
 
-        <f:link.action action="compile" class="button">
-            Compile
-        </f:link.action>
+        <div class="button-group">
+            <f:link.action action="compile" class="button">
+                Compile
+            </f:link.action>
 
-        <f:link.action action="compile" arguments="{clearPageCache:1}" class="button">
-            Compile and clear FE cache
-        </f:link.action>
+            <f:link.action action="compile" arguments="{clearPageCache:1}" class="button">
+                Compile and clear FE cache
+            </f:link.action>
+        </div>
+
+        <f:if condition="{lastBuildError}">
+            <div class="build-error">
+                <div class="button-group">
+                    <button class="button"
+                            type="button"
+                            data-toggle="collapse"
+                            data-target="#build-error-message"
+                            aria-expanded="false"
+                            aria-controls="build-error-message">
+                         Show build errors
+                    </button>
+                </div>
+                <div class="collapse" id="build-error-message">
+                    <pre>{lastBuildError}</pre>
+                </div>
+            </div>
+        </f:if>
     </div>
 </f:section>
 </html>
