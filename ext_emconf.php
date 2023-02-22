@@ -21,8 +21,10 @@ $EM_CONF[$_EXTKEY] = [
     'clearCacheOnLoad' => 0,
     'version'          => '3.1.0',
     'constraints'      => [
-        'depends' => [
-            'typo3'          => '10.4-11.5.99',
+        'depends'  => [
+            'typo3' => '10.4-11.5.99',
+        ],
+        'suggests' => [
             'cundd_composer' => '3.0-5.99',
         ],
     ],
