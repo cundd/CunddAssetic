@@ -8,6 +8,7 @@ use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility as Typo3PathUtility;
+use function fclose;
 
 /**
  * Helper class to generate the Live Reload code
@@ -104,9 +105,11 @@ JAVASCRIPT_CODE_TEMPLATE;
      */
     private function isServerRunning(Exception &$error = null): bool
     {
-        $connection = @fsockopen('localhost', $this->getPort(), $errorNumber, $errorString, 1.0);
+        $connection = @fsockopen('localhost', $this->getPort(), $errorNumber, $errorString, 0.1);
 
         if (is_resource($connection)) {
+            fclose($connection);
+
             return true;
         }
 
