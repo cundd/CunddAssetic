@@ -3,9 +3,15 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Utility;
 
+use function date;
+use function defined;
+use function fopen;
 use function fwrite;
 use function getenv;
 use function microtime;
+use function sprintf;
+use const PHP_EOL;
+use const STDOUT;
 
 /**
  * General utility class for debugging and message printing
@@ -85,17 +91,21 @@ abstract class GeneralUtility
     {
         if (getenv('CUNDD_ASSETIC_DEBUG')) {
             static $lastCall = -1;
+            static $profilerStart;
             if ($lastCall === -1) {
                 $lastCall = microtime(true);
+                $profilerStart = microtime(true);
             }
             $currentTime = microtime(true);
             $requestTime = $_SERVER['REQUEST_TIME_FLOAT'] ?? 0;
+            $outputStream = defined('STDOUT') ? STDOUT : fopen('php://output', 'a');
             fwrite(
-                STDOUT,
+                $outputStream,
                 sprintf(
-                    "[%s] %.4f %.4f %s" . PHP_EOL,
+                    "[%s] %.4f %.4f %.4f %s" . PHP_EOL,
                     date('Y-m-d H:i:s'),
                     $currentTime - $requestTime,
+                    $currentTime - $profilerStart,
                     $currentTime - $lastCall,
                     $msg
                 )
