@@ -18,7 +18,6 @@ use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Psr\Log\LoggerInterface;
 use Throwable;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use UnexpectedValueException;
@@ -59,11 +58,6 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * @var array
      */
     protected $pluginLevelOptions = [];
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
 
     /**
      * @var ConfigurationProviderInterface
