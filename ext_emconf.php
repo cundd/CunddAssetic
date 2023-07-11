@@ -22,7 +22,7 @@ $EM_CONF[$_EXTKEY] = [
     'version'          => '4.0.0-dev',
     'constraints'      => [
         'depends'  => [
-            'typo3' => '10.4-11.5.99',
+            'typo3' => '12.4-12.4.99',
         ],
         'suggests' => [
             'cundd_composer' => '3.0-5.99',

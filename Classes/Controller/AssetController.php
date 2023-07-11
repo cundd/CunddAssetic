@@ -7,8 +7,10 @@ use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Service\SessionServiceInterface;
 use Cundd\Assetic\Utility\Autoloader;
 use Cundd\Assetic\ValueObject\FilePath;
+use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
 class AssetController extends ActionController
@@ -19,46 +21,55 @@ class AssetController extends ActionController
 
     private SessionServiceInterface $sessionService;
 
+    private ModuleTemplateFactory $moduleTemplateFactory;
+
     public function __construct(
         ManagerInterface $manager,
         CacheManager $cacheManager,
-        SessionServiceInterface $sessionService
+        SessionServiceInterface $sessionService,
+        ModuleTemplateFactory $moduleTemplateFactory,
     ) {
         Autoloader::register();
         $this->manager = $manager;
         $this->cacheManager = $cacheManager;
         $this->sessionService = $sessionService;
+        $this->moduleTemplateFactory = $moduleTemplateFactory;
     }
 
     /**
      * Action list
      *
-     * @return void
+     * @return ResponseInterface
      */
-    public function listAction()
+    public function listAction(): ResponseInterface
     {
+        $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $assetCollection = [];
         $this->manager->collectAssets();
         if ($this->manager->getCompiler()->getAssetManager()->has('cundd_assetic')) {
             $assetCollection = $this->manager->getCompiler()->getAssetManager()->get('cundd_assetic');
         }
         if (!empty($assetCollection)) {
-            $this->view->assign('assets', $assetCollection);
+            $moduleTemplate->assign('assets', $assetCollection);
         } else {
             $this->addFlashMessage('No assets found');
         }
-        $this->view->assign('lastBuildError', $this->sessionService->getErrorFromSession());
+        $moduleTemplate->assign('lastBuildError', $this->sessionService->getErrorFromSession());
+
+        return $this->htmlResponse($moduleTemplate->render());
     }
 
     /**
      * Action that compiles the stylesheet
      *
      * @param bool $clearPageCache
+     * @return ResponseInterface
      */
-    public function compileAction(bool $clearPageCache = false)
+    public function compileAction(bool $clearPageCache = false): ResponseInterface
     {
         $this->compile($clearPageCache);
-        $this->redirect('list');
+
+        return $this->redirect('list');
     }
 
     /**
@@ -86,7 +97,7 @@ class AssetController extends ActionController
             $this->addFlashMessage(
                 $message,
                 '',
-                AbstractMessage::ERROR
+                ContextualFeedbackSeverity::ERROR
             );
         }
     }

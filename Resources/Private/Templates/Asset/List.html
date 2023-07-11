@@ -2,9 +2,9 @@
       xmlns:assetic="http://typo3.org/ns/Cundd/Assetic/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<f:layout name="Default"/>
+<f:layout name="Module"/>
 
-<f:section name="content">
+<f:section name="Content">
     <style>
         .assetic {
             padding: 10px;
@@ -23,7 +23,7 @@
             margin: 0 10px 0 0;
         }
 
-        .assetic .button:focus ,
+        .assetic .button:focus,
         .assetic .button:hover {
             background-color: #C8C8C8;
             border: 1px solid #737F91;
@@ -59,6 +59,7 @@
             border-color: #77142e;
             color: white;
         }
+
         .assetic .build-error .button::after {
             content: "\f0da";
             display: inline-block;
@@ -128,7 +129,7 @@
                             data-target="#build-error-message"
                             aria-expanded="false"
                             aria-controls="build-error-message">
-                         Show build errors
+                        Show build errors
                     </button>
                 </div>
                 <div class="collapse" id="build-error-message">
