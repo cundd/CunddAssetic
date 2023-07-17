@@ -29,8 +29,6 @@ class CacheManager implements CacheManagerInterface
     public function getCache(PathWoHash $identifier)
     {
         $identifier = $this->prepareIdentifier($identifier);
-        AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
-
         if (is_callable('apc_fetch')) {
             /** @noinspection PhpComposerExtensionStubsInspection */
             return apc_fetch($identifier);
@@ -50,8 +48,6 @@ class CacheManager implements CacheManagerInterface
     public function setCache(PathWoHash $identifier, $value)
     {
         $identifier = $this->prepareIdentifier($identifier);
-        AsseticGeneralUtility::pd(ConfigurationUtility::getDomainIdentifier() . '-' . $identifier);
-
         if (is_callable('apc_store')) {
             /** @noinspection PhpComposerExtensionStubsInspection */
             apc_store($identifier, $value);
@@ -89,8 +85,9 @@ class CacheManager implements CacheManagerInterface
     private function prepareIdentifier(PathWoHash $identifier): string
     {
         return sha1(
-            ConfigurationUtility::getDomainIdentifier(
-            ) . '-' . self::CACHE_IDENTIFIER_HASH . '_' . $identifier->getFileName()
+            ConfigurationUtility::getDomainIdentifier()
+            . '-' . self::CACHE_IDENTIFIER_HASH
+            . '_' . $identifier->getFileName()
         );
     }
 }
