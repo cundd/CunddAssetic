@@ -1,32 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Configuration;
 
 class LiveReloadConfiguration
 {
-    /**
-     * @var int
-     */
-    private $port;
+    private int $port;
 
-    /**
-     * @var bool
-     */
-    private $addJavascript;
+    private bool $addJavascript;
 
-    /**
-     * @var bool
-     */
-    private $skipServerTest;
+    private bool $skipServerTest;
 
-    /**
-     * LiveReload Configuration constructor
-     *
-     * @param int  $port
-     * @param bool $addJavascript
-     * @param bool $skipServerTest
-     */
     public function __construct(int $port, bool $addJavascript, bool $skipServerTest)
     {
         $this->port = $port;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\ViewHelpers;
@@ -10,6 +11,7 @@ use ReflectionException;
 use ReflectionProperty;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
+
 use function get_class;
 
 class FilterDescribeViewHelper extends AbstractViewHelper

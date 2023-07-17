@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\BuildStep;
@@ -9,6 +10,7 @@ use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
+
 use function clearstatcache;
 use function is_link;
 use function rename;

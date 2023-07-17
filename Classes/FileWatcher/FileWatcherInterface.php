@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\FileWatcher;
@@ -18,10 +19,10 @@ interface FileWatcherInterface
     /**
      * Sets the array of file suffix to watch for changes
      *
-     * @param string[] $assetSuffix
+     * @param string[] $assetSuffixes
      * @return $this
      */
-    public function setAssetSuffixes(array $assetSuffix): FileWatcherInterface;
+    public function setAssetSuffixes(array $assetSuffixes): FileWatcherInterface;
 
     /**
      * @return string[]

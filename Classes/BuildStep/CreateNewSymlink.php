@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\BuildStep;
@@ -10,7 +11,7 @@ use Cundd\Assetic\ValueObject\BuildStateResult;
 
 class CreateNewSymlink implements BuildStepInterface
 {
-    private SymlinkService $symlinkService;
+    private SymlinkServiceInterface $symlinkService;
 
     public function __construct(SymlinkServiceInterface $symlinkService)
     {

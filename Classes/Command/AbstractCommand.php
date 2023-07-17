@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
@@ -10,6 +11,7 @@ use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\ValueObject\FilePath;
 use Symfony\Component\Console\Command\Command;
 use Throwable;
+
 use function basename;
 use function copy;
 use function count;

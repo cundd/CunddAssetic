@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Utility;
@@ -10,6 +11,7 @@ use function fwrite;
 use function getenv;
 use function microtime;
 use function sprintf;
+
 use const PHP_EOL;
 use const STDOUT;
 

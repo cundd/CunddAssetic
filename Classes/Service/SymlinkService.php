@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Service;
@@ -8,6 +9,7 @@ use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\SymlinkException;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\PathWoHash;
+
 use function clearstatcache;
 use function file_exists;
 use function is_link;

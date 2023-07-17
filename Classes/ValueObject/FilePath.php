@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\ValueObject;
@@ -6,7 +7,9 @@ namespace Cundd\Assetic\ValueObject;
 use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\ConfigurationUtility;
+
 use function rtrim;
+
 use const DIRECTORY_SEPARATOR;
 
 class FilePath

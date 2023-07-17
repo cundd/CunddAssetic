@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Service;
 
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+
 use function filemtime;
 use function glob;
 use function usort;

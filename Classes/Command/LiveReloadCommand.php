@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
@@ -17,6 +18,7 @@ use React\Socket\SocketServer;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+
 use function array_merge;
 use function class_exists;
 use function file_exists;
@@ -26,6 +28,7 @@ use function pathinfo;
 use function rtrim;
 use function sprintf;
 use function substr;
+
 use const PATHINFO_EXTENSION;
 use const PHP_VERSION;
 

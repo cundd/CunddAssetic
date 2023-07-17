@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Service;
@@ -11,6 +12,7 @@ use Cundd\Assetic\ValueObject\PathWoHash;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 use UnexpectedValueException;
+
 use function end;
 use function file_exists;
 use function hash_file;
@@ -21,7 +23,7 @@ use function substr;
 
 class OutputFileHashService
 {
-    private CacheManager $cacheManager;
+    private CacheManagerInterface $cacheManager;
 
     private ConfigurationProviderInterface $configurationProvider;
 
@@ -29,7 +31,7 @@ class OutputFileHashService
 
     private array $wasWritten;
 
-    private OutputFileFinder $outputFileFinder;
+    private OutputFileFinderInterface $outputFileFinder;
 
     public function __construct(
         CacheManagerInterface $cacheManager,

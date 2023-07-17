@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Command\Input;
@@ -6,6 +7,7 @@ namespace Cundd\Assetic\Command\Input;
 use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\Utility\PathUtility;
 use Symfony\Component\Console\Input\InputInterface;
+
 use function array_filter;
 use function array_map;
 use function sprintf;

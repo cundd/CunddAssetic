@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\BuildStep;
@@ -14,6 +15,7 @@ use Cundd\Assetic\ValueObject\BuildStateResult;
 use Throwable;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 use function php_sapi_name;
 
 class Compile implements BuildStepInterface

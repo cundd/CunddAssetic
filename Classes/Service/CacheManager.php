@@ -1,14 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Service;
 
 use Cundd\Assetic\Utility\ConfigurationUtility;
-use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\ValueObject\PathWoHash;
 use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 use function is_callable;
 use function sha1;
 

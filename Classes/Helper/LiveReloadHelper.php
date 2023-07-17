@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Helper;
@@ -8,6 +9,7 @@ use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility as Typo3PathUtility;
+
 use function fclose;
 
 /**

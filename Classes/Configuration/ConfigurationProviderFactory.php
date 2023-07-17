@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Configuration;
@@ -17,7 +18,7 @@ class ConfigurationProviderFactory
         $allConfiguration = $configurationManager->getConfiguration(
             ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
         );
-        if (isset($allConfiguration['plugin.']) && isset($allConfiguration['plugin.']['CunddAssetic.'])) {
+        if (isset($allConfiguration['plugin.']['CunddAssetic.'])) {
             $configuration = $allConfiguration['plugin.']['CunddAssetic.'];
 
             return new ConfigurationProvider($configuration);

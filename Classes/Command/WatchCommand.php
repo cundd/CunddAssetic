@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
@@ -7,6 +8,7 @@ use Cundd\Assetic\FileWatcher\FileWatcherInterface;
 use Cundd\Assetic\Utility\Autoloader;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+
 use function usleep;
 
 /**

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Server;
@@ -11,7 +12,9 @@ use Ratchet\Server\IoConnection;
 use Ratchet\Wamp\WampConnection;
 use React\EventLoop\LoopInterface;
 use SplObjectStorage;
+
 use function json_encode;
+
 use const JSON_PRETTY_PRINT;
 use const JSON_UNESCAPED_SLASHES;
 

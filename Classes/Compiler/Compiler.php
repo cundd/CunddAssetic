@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Compiler;
@@ -21,6 +22,7 @@ use Psr\Log\LoggerAwareTrait;
 use Throwable;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use UnexpectedValueException;
+
 use function get_class;
 use function preg_match;
 

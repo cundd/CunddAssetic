@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cundd\Assetic\Utility;
 
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 use function clearstatcache;
 use function dirname;
 use function file_exists;
