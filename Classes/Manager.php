@@ -248,6 +248,9 @@ class Manager implements ManagerInterface
             // Compile
             new BuildStep\Compile($this->compiler, new ConfigurationProviderFactory()),
 
+            // Patch extension paths
+            new BuildStep\PatchExtensionPath(),
+
             // Clean up old files
             new BuildStep\CleanUpOldFiles(),
 
