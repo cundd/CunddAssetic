@@ -16,6 +16,8 @@ use function file_put_contents;
 use function preg_match_all;
 use function sprintf;
 use function str_replace;
+use function str_starts_with;
+use function strpos;
 
 /**
  * Build step to replace occurrences of `EXT:extension_name/Resources/Public/` with the correct `_assets/...` URI
@@ -34,7 +36,7 @@ class PatchExtensionPath implements BuildStepInterface
             try {
                 $contents = str_replace(
                     $extensionPath,
-                    PathUtility::getPublicResourceWebPath($extensionPath),
+                    $this->getPublicResourceWebPath($extensionPath),
                     $contents
                 );
             } catch (InvalidFileException $e) {
@@ -57,5 +59,21 @@ class PatchExtensionPath implements BuildStepInterface
         }
 
         return BuildStateResult::ok($currentState);
+    }
+
+    private function getPublicResourceWebPath(mixed $extensionPath): string
+    {
+        $path = PathUtility::getPublicResourceWebPath($extensionPath);
+
+        $looksLikeFullUri = str_starts_with($path, '//') || strpos($path, '://') > 0;
+        if ($looksLikeFullUri) {
+            return $path;
+        }
+
+        if (!str_starts_with($path, '/')) {
+            return '/' . $path;
+        }
+
+        return $path;
     }
 }
