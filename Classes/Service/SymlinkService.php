@@ -7,6 +7,7 @@ namespace Cundd\Assetic\Service;
 use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\SymlinkException;
+use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\PathWoHash;
 
@@ -59,7 +60,7 @@ class SymlinkService implements SymlinkServiceInterface
                         sprintf(
                             'Could not create the symlink "%s" because %s',
                             $symlinkPathString,
-                            \Cundd\Assetic\Utility\PathUtility::getReasonForWriteFailure($symlinkPathString)
+                            PathUtility::getReasonForWriteFailure($symlinkPathString)
                         ),
                         1456396454
                     );
@@ -80,7 +81,7 @@ class SymlinkService implements SymlinkServiceInterface
     /**
      * Remove the symlink
      */
-    public function removeSymlink(PathWoHash $outputFilePathWithoutHash)
+    public function removeSymlink(PathWoHash $outputFilePathWithoutHash): void
     {
         if (!$this->configurationProvider->getCreateSymlink()) {
             return;
@@ -88,7 +89,7 @@ class SymlinkService implements SymlinkServiceInterface
         // Unlink the symlink
         $symlinkPath = $this->getSymlinkPath($outputFilePathWithoutHash)->getAbsoluteUri();
         if (is_link($symlinkPath)) {
-            if (unlink($symlinkPath)) {
+            if (@unlink($symlinkPath)) {
                 $this->isOwnerOfSymlink = true;
             } else {
                 $this->isOwnerOfSymlink = false;

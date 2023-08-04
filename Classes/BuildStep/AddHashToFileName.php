@@ -62,7 +62,7 @@ class AddHashToFileName implements BuildStepInterface
 
         $compileDestinationPath = $outputFilenameWithoutHash->getAbsoluteUri();
 
-        if (!rename($compileDestinationPath, $outputFileFinalPath)) {
+        if (!@rename($compileDestinationPath, $outputFileFinalPath)) {
             $reason = PathUtility::getReasonForWriteFailure($outputFileFinalPath);
 
             return BuildStateResult::err(
