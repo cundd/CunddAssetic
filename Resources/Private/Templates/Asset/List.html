@@ -73,6 +73,11 @@
         .assetic .build-error .button[aria-expanded=true]::after {
             content: "\f0d7";
         }
+
+        .assetic .build-error pre {
+            border: 1px solid #C8C8C8;
+            padding: 10px;
+        }
     </style>
 
     <div class="assetic">
@@ -123,20 +128,20 @@
         <f:if condition="{lastBuildError}">
             <div class="build-error">
                 <div class="button-group">
-                    <button class="button"
+                    <button id="build-error-message-button"
+                            class="button"
                             type="button"
-                            data-toggle="collapse"
-                            data-target="#build-error-message"
                             aria-expanded="false"
                             aria-controls="build-error-message">
                         Show build errors
                     </button>
                 </div>
-                <div class="collapse" id="build-error-message">
+                <div hidden="hidden" id="build-error-message">
                     <pre>{lastBuildError}</pre>
                 </div>
             </div>
         </f:if>
     </div>
+    <f:asset.script identifier="assetic-backend" src="EXT:assetic/Resources/Public/JavaScript/Backend.js"/>
 </f:section>
 </html>
