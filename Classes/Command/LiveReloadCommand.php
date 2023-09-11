@@ -17,6 +17,7 @@ use React\Socket\SecureServer;
 use React\Socket\SocketServer;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use function array_merge;
@@ -46,6 +47,7 @@ class LiveReloadCommand extends AbstractWatchCommand
     private LiveReload $liveReloadServer;
 
     private bool $lastCompilationFailed = false;
+    private ConsoleLogger $logger;
 
     protected function configure()
     {
@@ -91,6 +93,7 @@ class LiveReloadCommand extends AbstractWatchCommand
     {
         Autoloader::register();
 
+        $this->logger = new ConsoleLogger($output);
         $fileWatcher = $this->getFileWatcher();
         $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
 
@@ -108,8 +111,12 @@ class LiveReloadCommand extends AbstractWatchCommand
     {
         $fileNeedsRecompile = $this->needsRecompile($this->getFileWatcher());
         if (!$fileNeedsRecompile) {
+            $this->logger->debug('No files changed');
+
             return;
         }
+
+        $this->logger->info(sprintf('File {file} did change'), ['file' => $fileNeedsRecompile]);
 
         $needFullPageReload = $this->needsFullPageReload($fileNeedsRecompile);
         if ($needFullPageReload) {
