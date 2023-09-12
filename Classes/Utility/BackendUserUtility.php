@@ -15,8 +15,6 @@ class BackendUserUtility
      */
     public static function isUserLoggedIn(): bool
     {
-        return !isset($GLOBALS['BE_USER'])
-            || !isset($GLOBALS['BE_USER']->user)
-            || !intval($GLOBALS['BE_USER']->user['uid']);
+        return isset($GLOBALS['BE_USER']->user) && 0 < intval($GLOBALS['BE_USER']->user['uid']);
     }
 }
