@@ -11,6 +11,7 @@ use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Helper\LiveReloadHelper;
 use Cundd\Assetic\Utility\Autoloader;
+use Cundd\Assetic\Utility\BackendUserUtility;
 use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\ValueObject\FilePath;
@@ -145,7 +146,7 @@ class Plugin
     private function addDebugInformation(float $collectAndCompileEnd, float $collectAndCompileStart): string
     {
         $isDevelopmentEnabled = $this->configurationProvider->isDevelopment();
-        if (false === $isDevelopmentEnabled || false === AsseticGeneralUtility::isBackendUser()) {
+        if (false === $isDevelopmentEnabled || false === BackendUserUtility::isUserLoggedIn()) {
             return '';
         }
 

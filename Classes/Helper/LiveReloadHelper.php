@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Helper;
 
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
-use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Cundd\Assetic\Utility\BackendUserUtility;
 use Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility as Typo3PathUtility;
@@ -96,7 +96,7 @@ JAVASCRIPT_CODE_TEMPLATE;
         $isEnabled = $this->configurationProvider->getLiveReloadConfiguration()->isEnabled()
             || $this->configurationProvider->getEnableExperimentalFeatures();
 
-        return $isEnabled && AsseticGeneralUtility::isBackendUser();
+        return $isEnabled && BackendUserUtility::isUserLoggedIn();
     }
 
     /**

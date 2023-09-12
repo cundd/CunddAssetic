@@ -15,6 +15,7 @@ use Cundd\Assetic\Service\OutputFileFinderInterface;
 use Cundd\Assetic\Service\OutputFileHashService;
 use Cundd\Assetic\Service\OutputFileServiceInterface;
 use Cundd\Assetic\Service\SymlinkServiceInterface;
+use Cundd\Assetic\Utility\BackendUserUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\FilePath;
@@ -114,7 +115,7 @@ class Manager implements ManagerInterface
         }
 
         $createDevelopmentSymlink = $this->configurationProvider->getCreateSymlink()
-            && AsseticGeneralUtility::isBackendUser();
+            && BackendUserUtility::isUserLoggedIn();
 
         if ($createDevelopmentSymlink) {
             return Result::ok($this->symlinkService->getSymlinkPath($currentState->getOutputFilePathWithoutHash()));
@@ -180,7 +181,7 @@ class Manager implements ManagerInterface
         if ($this->willCompile === -1) {
             // If no backend user is logged in, check if it is allowed
             $isDevelopment = $this->configurationProvider->isDevelopment();
-            if (!AsseticGeneralUtility::isBackendUser()) {
+            if (!BackendUserUtility::isUserLoggedIn()) {
                 $this->willCompile = $this->configurationProvider->isDevelopment()
                     || $this->configurationProvider->getAllowCompileWithoutLogin();
             } else {
@@ -188,7 +189,7 @@ class Manager implements ManagerInterface
             }
 
             AsseticGeneralUtility::say(
-                'Backend user detected: ' . (AsseticGeneralUtility::isBackendUser() ? 'yes' : 'no')
+                'Backend user detected: ' . (BackendUserUtility::isUserLoggedIn() ? 'yes' : 'no')
             );
             AsseticGeneralUtility::say('Development mode: ' . ($isDevelopment ? 'on' : 'off'));
             AsseticGeneralUtility::say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));

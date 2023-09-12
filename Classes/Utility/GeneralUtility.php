@@ -31,17 +31,11 @@ abstract class GeneralUtility
      * Return if a backend user is logged in
      *
      * @return bool
+     * @deprecated use \Cundd\Assetic\Utility\BackendUserUtility::isUserLoggedIn()
      */
     public static function isBackendUser(): bool
     {
-        if (!isset($GLOBALS['BE_USER'])
-            || !isset($GLOBALS['BE_USER']->user)
-            || !intval($GLOBALS['BE_USER']->user['uid'])
-        ) {
-            return false;
-        }
-
-        return true;
+        return BackendUserUtility::isUserLoggedIn();
     }
 
     /**
@@ -49,7 +43,7 @@ abstract class GeneralUtility
      *
      * @param mixed $var1
      */
-    public static function pd($var1 = '__iresults_pd_noValue')
+    public static function pd($var1 = '__iresults_pd_noValue'): void
     {
         if (!self::willDebug()) {
             return;
@@ -72,7 +66,7 @@ abstract class GeneralUtility
      *
      * @param string $message
      */
-    public static function say(string $message)
+    public static function say(string $message): void
     {
         if (!self::willDebug()) {
             return;
@@ -89,7 +83,7 @@ abstract class GeneralUtility
      *
      * @param string $msg
      */
-    public static function profile(string $msg = '')
+    public static function profile(string $msg = ''): void
     {
         if (getenv('CUNDD_ASSETIC_DEBUG')) {
             static $lastCall = -1;
@@ -121,11 +115,11 @@ abstract class GeneralUtility
      *
      * @return bool
      */
-    private static function willDebug()
+    private static function willDebug(): bool
     {
         if (self::$willDebug === -1) {
             $key = 'cundd_assetic_debug';
-            self::$willDebug = self::getRequestParameter($key) && self::isBackendUser();
+            self::$willDebug = self::getRequestParameter($key) && BackendUserUtility::isUserLoggedIn();
         }
 
         return self::$willDebug;
