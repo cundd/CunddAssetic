@@ -19,6 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 use function array_merge;
 use function class_exists;
@@ -31,6 +32,7 @@ use function sprintf;
 use function substr;
 
 use const PATHINFO_EXTENSION;
+use const PHP_EOL;
 use const PHP_VERSION;
 
 /**
@@ -47,6 +49,7 @@ class LiveReloadCommand extends AbstractWatchCommand
     private LiveReload $liveReloadServer;
 
     private bool $lastCompilationFailed = false;
+
     private ConsoleLogger $logger;
 
     protected function configure()
@@ -93,6 +96,12 @@ class LiveReloadCommand extends AbstractWatchCommand
     {
         Autoloader::register();
 
+        if (false === $this->getConfigurationProvider()->getCreateSymlink()) {
+            $io = new SymfonyStyle($input, $output);
+            $io->warning(
+                'Creation of required symlinks is not yet configured in TypoScript' . PHP_EOL . 'LiveReload may not work properly'
+            );
+        }
         $this->logger = new ConsoleLogger($output);
         $fileWatcher = $this->getFileWatcher();
         $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
