@@ -13,6 +13,7 @@ use Ratchet\Wamp\WampConnection;
 use React\EventLoop\LoopInterface;
 use SplObjectStorage;
 
+use function date;
 use function json_encode;
 
 use const JSON_PRETTY_PRINT;
@@ -325,11 +326,11 @@ class LiveReload implements MessageComponentInterface
     protected function debug(string $message, $logLevel = null): void
     {
         if ($logLevel !== null) {
-            $messagePrefix = null;
+            $messagePrefix =  date('r') . ' ';
             if (is_int($logLevel)) {
-                $messagePrefix = self::$logLevelPrefix[$logLevel] ?? '';
+                $messagePrefix .= self::$logLevelPrefix[$logLevel] ?? '';
             } elseif (is_string($logLevel)) {
-                $messagePrefix = "($logLevel)";
+                $messagePrefix .= "($logLevel)";
             }
             if ($messagePrefix) {
                 $message = $messagePrefix . ' ' . $message;
