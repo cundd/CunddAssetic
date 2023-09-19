@@ -179,17 +179,18 @@ class Manager implements ManagerInterface
     public function willCompile(): bool
     {
         if ($this->willCompile === -1) {
-            // If no backend user is logged in, check if it is allowed
+            // If no backend user is logged in, check if compiling is allowed
             $isDevelopment = $this->configurationProvider->isDevelopment();
-            if (!BackendUserUtility::isUserLoggedIn()) {
-                $this->willCompile = $this->configurationProvider->isDevelopment()
+            $isUserLoggedIn = BackendUserUtility::isUserLoggedIn();
+            if (!$isUserLoggedIn) {
+                $this->willCompile = $isDevelopment
                     || $this->configurationProvider->getAllowCompileWithoutLogin();
             } else {
                 $this->willCompile = $isDevelopment;
             }
 
             AsseticGeneralUtility::say(
-                'Backend user detected: ' . (BackendUserUtility::isUserLoggedIn() ? 'yes' : 'no')
+                'Backend user detected: ' . ($isUserLoggedIn ? 'yes' : 'no')
             );
             AsseticGeneralUtility::say('Development mode: ' . ($isDevelopment ? 'on' : 'off'));
             AsseticGeneralUtility::say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));
