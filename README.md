@@ -127,15 +127,12 @@ Command line
 
 Assetic provides three different CLI commands.
 
-To find information about the command's available options please run `typo3/cli_dispatch.phpsh extbase help` followed by the command.
-
-
 ### assetic:run
 
 Compiles the assets and exit.
 
 ```bash
-typo3/cli_dispatch.phpsh extbase assetic:run
+vendor/bin/typo3 assetic:run
 ```
 
 
@@ -144,7 +141,7 @@ typo3/cli_dispatch.phpsh extbase assetic:run
 Watches for file changes in fileadmin/ and re-compiles the assets if needed.
 
 ```bash
-typo3/cli_dispatch.phpsh extbase assetic:watch
+vendor/bin/typo3 assetic:watch
 ```
 
 
@@ -153,7 +150,7 @@ typo3/cli_dispatch.phpsh extbase assetic:watch
 Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed. The TypoScript constant `module.tx_assetic.settings.livereload.add_javascript` should be set to 1.
 
 ```bash
-typo3/cli_dispatch.phpsh extbase assetic:livereload
+vendor/bin/typo3 assetic:livereload
 ```
 
 
