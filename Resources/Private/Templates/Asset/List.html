@@ -1,147 +1,139 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
-      xmlns:assetic="http://typo3.org/ns/Cundd/Assetic/ViewHelpers"
-      data-namespace-typo3-fluid="true">
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:assetic="http://typo3.org/ns/Cundd/Assetic/ViewHelpers"
+    data-namespace-typo3-fluid="true">
+    <f:layout name="Default" />
 
-<f:layout name="Module"/>
+    <f:section name="Content">
+        <style>
+            .assetic .button {
+                display: inline-block;
+                background-color: #f6f6f6;
+                border: 1px solid #7c7c7c;
+                color: #434343;
+                cursor: pointer;
+                padding: 2px 4px;
+                line-height: 16px;
+                margin: 0 10px 0 0;
+            }
 
-<f:section name="Content">
-    <style>
-        .assetic {
-            padding: 10px;
-        }
+            .assetic .button:focus,
+            .assetic .button:hover {
+                background-color: #c8c8c8;
+                border: 1px solid #737f91;
+                color: #1e1e1e;
+                cursor: pointer;
+                text-decoration: none;
+            }
 
-        .assetic .button {
-            display: inline-block;
-            background-color: #F6F6F6;
-            border: 1px solid #7C7C7C;
-            color: #434343;
-            cursor: pointer;
-            padding: 2px 4px;
+            .assetic code {
+                margin: 0;
+            }
 
-            /*font-size: 13px;*/
-            line-height: 16px;
-            margin: 0 10px 0 0;
-        }
+            .assetic table {
+                margin-bottom: 10px;
+            }
 
-        .assetic .button:focus,
-        .assetic .button:hover {
-            background-color: #C8C8C8;
-            border: 1px solid #737F91;
-            color: #1E1E1E;
-            cursor: pointer;
-            text-decoration: none;
-        }
+            .assetic table th,
+            .assetic table td {
+                padding: 6px 8px;
+                border: 1px solid #c8c8c8;
+            }
 
-        .assetic code {
-            margin: 0;
-        }
+            .assetic .no-wrap {
+                white-space: nowrap;
+            }
 
-        .assetic table {
-            margin-bottom: 10px;
-        }
+            .assetic .build-error {
+                margin-top: 20px;
+            }
 
-        .assetic table th,
-        .assetic table td {
-            padding: 6px 8px;
-            border: 1px solid #C8C8C8;
-        }
+            .assetic .build-error .button {
+                background: #c83c3c;
+                border-color: #77142e;
+                color: white;
+            }
 
-        .assetic .no-wrap {
-            white-space: nowrap;
-        }
+            .assetic .build-error .button::after {
+                content: "\f0da";
+                display: inline-block;
+                font: normal normal normal 14px/1 FontAwesome;
+                font-size: inherit;
+                text-rendering: auto;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
 
-        .assetic .build-error {
-            margin-top: 20px;
-        }
+            .assetic .build-error .button[aria-expanded="true"]::after {
+                content: "\f0d7";
+            }
 
-        .assetic .build-error .button {
-            background: #c83c3c;
-            border-color: #77142e;
-            color: white;
-        }
+            .assetic .build-error pre {
+                border: 1px solid #c8c8c8;
+                padding: 10px;
+            }
+        </style>
 
-        .assetic .build-error .button::after {
-            content: "\f0da";
-            display: inline-block;
-            font: normal normal normal 14px/1 FontAwesome;
-            font-size: inherit;
-            text-rendering: auto;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+        <div class="assetic">
+            <h1>Assets</h1>
 
-        .assetic .build-error .button[aria-expanded=true]::after {
-            content: "\f0d7";
-        }
+            <f:flashMessages />
 
-        .assetic .build-error pre {
-            border: 1px solid #C8C8C8;
-            padding: 10px;
-        }
-    </style>
-
-    <div class="assetic">
-        <h1>Assets</h1>
-
-        <f:flashMessages/>
-
-        <table class="tx_assetic">
-            <tr>
-                <th>
-                    <f:translate key="tx_assetic_domain_model_asset.last_modified"/>
-                </th>
-                <th>
-                    <f:translate key="tx_assetic_domain_model_asset.path"/>
-                </th>
-                <th>
-                    <f:translate key="tx_assetic_domain_model_asset.filters"/>
-                </th>
-            </tr>
-
-            <f:for each="{assets}" as="asset">
+            <table class="tx_assetic">
                 <tr>
-                    <td class="no-wrap">
-                        <f:format.date format="d.m.Y - H:i:s">@{asset.lastModified}</f:format.date>
-                    </td>
-                    <td>{asset.sourceRoot}/{asset.sourcePath}</td>
-                    <td>
-                        <f:for each="{asset.filters}" as="filter">
-                            <code>
-                                <assetic:filterDescribe filter="{filter}"/>
-                            </code><br/>
-                        </f:for>
-                    </td>
+                    <th>
+                        <f:translate key="tx_assetic_domain_model_asset.last_modified" />
+                    </th>
+                    <th>
+                        <f:translate key="tx_assetic_domain_model_asset.path" />
+                    </th>
+                    <th>
+                        <f:translate key="tx_assetic_domain_model_asset.filters" />
+                    </th>
                 </tr>
-            </f:for>
-        </table>
 
-        <div class="button-group">
-            <f:link.action action="compile" class="button">
-                Compile
-            </f:link.action>
+                <f:for each="{assets}" as="asset">
+                    <tr>
+                        <td class="no-wrap">
+                            <f:format.date format="d.m.Y - H:i:s">@{asset.lastModified}</f:format.date>
+                        </td>
+                        <td>{asset.sourceRoot}/{asset.sourcePath}</td>
+                        <td>
+                            <f:for each="{asset.filters}" as="filter">
+                                <code><assetic:filterDescribe filter="{filter}" /></code>
+                                <br />
+                            </f:for>
+                        </td>
+                    </tr>
+                </f:for>
+            </table>
 
-            <f:link.action action="compile" arguments="{clearPageCache:1}" class="button">
-                Compile and clear FE cache
-            </f:link.action>
-        </div>
+            <div class="button-group">
+                <f:link.action action="compile" class="button">Compile</f:link.action>
 
-        <f:if condition="{lastBuildError}">
-            <div class="build-error">
-                <div class="button-group">
-                    <button id="build-error-message-button"
+                <f:link.action action="compile" arguments="{clearPageCache:1}" class="button">
+                    Compile and clear FE cache
+                </f:link.action>
+            </div>
+
+            <f:if condition="{lastBuildError}">
+                <div class="build-error">
+                    <div class="button-group">
+                        <button
+                            id="build-error-message-button"
                             class="button"
                             type="button"
                             aria-expanded="false"
                             aria-controls="build-error-message">
-                        Show build errors
-                    </button>
+                            Show build errors
+                        </button>
+                    </div>
+                    <div hidden="hidden" id="build-error-message">
+                        <pre>{lastBuildError}</pre>
+                    </div>
                 </div>
-                <div hidden="hidden" id="build-error-message">
-                    <pre>{lastBuildError}</pre>
-                </div>
-            </div>
-        </f:if>
-    </div>
-    <f:asset.script identifier="assetic-backend" src="EXT:assetic/Resources/Public/JavaScript/Backend.js"/>
-</f:section>
+            </f:if>
+        </div>
+        <f:asset.script identifier="assetic-backend" src="EXT:assetic/Resources/Public/JavaScript/Backend.js" />
+    </f:section>
 </html>

@@ -11,7 +11,7 @@ use Cundd\Assetic\ValueObject\FilePath;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
 class AssetController extends ActionController
@@ -39,8 +39,6 @@ class AssetController extends ActionController
 
     /**
      * Action list
-     *
-     * @return ResponseInterface
      */
     public function listAction(): ResponseInterface
     {
@@ -51,13 +49,15 @@ class AssetController extends ActionController
             $assetCollection = $this->manager->getCompiler()->getAssetManager()->get('cundd_assetic');
         }
         if (!empty($assetCollection)) {
-            $moduleTemplate->assign('assets', $assetCollection);
+            $this->view->assign('assets', $assetCollection);
         } else {
             $this->addFlashMessage('No assets found');
         }
-        $moduleTemplate->assign('lastBuildError', $this->sessionService->getErrorFromSession());
+        $this->view->assign('lastBuildError', $this->sessionService->getErrorFromSession());
 
-        return $this->htmlResponse($moduleTemplate->render());
+        $moduleTemplate->setContent($this->view->render());
+
+        return $this->htmlResponse($moduleTemplate->renderContent());
     }
 
     /**
@@ -98,7 +98,7 @@ class AssetController extends ActionController
             $this->addFlashMessage(
                 $message,
                 '',
-                ContextualFeedbackSeverity::ERROR
+                FlashMessage::ERROR
             );
         }
     }
