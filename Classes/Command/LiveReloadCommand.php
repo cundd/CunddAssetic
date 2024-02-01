@@ -131,7 +131,11 @@ class LiveReloadCommand extends AbstractWatchCommand
         if ($needFullPageReload) {
             $this->liveReloadServer->fileDidChange($fileNeedsRecompile, false);
         } else {
-            $changedFile = $this->compile(true);
+            $changedFile = $this->compile(true, $error);
+            if ($error) {
+                $this->logger->error($error->getMessage(), ['error' => $error]);
+            }
+            var_dump($changedFile);
             if (null !== $changedFile && !$this->lastCompilationFailed) {
                 $this->liveReloadServer->fileDidChange($changedFile, true);
             } else {
@@ -141,10 +145,6 @@ class LiveReloadCommand extends AbstractWatchCommand
         }
     }
 
-    /**
-     * @param InputInterface $input
-     * @return array
-     */
     private function buildSecureServerContext(InputInterface $input): array
     {
         return [
@@ -163,7 +163,7 @@ class LiveReloadCommand extends AbstractWatchCommand
         }
 
         $homeDirectory = $this->getHomeDirectory();
-        if (substr($path, 0, 2) === '~/' && $homeDirectory) {
+        if ('~/' === substr($path, 0, 2) && $homeDirectory) {
             $path = rtrim($homeDirectory, '/') . '/' . substr($path, 2);
         }
 
@@ -172,13 +172,9 @@ class LiveReloadCommand extends AbstractWatchCommand
         }
 
         if (file_exists($path)) {
-            throw new InvalidArgumentException(
-                sprintf('File "%s" for configuration %s exists, but is not readable', $path, $optionName)
-            );
+            throw new InvalidArgumentException(sprintf('File "%s" for configuration %s exists, but is not readable', $path, $optionName));
         } else {
-            throw new InvalidArgumentException(
-                sprintf('File "%s" for configuration %s does not exist', $path, $optionName)
-            );
+            throw new InvalidArgumentException(sprintf('File "%s" for configuration %s does not exist', $path, $optionName));
         }
     }
 
@@ -187,36 +183,26 @@ class LiveReloadCommand extends AbstractWatchCommand
         return $_SERVER['HOME'] ?? '';
     }
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @return IoServer
-     */
     private function buildServerFromInput(InputInterface $input, OutputInterface $output): IoServer
     {
         $address = $input->getOption(self::OPTION_ADDRESS);
         $port = $input->getOption(self::OPTION_PORT);
-        $notificationDelay = (float)$input->getOption(self::OPTION_NOTIFICATION_DELAY);
+        $notificationDelay = (float) $input->getOption(self::OPTION_NOTIFICATION_DELAY);
         $interval = $this->getInterval($input, 0.5);
 
-        $useTLS = (bool)$input->getOption(self::OPTION_TLS_CERTIFICATE);
+        $useTLS = (bool) $input->getOption(self::OPTION_TLS_CERTIFICATE);
         $server = $this->buildServer($input, $address, $port, $notificationDelay, $useTLS, $interval);
         $prefix = $useTLS ? 'Secure ' : '';
         $output->writeln(
-            "<info>{$prefix}Websocket server listening on $address:$port running under PHP version " . PHP_VERSION . "</info>"
+            "<info>{$prefix}Websocket server listening on $address:$port running under PHP version " . PHP_VERSION . '</info>'
         );
 
         return $server;
     }
 
     /**
-     * @param InputInterface $input
-     * @param string         $address
-     * @param int|string     $port
-     * @param float          $notificationDelay
-     * @param bool           $useTLS
-     * @param int|float      $interval The number of seconds to wait before execution.
-     * @return IoServer
+     * @param int|string $port
+     * @param int|float  $interval the number of seconds to wait before execution
      */
     private function buildServer(
         InputInterface $input,
@@ -264,10 +250,6 @@ class LiveReloadCommand extends AbstractWatchCommand
         return $server;
     }
 
-    /**
-     * @param string $fileNeedsRecompile
-     * @return bool
-     */
     private function needsFullPageReload(string $fileNeedsRecompile): bool
     {
         return in_array(

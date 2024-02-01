@@ -44,11 +44,12 @@ abstract class AbstractCommand extends Command
     /**
      * Compile the assets
      *
-     * @param bool $graceful
+     * @param bool           $graceful
+     * @param Throwable|null $error
      * @return string|null
      * @throws Throwable if an error occurred and `$graceful` is FALSE
      */
-    protected function compile(bool $graceful): ?string
+    protected function compile(bool $graceful, ?Throwable &$error = null): ?string
     {
         $this->manager->forceCompile();
 
@@ -58,9 +59,9 @@ abstract class AbstractCommand extends Command
         $outputFileLinkResult = $this->manager->forceCompile()->collectAndCompile();
         $this->manager->clearHashCache();
         if ($outputFileLinkResult->isErr()) {
-            $exception = $outputFileLinkResult->unwrapErr();
+            $error = $outputFileLinkResult->unwrapErr();
             if (!$graceful) {
-                throw $exception;
+                throw $error;
             }
 
             return null;
@@ -90,12 +91,10 @@ abstract class AbstractCommand extends Command
         }
 
         // Check if the filename has to be appended
-        if (substr($destination, -1) === '/' || intval(strrpos($destination, '.')) < intval(strrpos($destination, '/'))
-        ) {
-            if (substr($destination, -1) !== '/') {
-                $destination .= '/';
-            }
+        if ('/' === substr($destination, -1)) {
             $destination .= basename($source);
+        } elseif (intval(strrpos($destination, '.')) < intval(strrpos($destination, '/'))) {
+            $destination .= '/' . basename($source);
         }
 
         $destination = $this->getConfigurationProvider()->getPublicPath() . '/' . $destination;
