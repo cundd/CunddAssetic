@@ -135,7 +135,6 @@ class LiveReloadCommand extends AbstractWatchCommand
             if ($error) {
                 $this->logger->error($error->getMessage(), ['error' => $error]);
             }
-            var_dump($changedFile);
             if (null !== $changedFile && !$this->lastCompilationFailed) {
                 $this->liveReloadServer->fileDidChange($changedFile, true);
             } else {
