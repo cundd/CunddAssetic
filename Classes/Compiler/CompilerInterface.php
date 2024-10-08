@@ -18,7 +18,6 @@ interface CompilerInterface
     /**
      * Collect all the assets and adds them to the asset manager
      *
-     * @return AssetCollection
      * @throws LogicException if the assetic classes could not be found
      */
     public function collectAssets(): AssetCollection;
@@ -32,24 +31,16 @@ interface CompilerInterface
 
     /**
      * Return the shared asset manager
-     *
-     * @return AssetManager
      */
     public function getAssetManager(): AssetManager;
 
     /**
      * Create and collect the Asset with the given key and stylesheet
-     *
-     * @param string          $assetKey
-     * @param string          $stylesheet
-     * @param AssetCollection $assetCollection
-     * @param AssetFactory    $factory
-     * @return AssetCollection|null
      */
     public function createAsset(
         string $assetKey,
         string $stylesheet,
         AssetCollection $assetCollection,
-        AssetFactory $factory
+        AssetFactory $factory,
     ): ?AssetCollection;
 }

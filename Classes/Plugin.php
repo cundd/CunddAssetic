@@ -40,7 +40,7 @@ class Plugin
     public function __construct(
         ?ManagerInterface $manager = null,
         ?ConfigurationProviderFactory $configurationProviderFactory = null,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
     ) {
         $configurationProviderFactory = $configurationProviderFactory ?? new ConfigurationProviderFactory();
         $this->manager = $manager ?? GeneralUtility::makeInstance(Manager::class);
@@ -52,8 +52,6 @@ class Plugin
      * Output configured stylesheets as link tags
      *
      * Some processing will be done according to the TypoScript setup of the stylesheets.
-     *
-     * @return string
      */
     public function main(): string
     {
@@ -105,8 +103,6 @@ class Plugin
 
     /**
      * Returns the code for "live reload"
-     *
-     * @return string
      */
     private function getLiveReloadCode(): string
     {
@@ -119,6 +115,7 @@ class Plugin
      * Handle exceptions
      *
      * @param FilterException|OutputFileException $exception
+     *
      * @return void
      */
     private function handleBuildError(Throwable $exception): string
@@ -136,7 +133,7 @@ class Plugin
         }
 
         // Always output the exception message if the Assetic classes could not be found (identified by code 1356543545)
-        if ($exception->getCode() === 1356543545) {
+        if (1356543545 === $exception->getCode()) {
             return $exception->getMessage();
         }
 
@@ -152,9 +149,9 @@ class Plugin
 
         $collectAndCompileTime = $collectAndCompileEnd - $collectAndCompileStart;
         if ($this->manager->willCompile()) {
-            return sprintf("<!-- Compiled assets in %0.4fs -->", $collectAndCompileTime);
+            return sprintf('<!-- Compiled assets in %0.4fs -->', $collectAndCompileTime);
         } else {
-            return sprintf("<!-- Use pre-compiled assets in %0.4fs -->", $collectAndCompileTime);
+            return sprintf('<!-- Use pre-compiled assets in %0.4fs -->', $collectAndCompileTime);
         }
     }
 }

@@ -30,7 +30,6 @@ abstract class GeneralUtility
     /**
      * Return if a backend user is logged in
      *
-     * @return bool
      * @deprecated use \Cundd\Assetic\Utility\BackendUserUtility::isUserLoggedIn()
      */
     public static function isBackendUser(): bool
@@ -40,8 +39,6 @@ abstract class GeneralUtility
 
     /**
      * Dump a given variable (or the given variables) wrapped into a 'pre' tag.
-     *
-     * @param mixed $var1
      */
     public static function pd($var1 = '__iresults_pd_noValue'): void
     {
@@ -52,7 +49,7 @@ abstract class GeneralUtility
         $arguments = func_get_args();
         if (class_exists('Tx_Iresults')) {
             call_user_func_array(['Tx_Iresults', 'pd'], $arguments);
-        } elseif (php_sapi_name() !== 'cli') {
+        } elseif ('cli' !== php_sapi_name()) {
             echo '<pre>';
             foreach ($arguments as $argument) {
                 var_dump($argument);
@@ -63,15 +60,13 @@ abstract class GeneralUtility
 
     /**
      * Print the given message if debugging is enabled
-     *
-     * @param string $message
      */
     public static function say(string $message): void
     {
         if (!self::willDebug()) {
             return;
         }
-        if (php_sapi_name() === 'cli') {
+        if ('cli' === php_sapi_name()) {
             fwrite(STDOUT, $message . PHP_EOL);
         } else {
             echo "<pre>$message</pre>";
@@ -80,15 +75,13 @@ abstract class GeneralUtility
 
     /**
      * Print a profiling message
-     *
-     * @param string $msg
      */
     public static function profile(string $msg = ''): void
     {
         if (getenv('CUNDD_ASSETIC_DEBUG')) {
             static $lastCall = -1;
             static $profilerStart;
-            if ($lastCall === -1) {
+            if (-1 === $lastCall) {
                 $lastCall = microtime(true);
                 $profilerStart = microtime(true);
             }
@@ -98,7 +91,7 @@ abstract class GeneralUtility
             fwrite(
                 $outputStream,
                 sprintf(
-                    "[%s] %.4f %.4f %.4f %s" . PHP_EOL,
+                    '[%s] %.4f %.4f %.4f %s' . PHP_EOL,
                     date('Y-m-d H:i:s'),
                     $currentTime - $requestTime,
                     $currentTime - $profilerStart,
@@ -112,12 +105,10 @@ abstract class GeneralUtility
 
     /**
      * Returns if debugging is enabled
-     *
-     * @return bool
      */
     private static function willDebug(): bool
     {
-        if (self::$willDebug === -1) {
+        if (-1 === self::$willDebug) {
             $key = 'cundd_assetic_debug';
             self::$willDebug = self::getRequestParameter($key) && BackendUserUtility::isUserLoggedIn();
         }
@@ -125,10 +116,6 @@ abstract class GeneralUtility
         return self::$willDebug;
     }
 
-    /**
-     * @param string $key
-     * @return mixed
-     */
     private static function getRequestParameter(string $key)
     {
         return $_GET[$key] ?? $_POST[$key] ?? null;

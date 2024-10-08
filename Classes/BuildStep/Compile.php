@@ -26,7 +26,7 @@ class Compile implements BuildStepInterface
 
     public function __construct(
         CompilerInterface $compiler,
-        ConfigurationProviderFactory $configurationProviderFactory
+        ConfigurationProviderFactory $configurationProviderFactory,
     ) {
         $this->compiler = $compiler;
         $this->configurationProvider = $configurationProviderFactory->build();
@@ -45,13 +45,13 @@ class Compile implements BuildStepInterface
      * Handle exceptions
      *
      * @param FilterException|OutputFileException $exception
-     * @return void
+     *
      * @throws Throwable if run in CLI mode
      */
     private function handleCompilerException(Throwable $exception): void
     {
         if ($this->configurationProvider->isDevelopment()) {
-            if (php_sapi_name() == 'cli') {
+            if ('cli' == php_sapi_name()) {
                 throw $exception;
             }
             $exceptionPrinter = new ExceptionPrinter();

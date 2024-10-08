@@ -28,22 +28,16 @@ class FileWatcher implements FileWatcherInterface
 
     /**
      * Timestamp of the last directory scan
-     *
-     * @var int
      */
     private int $watchedFilesCacheTime = 0;
 
     /**
      * Lifetime of the directory scan cache
-     *
-     * @var int
      */
     private int $watchedFilesCacheLifetime = 5;
 
     /**
      * Max depth to collect files for
-     *
-     * @var int
      */
     private int $findFilesMaxDepth = 7;
 
@@ -56,8 +50,6 @@ class FileWatcher implements FileWatcherInterface
 
     /**
      * Timestamp of the last re-compile
-     *
-     * @var int
      */
     private int $lastChangeTime = 0;
 
@@ -80,8 +72,6 @@ class FileWatcher implements FileWatcherInterface
 
     /**
      * Returns the maximum directory depth of file to watch
-     *
-     * @return int
      */
     public function getFindFilesMaxDepth(): int
     {
@@ -90,8 +80,6 @@ class FileWatcher implements FileWatcherInterface
 
     /**
      * Sets the maximum directory depth of file to watch
-     *
-     * @param int $findFilesMaxDepth
      */
     public function setFindFilesMaxDepth(int $findFilesMaxDepth): void
     {
@@ -112,6 +100,7 @@ class FileWatcher implements FileWatcherInterface
      * Sets the array of file suffix to watch for changes
      *
      * @param string[] $assetSuffixes
+     *
      * @return $this
      */
     public function setAssetSuffixes(array $assetSuffixes): FileWatcherInterface
@@ -131,6 +120,7 @@ class FileWatcher implements FileWatcherInterface
 
     /**
      * @param string[] $watchPaths
+     *
      * @return $this
      */
     public function setWatchPaths(array $watchPaths): FileWatcherInterface
@@ -148,8 +138,6 @@ class FileWatcher implements FileWatcherInterface
 
     /**
      * If a file changed it's path will be returned, otherwise NULL
-     *
-     * @return string|null
      */
     public function getChangedFileSinceLastCheck(): ?string
     {
@@ -193,7 +181,6 @@ class FileWatcher implements FileWatcherInterface
     }
 
     /**
-     * @param float $interval
      * @return $this
      */
     public function setInterval(float $interval): FileWatcherInterface
@@ -205,7 +192,7 @@ class FileWatcher implements FileWatcherInterface
      * Returns all files with the given suffix under the given start directory
      *
      * @param string|string[] $suffix
-     * @param string          $startDirectory
+     *
      * @return string[]
      */
     private function findFilesBySuffix($suffix, string $startDirectory): array

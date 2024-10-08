@@ -17,7 +17,7 @@ use function fclose;
  */
 class LiveReloadHelper
 {
-    const JAVASCRIPT_CODE_TEMPLATE = /** @lang JavaScript */
+    private const JAVASCRIPT_CODE_TEMPLATE = /* @lang JavaScript */
         <<<JAVASCRIPT_CODE_TEMPLATE
 (function () {
     document.addEventListener('DOMContentLoaded', function () {
@@ -39,9 +39,6 @@ JAVASCRIPT_CODE_TEMPLATE;
         $this->configurationProvider = $configurationProvider;
     }
 
-    /**
-     * @return string
-     */
     public function getLiveReloadCodeIfEnabled(): string
     {
         if (!$this->isEnabled()) {
@@ -56,7 +53,7 @@ JAVASCRIPT_CODE_TEMPLATE;
             return "<script>$code</script>";
         }
 
-        /** @var Exception $error */
+        /* @var Exception $error */
 
         return sprintf(
             '<!-- Could not connect to LiveReload server at port %d: Error %d: %s -->',
@@ -68,8 +65,6 @@ JAVASCRIPT_CODE_TEMPLATE;
 
     /**
      * Return the Live Reload server port
-     *
-     * @return int
      */
     private function getPort(): int
     {
@@ -78,8 +73,6 @@ JAVASCRIPT_CODE_TEMPLATE;
 
     /**
      * Return if the livereload code should be inserted even if the server connection is not available
-     *
-     * @return bool
      */
     private function skipServerTest(): bool
     {
@@ -88,8 +81,6 @@ JAVASCRIPT_CODE_TEMPLATE;
 
     /**
      * Return if Live Reload is enabled
-     *
-     * @return bool
      */
     private function isEnabled(): bool
     {
@@ -101,11 +92,8 @@ JAVASCRIPT_CODE_TEMPLATE;
 
     /**
      * Return if the server is running
-     *
-     * @param Exception|null $error
-     * @return bool
      */
-    private function isServerRunning(Exception &$error = null): bool
+    private function isServerRunning(?Exception &$error = null): bool
     {
         $connection = @fsockopen('localhost', $this->getPort(), $errorNumber, $errorString, 0.1);
 

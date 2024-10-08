@@ -10,7 +10,7 @@ module.tx_assetic {
     }
 
     settings {
-        # cat=module.tx_assetic/enable/a; type=boolean; label=Strict mode: Throw exceptions on error
+        # cat=module.tx_assetic/enable/a; type=boolean; label=Strict mode: Throw exceptions for missing filter functions
         strict = 0
 
         # cat=module.tx_assetic/enable/b; type=boolean; label=Symlink: Always create a symlink to the compiled file

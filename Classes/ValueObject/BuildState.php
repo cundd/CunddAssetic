@@ -15,7 +15,7 @@ class BuildState
     public function __construct(
         FilePath $filePath,
         PathWoHash $outputFilePathWithoutHash,
-        array $filesToCleanUp
+        array $filesToCleanUp,
     ) {
         $this->filePath = $filePath;
         $this->filesToCleanUp = $filesToCleanUp;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Utility;
 
 use Assetic\Exception\FilterException;
+use Exception;
 use Throwable;
 
 /**
@@ -15,7 +16,7 @@ class ExceptionPrinter
     /**
      * Print the given exception to the screen
      *
-     * @param FilterException|\Exception $exception
+     * @param FilterException|Exception $exception
      */
     public function printException(Throwable $exception): string
     {
@@ -31,7 +32,7 @@ class ExceptionPrinter
             }
             $trace .= $step['function'] . '(arguments: ' . count($step['args']) . ')' . PHP_EOL;
             next($backtrace);
-            $i++;
+            ++$i;
         }
         $boxStyles = $this->getBoxStyle();
         $fontStyle = $this->getFontStyle();
@@ -47,9 +48,6 @@ class ExceptionPrinter
         );
     }
 
-    /**
-     * @return string
-     */
     private function getFontStyle(): string
     {
         $fontStyle = [
@@ -69,9 +67,6 @@ class ExceptionPrinter
         return implode(';', $fontStyle);
     }
 
-    /**
-     * @return string
-     */
     private function getTraceFontStyle(): string
     {
         $fontStyle = [
@@ -91,9 +86,6 @@ class ExceptionPrinter
         return implode(';', $fontStyle);
     }
 
-    /**
-     * @return string
-     */
     private function getBoxStyle(): string
     {
         $boxStyles = [

@@ -21,8 +21,6 @@ class LiveReloadConfiguration
 
     /**
      * Return if the LiveReload support is generally enabled
-     *
-     * @return bool
      */
     public function isEnabled(): bool
     {
@@ -31,8 +29,6 @@ class LiveReloadConfiguration
 
     /**
      * Return the LiveReload server port
-     *
-     * @return int
      */
     public function getPort(): int
     {
@@ -41,8 +37,6 @@ class LiveReloadConfiguration
 
     /**
      * Return if the LiveReload JavaScript code should be added to the output
-     *
-     * @return bool
      */
     public function getAddJavascript(): bool
     {
@@ -53,8 +47,6 @@ class LiveReloadConfiguration
      * Return if the LiveReload JavaScript code should be inserted even if the server connection is not available
      *
      * This is ignored if `addJavascript` is `FALSE`
-     *
-     * @return bool
      */
     public function getSkipServerTest(): bool
     {

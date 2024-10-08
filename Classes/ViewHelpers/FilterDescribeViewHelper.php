@@ -25,7 +25,7 @@ class FilterDescribeViewHelper extends AbstractViewHelper
     public static function renderStatic(
         array $arguments,
         Closure $renderChildrenClosure,
-        RenderingContextInterface $renderingContext
+        RenderingContextInterface $renderingContext,
     ) {
         /** @var FilterInterface $filter */
         $filter = $arguments['filter'] ?? $renderChildrenClosure();
@@ -49,7 +49,6 @@ class FilterDescribeViewHelper extends AbstractViewHelper
         $reflectionProperty->setAccessible(true);
         $value = $reflectionProperty->getValue($filter);
 
-        return $value ? (string)$value : null;
+        return $value ? (string) $value : null;
     }
-
 }

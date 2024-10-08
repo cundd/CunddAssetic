@@ -8,10 +8,6 @@ interface OutputFileFinderInterface
 {
     /**
      * Return an array of previously filtered Asset files
-     *
-     * @param string $filePath
-     * @param string $suffix
-     * @return array
      */
     public function findPreviousOutputFiles(string $filePath, string $suffix = '.css'): array;
 }

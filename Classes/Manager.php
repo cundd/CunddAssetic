@@ -33,7 +33,7 @@ class Manager implements ManagerInterface
     /**
      * Indicates if the assets will compile
      *
-     * @var boolean
+     * @var bool
      */
     protected $willCompile = -1;
 
@@ -64,7 +64,7 @@ class Manager implements ManagerInterface
         OutputFileHashService $outputFileHashService,
         OutputFileServiceInterface $outputFileService,
         SymlinkServiceInterface $symlinkService,
-        OutputFileFinderInterface $outputFileFinder
+        OutputFileFinderInterface $outputFileFinder,
     ) {
         $this->configurationProvider = $configurationProviderFactory->build();
         $this->cacheManager = $cacheManager;
@@ -126,8 +126,6 @@ class Manager implements ManagerInterface
 
     /**
      * Return the Compiler instance
-     *
-     * @return CompilerInterface
      */
     public function getCompiler(): CompilerInterface
     {
@@ -141,7 +139,6 @@ class Manager implements ManagerInterface
     /**
      * Collect all the assets and add them to the Asset Manager
      *
-     * @return AssetCollection
      * @throws LogicException if the Assetic classes could not be found
      */
     public function collectAssets(): AssetCollection
@@ -151,8 +148,6 @@ class Manager implements ManagerInterface
 
     /**
      * Collect the assets and set the target path
-     *
-     * @return AssetCollection
      */
     protected function collectAssetsAndSetTarget(): AssetCollection
     {
@@ -173,12 +168,10 @@ class Manager implements ManagerInterface
 
     /**
      * Return if the files should be compiled
-     *
-     * @return boolean
      */
     public function willCompile(): bool
     {
-        if ($this->willCompile === -1) {
+        if (-1 === $this->willCompile) {
             // If no backend user is logged in, check if compiling is allowed
             $isDevelopment = $this->configurationProvider->isDevelopment();
             $isUserLoggedIn = BackendUserUtility::isUserLoggedIn();
@@ -206,8 +199,6 @@ class Manager implements ManagerInterface
 
     /**
      * Return the symlink URI
-     *
-     * @return string
      */
     public function getSymlinkUri(): string
     {
@@ -216,8 +207,6 @@ class Manager implements ManagerInterface
 
     /**
      * Return the "options" configuration from the TypoScript of the current page
-     *
-     * @return array
      */
     public function getPluginLevelOptions(): array
     {

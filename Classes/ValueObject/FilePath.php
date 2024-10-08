@@ -28,13 +28,11 @@ class FilePath
     }
 
     /**
-     * @param string                              $fileName
-     * @param ConfigurationProviderInterface|null $configurationProvider
      * @return static
      */
     public static function fromFileName(
         string $fileName,
-        ?ConfigurationProviderInterface $configurationProvider = null
+        ?ConfigurationProviderInterface $configurationProvider = null,
     ): self {
         $configurationProvider = $configurationProvider ?? (new ConfigurationProviderFactory())->build();
 
@@ -47,8 +45,6 @@ class FilePath
 
     /**
      * Return the public web-URI
-     *
-     * @return string
      */
     public function getPublicUri(): string
     {
@@ -57,8 +53,6 @@ class FilePath
 
     /**
      * Return the absolute file-system URI
-     *
-     * @return string
      */
     public function getAbsoluteUri(): string
     {

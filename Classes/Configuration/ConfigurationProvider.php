@@ -23,12 +23,12 @@ class ConfigurationProvider implements ConfigurationProviderInterface
 
     public function getStylesheetConfigurations(): array
     {
-        return (array)$this->configuration['stylesheets.'];
+        return (array) $this->configuration['stylesheets.'];
     }
 
     public function getAllowCompileWithoutLogin(): bool
     {
-        return (bool)($this->configuration['allow_compile_without_login'] ?? false);
+        return (bool) ($this->configuration['allow_compile_without_login'] ?? false);
     }
 
     public function getPublicPath(): string
@@ -48,11 +48,11 @@ class ConfigurationProvider implements ConfigurationProviderInterface
 
     public function isDevelopment(): bool
     {
-        if (php_sapi_name() === 'cli') {
+        if ('cli' === php_sapi_name()) {
             return true;
         }
 
-        return (bool)($this->configuration['development'] ?? false);
+        return (bool) ($this->configuration['development'] ?? false);
     }
 
     public function getOptions()
@@ -77,9 +77,9 @@ class ConfigurationProvider implements ConfigurationProviderInterface
             $rawLiveReloadConfiguration = $this->configuration['livereload.'] ?? [];
 
             $this->liveReloadConfiguration = new LiveReloadConfiguration(
-                (int)($rawLiveReloadConfiguration['port'] ?? 35729),
-                (bool)($rawLiveReloadConfiguration['add_javascript'] ?? false),
-                (bool)($rawLiveReloadConfiguration['skip_server_test'] ?? false)
+                (int) ($rawLiveReloadConfiguration['port'] ?? 35729),
+                (bool) ($rawLiveReloadConfiguration['add_javascript'] ?? false),
+                (bool) ($rawLiveReloadConfiguration['skip_server_test'] ?? false)
             );
         }
 
@@ -95,16 +95,16 @@ class ConfigurationProvider implements ConfigurationProviderInterface
 
     public function getFilterForType(): array
     {
-        return (array)$this->configuration['filter_for_type.'];
+        return (array) $this->configuration['filter_for_type.'];
     }
 
     public function getFilterBinaries(): array
     {
-        return (array)$this->configuration['filter_binaries.'];
+        return (array) $this->configuration['filter_binaries.'];
     }
 
     public function getStrictModeEnabled(): bool
     {
-        return (bool)($this->configuration['strict'] ?? false);
+        return (bool) ($this->configuration['strict'] ?? false);
     }
 }

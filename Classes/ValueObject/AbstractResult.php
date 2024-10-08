@@ -47,8 +47,10 @@ abstract class AbstractResult
      *
      * @template R
      * @template X
+     *
      * @param callable(T): R $ok
      * @param callable(E): X $err
+     *
      * @return R|X
      */
     public function doMatch(callable $ok, callable $err)

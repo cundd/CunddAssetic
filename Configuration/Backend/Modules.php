@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 return [
@@ -15,7 +16,7 @@ return [
         'extensionName'     => 'Assetic',
         'iconIdentifier'    => 'ext-cundd-assetic-icon',
         'controllerActions' => [
-            \Cundd\Assetic\Controller\AssetController::class => [
+            Cundd\Assetic\Controller\AssetController::class => [
                 'list',
                 'compile',
             ],

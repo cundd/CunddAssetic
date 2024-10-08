@@ -30,7 +30,7 @@ class LiveReload implements MessageComponentInterface
      * You'd likely not be able to reach the system. You better have an SLA in
      * place when this happens.
      *
-     * @var integer
+     * @var int
      */
     private const LOG_LEVEL_EMERGENCY = 0;
 
@@ -39,7 +39,7 @@ class LiveReload implements MessageComponentInterface
      *
      * Example: Entire website down, database unavailable, etc.
      *
-     * @var integer
+     * @var int
      */
     private const LOG_LEVEL_ALERT = 1;
 
@@ -48,7 +48,7 @@ class LiveReload implements MessageComponentInterface
      *
      * Example: unexpected exception.
      *
-     * @var integer
+     * @var int
      */
     private const LOG_LEVEL_CRITICAL = 2;
 
@@ -57,7 +57,7 @@ class LiveReload implements MessageComponentInterface
      *
      * Example: Runtime error.
      *
-     * @var integer
+     * @var int
      */
     private const LOG_LEVEL_ERROR = 3;
 
@@ -67,7 +67,7 @@ class LiveReload implements MessageComponentInterface
      * Examples: Use of deprecated APIs, undesirable things that are not
      * necessarily wrong.
      *
-     * @var integer
+     * @var int
      */
     private const LOG_LEVEL_WARNING = 4;
 
@@ -76,7 +76,7 @@ class LiveReload implements MessageComponentInterface
      *
      * Example: things you should have a look at, nothing to worry about though.
      *
-     * @var integer
+     * @var int
      */
     private const LOG_LEVEL_NOTICE = 5;
 
@@ -85,7 +85,7 @@ class LiveReload implements MessageComponentInterface
      *
      * Examples: User logs in, SQL logs.
      *
-     * @var integer
+     * @var int
      */
     private const LOG_LEVEL_INFO = 6;
 
@@ -94,14 +94,12 @@ class LiveReload implements MessageComponentInterface
      *
      * Example: Detailed status information.
      *
-     * @var integer
+     * @var int
      */
     private const LOG_LEVEL_DEBUG = 7;
 
     /**
      * Reverse look up of log level to level name.
-     *
-     * @var array
      */
     protected static array $logLevelPrefix = [
         self::LOG_LEVEL_EMERGENCY => '!!!',
@@ -128,25 +126,21 @@ class LiveReload implements MessageComponentInterface
 
     /**
      * Handshake message
-     *
-     * @var array
      */
     protected array $handshakeMessage = [
-        'command'    => 'hello',
-        'protocols'  => [
+        'command'   => 'hello',
+        'protocols' => [
             'http://livereload.com/protocols/official-7',
             'http://livereload.com/protocols/official-8',
-            //'http://livereload.com/protocols/official-9',
-            //'http://livereload.com/protocols/2.x-origin-version-negotiation',
-            //'http://livereload.com/protocols/2.x-remote-control',
+            // 'http://livereload.com/protocols/official-9',
+            // 'http://livereload.com/protocols/2.x-origin-version-negotiation',
+            // 'http://livereload.com/protocols/2.x-remote-control',
         ],
         'serverName' => 'CunddAssetic',
     ];
 
     /**
      * Reload message
-     *
-     * @var array
      */
     protected array $reloadMessage = [
         'command' => 'reload',
@@ -156,8 +150,6 @@ class LiveReload implements MessageComponentInterface
 
     /**
      * Alert message
-     *
-     * @var array
      */
     protected array $alertMessage = [
         'command' => 'alert',
@@ -174,13 +166,11 @@ class LiveReload implements MessageComponentInterface
     public function __construct($notificationDelay)
     {
         $this->notificationDelay = $notificationDelay;
-        $this->clients = new SplObjectStorage;
+        $this->clients = new SplObjectStorage();
     }
 
     /**
      * Attach the event loop to the server to allow sending delayed responses
-     *
-     * @param LoopInterface $loop
      */
     public function setEventLoop(LoopInterface $loop)
     {
@@ -192,11 +182,12 @@ class LiveReload implements MessageComponentInterface
      *
      * @param ConnectionInterface $from The socket/connection that sent the message to your application
      * @param string              $msg  The message received
+     *
      * @throws Exception
      */
     public function onMessage(ConnectionInterface $from, $msg)
     {
-        /** @var WampConnection|Connection $from */
+        /* @var WampConnection|Connection $from */
         $this->debugLine(
             sprintf(
                 'Received message "%s" from connection %d address %s',
@@ -208,7 +199,7 @@ class LiveReload implements MessageComponentInterface
         );
 
         // If the sender is the current host, pass the message to the clients
-        if ($from->remoteAddress === '127.0.0.1') {
+        if ('127.0.0.1' === $from->remoteAddress) {
             /** @var IoConnection $client */
             foreach ($this->clients as $client) {
                 if ($from !== $client) {
@@ -223,11 +214,12 @@ class LiveReload implements MessageComponentInterface
      * When a new connection is opened it will be passed to this method
      *
      * @param ConnectionInterface $conn The socket/connection that just connected to your application
+     *
      * @throws Exception
      */
     public function onOpen(ConnectionInterface $conn)
     {
-        /** @var WampConnection|Connection $conn */
+        /* @var WampConnection|Connection $conn */
         // Store the new connection to send messages to later
         $this->clients->attach($conn);
         $this->send($conn, $this->handshakeMessage);
@@ -239,11 +231,12 @@ class LiveReload implements MessageComponentInterface
      * This is called before or after a socket is closed (depends on how it's closed).  SendMessage to $conn will not result in an error if it has already been closed.
      *
      * @param ConnectionInterface $conn The socket/connection that is closing/closed
+     *
      * @throws Exception
      */
     public function onClose(ConnectionInterface $conn)
     {
-        /** @var WampConnection|Connection $conn */
+        /* @var WampConnection|Connection $conn */
         // The connection is closed, remove it, as we can no longer send it messages
         $this->clients->detach($conn);
         $this->debugLine("Connection {$conn->resourceId} has disconnected", '-');
@@ -253,8 +246,6 @@ class LiveReload implements MessageComponentInterface
      * If there is an error with one of the sockets, or somewhere in the application where an Exception is thrown,
      * the Exception is sent back down the stack, handled by the Server and bubbled back up the application through this method
      *
-     * @param ConnectionInterface $conn
-     * @param Exception           $e
      * @throws Exception
      */
     public function onError(ConnectionInterface $conn, Exception $e)
@@ -265,9 +256,6 @@ class LiveReload implements MessageComponentInterface
 
     /**
      * Invoked when a file changed
-     *
-     * @param string $changedFile
-     * @param bool   $liveCss
      */
     public function fileDidChange(string $changedFile, bool $liveCss): void
     {
@@ -300,14 +288,10 @@ class LiveReload implements MessageComponentInterface
         );
     }
 
-    /**
-     * @param ConnectionInterface $connection
-     * @param mixed               $message
-     */
     protected function send(ConnectionInterface $connection, $message): void
     {
         if (is_string($message)) {
-            if (substr($message, -strlen(self::MESSAGE_END)) !== self::MESSAGE_END) {
+            if (self::MESSAGE_END !== substr($message, -strlen(self::MESSAGE_END))) {
                 $message .= self::MESSAGE_END;
             }
         } else {
@@ -320,13 +304,12 @@ class LiveReload implements MessageComponentInterface
     /**
      * Print the given message to the console
      *
-     * @param string          $message
      * @param string|int|null $logLevel Log Level or symbol
      */
     protected function debug(string $message, $logLevel = null): void
     {
-        if ($logLevel !== null) {
-            $messagePrefix =  date('r') . ' ';
+        if (null !== $logLevel) {
+            $messagePrefix = date('r') . ' ';
             if (is_int($logLevel)) {
                 $messagePrefix .= self::$logLevelPrefix[$logLevel] ?? '';
             } elseif (is_string($logLevel)) {
@@ -342,7 +325,6 @@ class LiveReload implements MessageComponentInterface
     /**
      * Print the given message to the console
      *
-     * @param string          $message
      * @param string|int|null $logLevel Log Level or symbol
      */
     protected function debugLine(string $message, $logLevel = null): void

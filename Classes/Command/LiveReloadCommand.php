@@ -209,7 +209,7 @@ class LiveReloadCommand extends AbstractWatchCommand
         $port,
         float $notificationDelay,
         bool $useTLS,
-        $interval
+        $interval,
     ): IoServer {
         if (!class_exists(HttpServer::class)) {
             throw new LogicException('The Ratchet classes could not be found', 1356543545);

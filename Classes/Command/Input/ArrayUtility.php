@@ -13,6 +13,7 @@ class ArrayUtility
      * Normalize the given string array
      *
      * @param string[] $rawInput
+     *
      * @return string[]
      */
     public static function normalizeInput(array $rawInput): array

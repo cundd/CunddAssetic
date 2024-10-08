@@ -17,21 +17,17 @@ class WatchPathsBuilder
     /**
      * Fetch the argument or option from the given CLI input and parse them as an array of absolute URLs
      *
-     * @param InputInterface $input
-     * @param string         $name
      * @return string[]
      */
     public function buildPathsFromInput(InputInterface $input, string $name): array
     {
-        $rawInput = $this->getRawInput($input, $name,);
+        $rawInput = $this->getRawInput($input, $name);
         $normalizedInput = ArrayUtility::normalizeInput($rawInput);
 
         return $this->prepareWatchPaths($normalizedInput);
     }
 
     /**
-     * @param InputInterface $input
-     * @param string         $name
      * @return string[]
      */
     private function getRawInput(InputInterface $input, string $name): array
@@ -43,6 +39,7 @@ class WatchPathsBuilder
 
     /**
      * @param string[] $paths
+     *
      * @return string[]
      */
     private function prepareWatchPaths(array $paths): array

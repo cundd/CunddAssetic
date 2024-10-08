@@ -20,6 +20,7 @@ interface FileWatcherInterface
      * Sets the array of file suffix to watch for changes
      *
      * @param string[] $assetSuffixes
+     *
      * @return $this
      */
     public function setAssetSuffixes(array $assetSuffixes): FileWatcherInterface;
@@ -31,14 +32,13 @@ interface FileWatcherInterface
 
     /**
      * @param string[] $watchPaths
+     *
      * @return $this
      */
     public function setWatchPaths(array $watchPaths): FileWatcherInterface;
 
     /**
      * If a file changed it's path will be returned, otherwise NULL
-     *
-     * @return string|null
      */
     public function getChangedFileSinceLastCheck(): ?string;
 
@@ -50,7 +50,6 @@ interface FileWatcherInterface
     public function collectFilesToWatch(): array;
 
     /**
-     * @param float $interval
      * @return $this
      */
     public function setInterval(float $interval): FileWatcherInterface;

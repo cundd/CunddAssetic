@@ -12,7 +12,6 @@ interface CacheManagerInterface
      * Return the value for the given identifier in the cache
      *
      * @param PathWoHash $identifier Identifier key
-     * @return mixed
      */
     public function getCache(PathWoHash $identifier);
 
@@ -26,9 +25,6 @@ interface CacheManagerInterface
 
     /**
      * Remove the cached hash
-     *
-     * @param PathWoHash $currentOutputFilenameWithoutHash
-     * @return void
      */
     public function clearHashCache(PathWoHash $currentOutputFilenameWithoutHash): void;
 }

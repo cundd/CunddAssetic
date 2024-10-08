@@ -30,15 +30,10 @@ abstract class AbstractWatchCommand extends AbstractCommand
 
     private FileWatcherInterface $fileWatcher;
 
-    /**
-     * @param ManagerInterface             $manager
-     * @param FileWatcher                  $fileWatcher
-     * @param ConfigurationProviderFactory $configurationProviderFactory
-     */
     public function __construct(
         ManagerInterface $manager,
         FileWatcher $fileWatcher,
-        ConfigurationProviderFactory $configurationProviderFactory
+        ConfigurationProviderFactory $configurationProviderFactory,
     ) {
         parent::__construct($manager, $configurationProviderFactory);
         $this->fileWatcher = $fileWatcher;
@@ -88,17 +83,17 @@ abstract class AbstractWatchCommand extends AbstractCommand
 
     protected function getInterval(InputInterface $input, float $min): float
     {
-        return max((float)(int)$input->getOption(self::OPTION_INTERVAL), $min);
+        return max((float) (int) $input->getOption(self::OPTION_INTERVAL), $min);
     }
 
     protected function configureFileWatcherFromInput(
         InputInterface $input,
         OutputInterface $output,
-        FileWatcherInterface $fileWatcher
+        FileWatcherInterface $fileWatcher,
     ): FileWatcherInterface {
         $paths = (new WatchPathsBuilder())->buildPathsFromInput($input, self::PATHS);
         $suffixes = $input->getOption(self::OPTION_SUFFIXES);
-        $maxDepth = (int)$input->getOption(self::OPTION_MAX_DEPTH);
+        $maxDepth = (int) $input->getOption(self::OPTION_MAX_DEPTH);
 
         $this->configureFileWatcher($fileWatcher, $paths, $maxDepth, $suffixes);
         $this->printWatchedPaths($output, $fileWatcher);
@@ -110,7 +105,7 @@ abstract class AbstractWatchCommand extends AbstractCommand
         FileWatcherInterface $fileWatcher,
         array $paths,
         int $maxDepth,
-        array $suffixes
+        array $suffixes,
     ): FileWatcherInterface {
         $fileWatcher->setWatchPaths($paths);
         $fileWatcher->setFindFilesMaxDepth($maxDepth);
@@ -123,22 +118,16 @@ abstract class AbstractWatchCommand extends AbstractCommand
 
     /**
      * Print the watched paths
-     *
-     * @param OutputInterface      $output
-     * @param FileWatcherInterface $fileWatcher
      */
     protected function printWatchedPaths(OutputInterface $output, FileWatcherInterface $fileWatcher)
     {
         $output->writeln(
-            '<info>' . 'Watching path(s): ' . implode(', ', $fileWatcher->getWatchPaths()) . '</info>'
+            '<info>Watching path(s): ' . implode(', ', $fileWatcher->getWatchPaths()) . '</info>'
         );
     }
 
     /**
      * If a file changed its path will be returned, otherwise FALSE
-     *
-     * @param FileWatcherInterface $fileWatcher
-     * @return string|null
      */
     protected function needsRecompile(FileWatcherInterface $fileWatcher): ?string
     {

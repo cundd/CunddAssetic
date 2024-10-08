@@ -24,13 +24,12 @@ class CacheManager implements CacheManagerInterface
      * Return the value for the given identifier in the cache
      *
      * @param PathWoHash $identifier Identifier key
-     * @return mixed
      */
     public function getCache(PathWoHash $identifier)
     {
         $identifier = $this->prepareIdentifier($identifier);
         if (is_callable('apc_fetch')) {
-            /** @noinspection PhpComposerExtensionStubsInspection */
+            /* @noinspection PhpComposerExtensionStubsInspection */
             return apc_fetch($identifier);
         }
 
@@ -49,7 +48,7 @@ class CacheManager implements CacheManagerInterface
     {
         $identifier = $this->prepareIdentifier($identifier);
         if (is_callable('apc_store')) {
-            /** @noinspection PhpComposerExtensionStubsInspection */
+            /* @noinspection PhpComposerExtensionStubsInspection */
             apc_store($identifier, $value);
         } else {
             $cacheInstance = $this->getCacheInstance();
@@ -64,9 +63,6 @@ class CacheManager implements CacheManagerInterface
 
     /**
      * Remove the cached hash
-     *
-     * @param PathWoHash $currentOutputFilenameWithoutHash
-     * @return void
      */
     public function clearHashCache(PathWoHash $currentOutputFilenameWithoutHash): void
     {

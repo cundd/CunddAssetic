@@ -28,13 +28,9 @@ abstract class AbstractCommand extends Command
 
     private ConfigurationProviderInterface $configurationProvider;
 
-    /**
-     * @param ManagerInterface             $manager
-     * @param ConfigurationProviderFactory $configurationProviderFactory
-     */
     public function __construct(
         ManagerInterface $manager,
-        ConfigurationProviderFactory $configurationProviderFactory
+        ConfigurationProviderFactory $configurationProviderFactory,
     ) {
         parent::__construct();
         $this->manager = $manager;
@@ -44,9 +40,6 @@ abstract class AbstractCommand extends Command
     /**
      * Compile the assets
      *
-     * @param bool           $graceful
-     * @param Throwable|null $error
-     * @return string|null
      * @throws Throwable if an error occurred and `$graceful` is FALSE
      */
     protected function compile(bool $graceful, ?Throwable &$error = null): ?string
@@ -80,8 +73,6 @@ abstract class AbstractCommand extends Command
     /**
      * Copy the source to the destination
      *
-     * @param string $source
-     * @param string $destination
      * @return string Returns the used path
      */
     protected function copyToDestination(string $source, string $destination): string

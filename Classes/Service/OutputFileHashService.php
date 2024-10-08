@@ -36,7 +36,7 @@ class OutputFileHashService
     public function __construct(
         CacheManagerInterface $cacheManager,
         ConfigurationProviderFactory $configurationProviderFactory,
-        OutputFileFinderInterface $outputFileFinder
+        OutputFileFinderInterface $outputFileFinder,
     ) {
         $this->cacheManager = $cacheManager;
         $this->configurationProvider = $configurationProviderFactory->build();
@@ -44,13 +44,11 @@ class OutputFileHashService
     }
 
     /**
-     * @param PathWoHash $outputFilenameWithoutHash
-     * @param string     $hashAlgorithm
      * @return Result<FinalOutputFilePath,UnexpectedValueException>
      */
     public function buildAndStoreFileHash(
         PathWoHash $outputFilenameWithoutHash,
-        string $hashAlgorithm = 'md5'
+        string $hashAlgorithm = 'md5',
     ): Result {
         // $hashAlgorithm = 'crc32';
         // $hashAlgorithm = 'sha1';
@@ -80,19 +78,12 @@ class OutputFileHashService
      *
      * Warning: Other running PHP processes also may have updated the hash in between. This is not detected
      *
-     * @param PathWoHash $currentOutputFilenameWithoutHash
-     * @return string
      * @throws LogicException if the hash for the given output file was already updated by this instance
      */
     public function getPreviousHash(PathWoHash $currentOutputFilenameWithoutHash): string
     {
         if (isset($this->wasWritten[$currentOutputFilenameWithoutHash->getAbsoluteUri()])) {
-            throw new LogicException(
-                sprintf(
-                    'Data for the given output file was already updated. File path "%s"',
-                    $currentOutputFilenameWithoutHash->getAbsoluteUri()
-                )
-            );
+            throw new LogicException(sprintf('Data for the given output file was already updated. File path "%s"', $currentOutputFilenameWithoutHash->getAbsoluteUri()));
         }
         $suffix = '.css';
         $publicUri = $currentOutputFilenameWithoutHash->getPublicUri();
@@ -119,14 +110,10 @@ class OutputFileHashService
         $this->cacheManager->setCache($outputFilenameWithoutHash, $fileHash);
     }
 
-    /**
-     * @param PathWoHash $currentOutputFilenameWithoutHash
-     * @return string
-     */
     private function getCachedPreviousHash(PathWoHash $currentOutputFilenameWithoutHash): string
     {
         if (!isset($this->previousHashFromCache)) {
-            $this->previousHashFromCache = (string)$this->cacheManager->getCache($currentOutputFilenameWithoutHash);
+            $this->previousHashFromCache = (string) $this->cacheManager->getCache($currentOutputFilenameWithoutHash);
         }
 
         return $this->previousHashFromCache;

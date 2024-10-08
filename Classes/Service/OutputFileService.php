@@ -23,7 +23,7 @@ class OutputFileService implements OutputFileServiceInterface
 
     public function __construct(
         ConfigurationProviderFactory $configurationProviderFactory,
-        OutputFileHashService $outputFileHashService
+        OutputFileHashService $outputFileHashService,
     ) {
         $this->configurationProvider = $configurationProviderFactory->build();
         $this->outputFileHashService = $outputFileHashService;
@@ -34,8 +34,6 @@ class OutputFileService implements OutputFileServiceInterface
      *
      * If an output file name is set in the configuration use it, otherwise create it by combining the file names of the
      * assets.
-     *
-     * @return PathWoHash
      */
     public function getPathWoHash(): PathWoHash
     {

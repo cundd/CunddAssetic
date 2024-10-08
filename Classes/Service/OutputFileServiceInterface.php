@@ -14,16 +14,11 @@ interface OutputFileServiceInterface
      *
      * If an output file name is set in the configuration use it, otherwise create it by combining the file names of the
      * assets.
-     *
-     * @return PathWoHash
      */
     public function getPathWoHash(): PathWoHash;
 
     /**
      * Return the expected final File Path
-     *
-     * @param PathWoHash $outputFilenameWithoutHash
-     * @return FilePath|null
      */
     public function getExpectedPathWithHash(PathWoHash $outputFilenameWithoutHash): ?FilePath;
 }

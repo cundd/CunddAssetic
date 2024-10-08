@@ -62,9 +62,6 @@ class AssetController extends ActionController
 
     /**
      * Action that compiles the stylesheet
-     *
-     * @param bool $clearPageCache
-     * @return ResponseInterface
      */
     public function compileAction(bool $clearPageCache = false): ResponseInterface
     {
@@ -75,8 +72,6 @@ class AssetController extends ActionController
 
     /**
      * Compile the assets
-     *
-     * @param bool $clearPageCache
      */
     private function compile(bool $clearPageCache): void
     {

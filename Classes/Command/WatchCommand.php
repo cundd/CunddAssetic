@@ -37,15 +37,12 @@ class WatchCommand extends AbstractWatchCommand
         $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
         while (true) {
             $this->recompileIfNeeded($output, $fileWatcher);
-            usleep((int)($interval * 1000000));
+            usleep((int) ($interval * 1000000));
         }
     }
 
     /**
      * Re-compiles the sources if needed
-     *
-     * @param OutputInterface      $output
-     * @param FileWatcherInterface $fileWatcher
      */
     private function recompileIfNeeded(OutputInterface $output, FileWatcherInterface $fileWatcher)
     {
@@ -54,7 +51,7 @@ class WatchCommand extends AbstractWatchCommand
             return;
         }
         // TODO: Handle the error
-        $compiledFile = (string)$this->compile(true);
+        $compiledFile = (string) $this->compile(true);
 
         $output->writeln("<info>File $changedFile has changed. Assets have been compiled into $compiledFile </info>");
     }

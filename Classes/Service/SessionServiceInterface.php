@@ -9,15 +9,12 @@ interface SessionServiceInterface
     /**
      * Store the given error message in the session
      *
-     * @param string $error
      * @return void
      */
     public function storeErrorInSession(string $error);
 
     /**
      * Return the last error message from the session
-     *
-     * @return string|null
      */
     public function getErrorFromSession(): ?string;
 

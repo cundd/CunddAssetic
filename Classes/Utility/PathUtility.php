@@ -20,14 +20,14 @@ class PathUtility
 {
     public static function getAbsolutePath(string $path): string
     {
-        if ($path[0] === '~') {
+        if ('~' === $path[0]) {
             return ($_SERVER['HOME'] ?? '') . substr($path, 1);
         }
 
-        if (substr($path, 0, 4) === 'EXT:') {
+        if ('EXT:' === substr($path, 0, 4)) {
             return dirname(GeneralUtility::getFileAbsFileName(rtrim($path, '/') . '/fake-file'));
         }
-        if (substr($path, 0, 12) === 'ProjectPath:') {
+        if ('ProjectPath:' === substr($path, 0, 12)) {
             return Environment::getProjectPath() . substr($path, 12);
         }
 
@@ -36,9 +36,6 @@ class PathUtility
 
     /**
      * Try to detect the reason for the write-failure
-     *
-     * @param string $path
-     * @return string
      */
     public static function getReasonForWriteFailure(string $path): string
     {

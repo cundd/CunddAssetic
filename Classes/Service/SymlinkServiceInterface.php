@@ -11,10 +11,6 @@ interface SymlinkServiceInterface
 {
     /**
      * Create the symlink to the given final path
-     *
-     * @param FilePath   $fileFinalPath
-     * @param PathWoHash $outputFilePathWithoutHash
-     * @return FilePath|null
      */
     public function createSymlinkToFinalPath(FilePath $fileFinalPath, PathWoHash $outputFilePathWithoutHash): ?FilePath;
 
@@ -25,9 +21,6 @@ interface SymlinkServiceInterface
 
     /**
      * Return the symlink URI
-     *
-     * @param PathWoHash $outputFilePathWithoutHash
-     * @return FilePath
      */
     public function getSymlinkPath(PathWoHash $outputFilePathWithoutHash): FilePath;
 }

@@ -8,6 +8,7 @@ use Throwable;
 
 /**
  * @template-implements BuildState
+ *
  * @template E extends Throwable
  */
 abstract class BuildStateResult extends AbstractResult

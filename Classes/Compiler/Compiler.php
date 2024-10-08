@@ -66,8 +66,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      */
     private $configurationProvider;
 
-    public function __construct(ConfigurationProviderInterface $configurationProvider, array $pluginLevelOptions)
-    {
+    /**
+     * @param array<string,mixed> $pluginLevelOptions
+     */
+    public function __construct(
+        ConfigurationProviderInterface $configurationProvider,
+        array $pluginLevelOptions,
+    ) {
         $this->configurationProvider = $configurationProvider;
         $this->pluginLevelOptions = $pluginLevelOptions;
     }
@@ -75,7 +80,6 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Collect all the assets and add them to the Asset Manager
      *
-     * @return AssetCollection
      * @throws LogicException if the Assetic classes could not be found
      */
     public function collectAssets(): AssetCollection
@@ -129,14 +133,16 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         return new Result\Ok(null);
     }
 
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+    // =========================================================================
     // FILTERS
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+    // =========================================================================
     /**
      * Return the right filter for the given file type
      *
      * @param string $type The file type
-     * @return Filter\FilterInterface       The filter
+     *
+     * @return Filter\FilterInterface The filter
+     *
      * @throws LogicException if the required filter class does not exist
      */
     protected function getFilterForType(string $type): ?Filter\FilterInterface
@@ -156,7 +162,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         // Check if no filter should be used
-        if ($filterClass === 'none') {
+        if ('none' === $filterClass) {
             return null;
         }
 
@@ -177,13 +183,11 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         return $filter;
     }
 
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+    // =========================================================================
     // HELPERS
-    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+    // =========================================================================
     /**
      * Return the shared asset manager
-     *
-     * @return AssetManager
      */
     public function getAssetManager(): AssetManager
     {
@@ -200,19 +204,18 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * @param Filter\FilterInterface $filter                  The filter to apply to
      * @param array                  $stylesheetConfiguration The stylesheet configuration
      * @param string                 $stylesheetType          The stylesheet type
-     * @return Filter\FilterInterface                            Return the filter
+     *
+     * @return Filter\FilterInterface Return the filter
+     *
      * @throws UnexpectedValueException if the given stylesheet type is invalid
      */
     protected function applyFunctionsToFilterForType(
         Filter\FilterInterface $filter,
         array $stylesheetConfiguration,
-        string $stylesheetType
+        string $stylesheetType,
     ): Filter\FilterInterface {
         if (!$stylesheetType) {
-            throw new UnexpectedValueException(
-                'The given stylesheet type is invalid "' . $stylesheetType . '"',
-                1355910725
-            );
+            throw new UnexpectedValueException('The given stylesheet type is invalid "' . $stylesheetType . '"', 1355910725);
         }
         $functions = $stylesheetConfiguration['functions.'];
         ksort($functions);
@@ -231,10 +234,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
             if (is_callable([$filter, $function])) {
                 call_user_func_array([$filter, $function], $data);
             } elseif ($this->configurationProvider->getStrictModeEnabled()) {
-                throw new FilterException(
-                    sprintf('Filter "%s" does not implement method "%s"', get_class($filter), $function),
-                    1447161985
-                );
+                throw new FilterException(sprintf('Filter "%s" does not implement method "%s"', get_class($filter), $function), 1447161985);
             } else {
                 trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
             }
@@ -248,18 +248,12 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
     /**
      * Create and collect the Asset with the given key and stylesheet
-     *
-     * @param string          $assetKey
-     * @param string          $stylesheet
-     * @param AssetCollection $assetCollection
-     * @param AssetFactory    $factory
-     * @return AssetCollection|null
      */
     public function createAsset(
         string $assetKey,
         string $stylesheet,
         AssetCollection $assetCollection,
-        AssetFactory $factory
+        AssetFactory $factory,
     ): ?AssetCollection {
         $allStylesheetConfiguration = $this->configurationProvider->getStylesheetConfigurations();
         $stylesheetConf = is_array($allStylesheetConfiguration[$assetKey . '.'])
@@ -268,7 +262,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
         // Get the type to find the according filter
         if (isset($stylesheetConf['type'])) {
-            $stylesheetType = (string)$stylesheetConf['type'];
+            $stylesheetType = (string) $stylesheetConf['type'];
         } else {
             $stylesheetType = substr(strrchr($stylesheet, '.'), 1);
         }
@@ -276,9 +270,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         $originalStylesheet = $stylesheet;
         $stylesheet = PathUtility::getAbsolutePath($stylesheet);
         if (!$stylesheet) {
-            throw new FilePathException(
-                sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet)
-            );
+            throw new FilePathException(sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet));
         }
 
         // Make sure the filter manager knows the filter
@@ -318,12 +310,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * I.e. expands paths to their absolute path
      *
      * @param array $parameters Reference to the data array
+     *
      * @return void
      */
     protected function prepareFunctionParameters(array &$parameters)
     {
         foreach ($parameters as &$parameter) {
-            if (strpos($parameter, '.') !== false || strpos($parameter, DIRECTORY_SEPARATOR) !== false) {
+            if (false !== strpos($parameter, '.') || false !== strpos($parameter, DIRECTORY_SEPARATOR)) {
                 $path = PathUtility::getAbsolutePath($parameter);
                 $parameter = realpath($path) ?: $path;
             }
@@ -341,10 +334,10 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         $filterBinaryPath = $filterBinaries[$filterClassIdentifier];
-        if ($filterBinaryPath[0] === '~') {
+        if ('~' === $filterBinaryPath[0]) {
             $homeDirectory = $this->getHomeDirectory();
             $filterBinaryPath = $homeDirectory . substr($filterBinaryPath, 1);
-        } elseif (substr($filterBinaryPath, 0, 4) === 'EXT:') {
+        } elseif ('EXT:' === substr($filterBinaryPath, 0, 4)) {
             $filterBinaryPath = PathUtility::getAbsolutePath($filterBinaryPath);
         }
 
@@ -355,10 +348,10 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     {
         $homeDirectory = getenv('HOME');
         if ($homeDirectory) {
-            return (string)$homeDirectory;
+            return (string) $homeDirectory;
         }
         if (isset($_SERVER['HOME'])) {
-            return (string)$_SERVER['HOME'];
+            return (string) $_SERVER['HOME'];
         }
 
         return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/..' : '';

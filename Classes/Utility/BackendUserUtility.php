@@ -10,8 +10,6 @@ class BackendUserUtility
 {
     /**
      * Return if a backend user is logged in
-     *
-     * @return bool
      */
     public static function isUserLoggedIn(): bool
     {

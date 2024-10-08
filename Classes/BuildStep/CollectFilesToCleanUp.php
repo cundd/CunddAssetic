@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\BuildStep;
 
-use Cundd\Assetic\Service\OutputFileFinder;
 use Cundd\Assetic\Service\OutputFileFinderInterface;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
