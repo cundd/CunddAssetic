@@ -1,48 +1,48 @@
 {
-    "name": "cundd/assetic",
-    "description": "Assetic for TYPO3 CMS",
-    "keywords": [
-        "assets",
-        "compression",
-        "minification",
-        "typo3"
-    ],
-    "homepage": "https://github.com/cundd/CunddAssetic",
-    "type": "typo3-cms-extension",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Daniel Corn",
-            "email": "info@cundd.net",
-            "homepage": "https://cundd.net/"
-        }
-    ],
-    "require": {
-        "php": "^8.1",
-        "ext-ctype": "*",
-        "typo3/cms-core": "^11.5.34 || ^12.4.6",
-        "cundd/assetic_additions": "^2.0.0",
-        "assetic/framework": "^3.0.1"
-    },
-    "require-dev": {
-        "cboden/ratchet": "^0.4.3"
-    },
-    "autoload": {
-        "psr-4": {
-            "Cundd\\Assetic\\": "Classes/"
-        }
-    },
-    "suggest": {
-        "leafo/lessphp": "Allows to compile LESS with PHP",
-        "leafo/scssphp": "Allows to compile SCSS 3.x with PHP",
-        "cboden/ratchet": "For livereload support (^0.4.3)"
-    },
-    "extra": {
-        "typo3/cms": {
-            "extension-key": "assetic"
-        },
-        "cundd/composer": {
-            "install": false
-        }
+  "name": "cundd/assetic",
+  "description": "Assetic for TYPO3 CMS",
+  "keywords": [
+    "assets",
+    "compression",
+    "minification",
+    "typo3"
+  ],
+  "homepage": "https://github.com/cundd/CunddAssetic",
+  "type": "typo3-cms-extension",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Daniel Corn",
+      "email": "info@cundd.net",
+      "homepage": "https://cundd.net/"
     }
+  ],
+  "require": {
+    "php": "^8.1",
+    "ext-ctype": "*",
+    "typo3/cms-core": "^11.5.34 || ^12.4.6",
+    "cundd/assetic_additions": "^2.0.0",
+    "assetic/framework": "^3.0.1"
+  },
+  "require-dev": {
+    "cboden/ratchet": "^0.4.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Cundd\\Assetic\\": "Classes/"
+    }
+  },
+  "suggest": {
+    "leafo/lessphp": "Allows to compile LESS with PHP",
+    "leafo/scssphp": "Allows to compile SCSS 3.x with PHP",
+    "cboden/ratchet": "For livereload support (^0.4.3)"
+  },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "assetic"
+    },
+    "cundd/composer": {
+      "install": false
+    }
+  }
 }

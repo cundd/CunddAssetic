@@ -1,12 +1,7 @@
 {
     "name": "cundd/assetic",
     "description": "Assetic for TYPO3 CMS",
-    "keywords": [
-        "assets",
-        "compression",
-        "minification",
-        "typo3"
-    ],
+    "keywords": ["assets", "compression", "minification", "typo3"],
     "homepage": "https://github.com/cundd/CunddAssetic",
     "type": "typo3-cms-extension",
     "license": "MIT",
