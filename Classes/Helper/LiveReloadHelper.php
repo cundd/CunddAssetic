@@ -29,14 +29,8 @@ class LiveReloadHelper
 })();
 JAVASCRIPT_CODE_TEMPLATE;
 
-    /**
-     * @var ConfigurationProviderInterface
-     */
-    private $configurationProvider;
-
-    public function __construct(ConfigurationProviderInterface $configurationProvider)
+    public function __construct(private readonly ConfigurationProviderInterface $configurationProvider)
     {
-        $this->configurationProvider = $configurationProvider;
     }
 
     public function getLiveReloadCodeIfEnabled(): string
@@ -84,9 +78,12 @@ JAVASCRIPT_CODE_TEMPLATE;
      */
     private function isEnabled(): bool
     {
-        $isEnabled = $this->configurationProvider->getLiveReloadConfiguration()->isEnabled();
+        if (!$this->configurationProvider->getLiveReloadConfiguration()->isEnabled()) {
+            return false;
+        }
 
-        return $isEnabled && BackendUserUtility::isUserLoggedIn();
+        return BackendUserUtility::isUserLoggedIn()
+            || $this->configurationProvider->getAllowCompileWithoutLogin();
     }
 
     /**
