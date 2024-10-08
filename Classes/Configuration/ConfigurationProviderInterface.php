@@ -49,11 +49,6 @@ interface ConfigurationProviderInterface
     public function getOutputFileName(): ?string;
 
     /**
-     * Return if experimental features are enabled
-     */
-    public function getEnableExperimentalFeatures(): bool;
-
-    /**
      * Return configuration for LiveReload
      */
     public function getLiveReloadConfiguration(): LiveReloadConfiguration;

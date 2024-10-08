@@ -37,13 +37,6 @@ class Manager implements ManagerInterface
      */
     protected $willCompile = -1;
 
-    /**
-     * Indicates if experimental features are enabled
-     *
-     * @var bool
-     */
-    protected $experimental = -1;
-
     private CompilerInterface $compiler;
 
     private CacheManagerInterface $cacheManager;

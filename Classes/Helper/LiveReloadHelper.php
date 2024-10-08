@@ -84,8 +84,7 @@ JAVASCRIPT_CODE_TEMPLATE;
      */
     private function isEnabled(): bool
     {
-        $isEnabled = $this->configurationProvider->getLiveReloadConfiguration()->isEnabled()
-            || $this->configurationProvider->getEnableExperimentalFeatures();
+        $isEnabled = $this->configurationProvider->getLiveReloadConfiguration()->isEnabled();
 
         return $isEnabled && BackendUserUtility::isUserLoggedIn();
     }

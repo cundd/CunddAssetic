@@ -55,7 +55,10 @@ class ConfigurationProvider implements ConfigurationProviderInterface
         return (bool) ($this->configuration['development'] ?? false);
     }
 
-    public function getOptions()
+    /**
+     * @return array|null
+     */
+    public function getOptions(): mixed
     {
         return $this->configuration['options.'] ?? null;
     }
@@ -63,12 +66,6 @@ class ConfigurationProvider implements ConfigurationProviderInterface
     public function getOutputFileName(): ?string
     {
         return $this->configuration['output'] ?? null;
-    }
-
-    public function getEnableExperimentalFeatures(): bool
-    {
-        return $this->getLiveReloadConfiguration()->isEnabled()
-            || ($this->configuration['experimental'] ?? false);
     }
 
     public function getLiveReloadConfiguration(): LiveReloadConfiguration
@@ -88,9 +85,7 @@ class ConfigurationProvider implements ConfigurationProviderInterface
 
     public function getCreateSymlink(): bool
     {
-        return $this->configuration['create_symlink']
-            || $this->getLiveReloadConfiguration()->isEnabled()
-            || $this->getEnableExperimentalFeatures();
+        return $this->configuration['create_symlink'] || $this->getLiveReloadConfiguration()->isEnabled();
     }
 
     public function getFilterForType(): array
