@@ -86,7 +86,7 @@ class Plugin
         return $content;
     }
 
-    private function includeCss(string $renderedStylesheet)
+    private function includeCss(string $renderedStylesheet): void
     {
         $renderer = GeneralUtility::makeInstance(PageRenderer::class);
         $renderer->addCssFile(

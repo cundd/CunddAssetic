@@ -16,6 +16,9 @@ class ConfigurationProvider implements ConfigurationProviderInterface
 
     private string $outputFileDir = 'typo3temp/cundd_assetic/';
 
+    /**
+     * @param array<string, mixed> $configuration
+     */
     public function __construct(array $configuration)
     {
         $this->configuration = $configuration;

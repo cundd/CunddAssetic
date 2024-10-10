@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Configuration;
 
+/**
+ * @phpstan-type StylesheetConfiguration array<string|array<string,mixed>>
+ */
 interface ConfigurationProviderInterface
 {
     /**
      * Return the configurations for the stylesheets
+     *
+     * @return StylesheetConfiguration
      */
     public function getStylesheetConfigurations(): array;
 
@@ -40,8 +45,10 @@ interface ConfigurationProviderInterface
 
     /**
      * Return the plugin level options
+     *
+     * @return array<string, mixed>|null
      */
-    public function getOptions();
+    public function getOptions(): mixed;
 
     /**
      * Return the name of the compiled asset file or `NULL` if it should be generated automatically
@@ -60,11 +67,15 @@ interface ConfigurationProviderInterface
 
     /**
      * Return the map of filters for types
+     *
+     * @return array<string, class-string>
      */
     public function getFilterForType(): array;
 
     /**
      * Return the registered filter binaries
+     *
+     * @return array<string, string>
      */
     public function getFilterBinaries(): array;
 

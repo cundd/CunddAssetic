@@ -17,7 +17,7 @@ interface SymlinkServiceInterface
     /**
      * Remove the symlink
      */
-    public function removeSymlink(PathWoHash $outputFilePathWithoutHash);
+    public function removeSymlink(PathWoHash $outputFilePathWithoutHash): void;
 
     /**
      * Return the symlink URI
