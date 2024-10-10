@@ -108,7 +108,7 @@ class Manager implements ManagerInterface
         }
 
         $createDevelopmentSymlink = $this->configurationProvider->getCreateSymlink()
-            && BackendUserUtility::isUserLoggedIn();
+            && (BackendUserUtility::isUserLoggedIn() || $this->configurationProvider->getAllowCompileWithoutLogin());
 
         if ($createDevelopmentSymlink) {
             return Result::ok($this->symlinkService->getSymlinkPath($currentState->getOutputFilePathWithoutHash()));
