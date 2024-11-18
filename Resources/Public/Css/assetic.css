@@ -1,0 +1,66 @@
+.assetic .button {
+    display: inline-block;
+    background-color: #f6f6f6;
+    border: 1px solid #7c7c7c;
+    color: #434343;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 16px;
+    margin: 0 10px 0 0;
+}
+
+.assetic .button:focus,
+.assetic .button:hover {
+    background-color: #c8c8c8;
+    border: 1px solid #737f91;
+    color: #1e1e1e;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.assetic code {
+    margin: 0;
+}
+
+.assetic table {
+    margin-bottom: 10px;
+}
+
+.assetic table th,
+.assetic table td {
+    padding: 6px 8px;
+    border: 1px solid #c8c8c8;
+}
+
+.assetic .no-wrap {
+    white-space: nowrap;
+}
+
+.assetic .build-error {
+    margin-top: 20px;
+}
+
+.assetic .build-error .button {
+    background: #c83c3c;
+    border-color: #77142e;
+    color: white;
+}
+
+.assetic .build-error .button::after {
+    content: "\f0da";
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.assetic .build-error .button[aria-expanded="true"]::after {
+    content: "\f0d7";
+}
+
+.assetic .build-error pre {
+    border: 1px solid #c8c8c8;
+    padding: 10px;
+}
