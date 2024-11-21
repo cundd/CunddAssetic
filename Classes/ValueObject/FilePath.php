@@ -20,7 +20,7 @@ class FilePath
 
     private string $absoluteDirectoryPath;
 
-    public function __construct(string $fileName, string $relativeDirectoryPath, string $absoluteDirectoryPath)
+    final public function __construct(string $fileName, string $relativeDirectoryPath, string $absoluteDirectoryPath)
     {
         $this->fileName = $fileName;
         $this->relativeDirectoryPath = rtrim($relativeDirectoryPath, DIRECTORY_SEPARATOR);
@@ -32,7 +32,7 @@ class FilePath
      */
     public static function fromFileName(
         string $fileName,
-        ?ConfigurationProviderInterface $configurationProvider = null,
+        ConfigurationProviderInterface $configurationProvider,
     ): self {
         $configurationProvider = $configurationProvider ?? (new ConfigurationProviderFactory())->build();
 
