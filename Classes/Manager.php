@@ -33,10 +33,8 @@ class Manager implements ManagerInterface
 {
     /**
      * Indicates if the assets will compile
-     *
-     * @var bool
      */
-    protected $willCompile = -1;
+    private bool $forceCompilation = false;
 
     private CompilerInterface $compiler;
 
@@ -138,7 +136,7 @@ class Manager implements ManagerInterface
 
     public function forceCompile(): self
     {
-        $this->willCompile = true;
+        $this->forceCompilation = true;
 
         return $this;
     }
@@ -148,25 +146,29 @@ class Manager implements ManagerInterface
      */
     public function willCompile(): bool
     {
-        if (-1 === $this->willCompile) {
-            // If no backend user is logged in, check if compiling is allowed
-            $isDevelopment = $this->configurationProvider->isDevelopment();
-            $isUserLoggedIn = BackendUserUtility::isUserLoggedIn();
-            if (!$isUserLoggedIn) {
-                $this->willCompile = $isDevelopment
-                    || $this->configurationProvider->getAllowCompileWithoutLogin();
-            } else {
-                $this->willCompile = $isDevelopment;
-            }
-
-            AsseticGeneralUtility::say(
-                'Backend user detected: ' . ($isUserLoggedIn ? 'yes' : 'no')
-            );
-            AsseticGeneralUtility::say('Development mode: ' . ($isDevelopment ? 'on' : 'off'));
-            AsseticGeneralUtility::say('Will compile: ' . ($this->willCompile ? 'yes' : 'no'));
+        if ($this->forceCompilation) {
+            return true;
         }
 
-        return $this->willCompile;
+        $isDevelopment = $this->configurationProvider->isDevelopment();
+        if ($isDevelopment) {
+            return true;
+        }
+
+        $isUserLoggedIn = BackendUserUtility::isUserLoggedIn();
+
+        AsseticGeneralUtility::say(
+            'Backend user detected: ' . ($isUserLoggedIn ? 'yes' : 'no')
+        );
+        AsseticGeneralUtility::say(
+            'Development mode: ' . ($isDevelopment ? 'on' : 'off')
+        );
+        if (!$isUserLoggedIn) {
+            // If no backend user is logged in, check if compiling is still allowed
+            return $this->configurationProvider->getAllowCompileWithoutLogin();
+        } else {
+            return false;
+        }
     }
 
     public function getPathWOHash(): PathWoHash
