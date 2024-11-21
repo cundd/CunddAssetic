@@ -13,7 +13,6 @@ use Cundd\Assetic\ValueObject\PathWoHash;
 use function basename;
 use function implode;
 use function is_array;
-use function str_replace;
 
 class OutputFileService implements OutputFileServiceInterface
 {
@@ -56,7 +55,7 @@ class OutputFileService implements OutputFileServiceInterface
             // the stylesheet path itself
             if (!is_array($stylesheet)) {
                 $stylesheetFileName = basename($stylesheet);
-                $stylesheetFileName = str_replace(['.', ' '], '', $stylesheetFileName);
+                $stylesheetFileName = preg_replace('![^0-9a-zA-Z-_]!', '', $stylesheetFileName);
                 $outputFileNameParts[] = $stylesheetFileName;
             }
         }
