@@ -74,11 +74,12 @@ class Plugin
 
         /** @var FilePath $filePath */
         $filePath = $result->unwrap();
+        $publicUri = $filePath->getPublicUri() . ($filePath->isSymlink() ? '?' . time() : '');
         $content = $this->getLiveReloadCode();
         $content .= $this->addDebugInformation($collectAndCompileEnd, $collectAndCompileStart);
         $content .= sprintf(
             '<link rel="stylesheet" type="text/css" href="%s" media="all">',
-            $filePath->getPublicUri()
+            $publicUri
         );
 
         AsseticGeneralUtility::profile('Cundd Assetic plugin end');

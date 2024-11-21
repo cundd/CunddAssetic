@@ -63,4 +63,9 @@ class FilePath
     {
         return $this->fileName;
     }
+
+    public function isSymlink(): bool
+    {
+        return is_link($this->getAbsoluteUri());
+    }
 }
