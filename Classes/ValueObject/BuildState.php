@@ -12,6 +12,9 @@ class BuildState
 
     private array $filesToCleanUp;
 
+    /**
+     * @param string[] $filesToCleanUp
+     */
     public function __construct(
         FilePath $filePath,
         PathWoHash $outputFilePathWithoutHash,
@@ -48,6 +51,9 @@ class BuildState
         return $this->filesToCleanUp;
     }
 
+    /**
+     * @param string[] $filesToCleanUp
+     */
     public function withFilesToCleanUp(array $filesToCleanUp): self
     {
         $clone = clone $this;
