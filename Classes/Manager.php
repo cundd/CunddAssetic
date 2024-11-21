@@ -7,6 +7,7 @@ namespace Cundd\Assetic;
 use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\BuildStep\BuildStepInterface;
 use Cundd\Assetic\Compiler\Compiler;
+use Cundd\Assetic\Compiler\CompilerFactory;
 use Cundd\Assetic\Compiler\CompilerInterface;
 use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
@@ -39,32 +40,19 @@ class Manager implements ManagerInterface
 
     private CompilerInterface $compiler;
 
-    private CacheManagerInterface $cacheManager;
-
-    private ConfigurationProviderInterface $configurationProvider;
-
-    private OutputFileHashService $outputFileHashService;
-
-    private OutputFileServiceInterface $outputFileService;
-
-    private SymlinkServiceInterface $symlinkService;
-
-    private OutputFileFinderInterface $outputFileFinder;
+    private readonly ConfigurationProviderInterface $configurationProvider;
 
     public function __construct(
         ConfigurationProviderFactory $configurationProviderFactory,
-        CacheManagerInterface $cacheManager,
-        OutputFileHashService $outputFileHashService,
-        OutputFileServiceInterface $outputFileService,
-        SymlinkServiceInterface $symlinkService,
-        OutputFileFinderInterface $outputFileFinder,
+        CompilerFactory $compilerFactory,
+        private readonly CacheManagerInterface $cacheManager,
+        private readonly OutputFileHashService $outputFileHashService,
+        private readonly OutputFileServiceInterface $outputFileService,
+        private readonly SymlinkServiceInterface $symlinkService,
+        private readonly OutputFileFinderInterface $outputFileFinder,
     ) {
+        $this->compiler = $compilerFactory->build();
         $this->configurationProvider = $configurationProviderFactory->build();
-        $this->cacheManager = $cacheManager;
-        $this->outputFileHashService = $outputFileHashService;
-        $this->outputFileService = $outputFileService;
-        $this->symlinkService = $symlinkService;
-        $this->outputFileFinder = $outputFileFinder;
     }
 
     public function collectAndCompile(): Result
@@ -122,10 +110,6 @@ class Manager implements ManagerInterface
      */
     public function getCompiler(): CompilerInterface
     {
-        if (!isset($this->compiler)) {
-            $this->compiler = new Compiler($this->configurationProvider, $this->getPluginLevelOptions());
-        }
-
         return $this->compiler;
     }
 
@@ -196,20 +180,6 @@ class Manager implements ManagerInterface
     public function getSymlinkUri(): string
     {
         return $this->symlinkService->getSymlinkPath($this->getPathWOHash())->getPublicUri();
-    }
-
-    /**
-     * Return the "options" configuration from the TypoScript of the current page
-     */
-    public function getPluginLevelOptions(): array
-    {
-        // Get the options
-        $pluginLevelOptions = $this->configurationProvider->getOptions() ?? [];
-
-        // Check for the development mode
-        $pluginLevelOptions['debug'] = $this->configurationProvider->isDevelopment();
-
-        return $pluginLevelOptions;
     }
 
     public function clearHashCache(): void
