@@ -60,10 +60,6 @@ abstract class AbstractCommand extends Command
             return null;
         }
 
-        if ($this->getConfigurationProvider()->getCreateSymlink()) {
-            return $this->manager->getSymlinkUri();
-        }
-
         /** @var FilePath $filePath */
         $filePath = $outputFileLinkResult->unwrap();
 

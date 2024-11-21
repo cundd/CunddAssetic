@@ -19,11 +19,11 @@ class CreateNewSymlink implements BuildStepInterface
 
     public function process(BuildState $currentState): BuildStateResult
     {
-        $this->symlinkService->createSymlinkToFinalPath(
+        $filePath = $this->symlinkService->createSymlinkToFinalPath(
             $currentState->getFilePath(),
             $currentState->getOutputFilePathWithoutHash()
         );
 
-        return BuildStateResult::ok($currentState);
+        return BuildStateResult::ok($currentState->withFilePath($filePath));
     }
 }

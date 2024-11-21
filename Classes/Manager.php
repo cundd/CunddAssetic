@@ -6,7 +6,6 @@ namespace Cundd\Assetic;
 
 use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\BuildStep\BuildStepInterface;
-use Cundd\Assetic\Compiler\Compiler;
 use Cundd\Assetic\Compiler\CompilerFactory;
 use Cundd\Assetic\Compiler\CompilerInterface;
 use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
@@ -84,7 +83,7 @@ class Manager implements ManagerInterface
         $outputFilePathWithoutHash = $this->outputFileService->getPathWoHash();
         $currentState = new BuildState($outputFilePathWithoutHash, $outputFilePathWithoutHash, []);
 
-        $buildSteps = $this->getBuildSteps();
+        $buildSteps = $this->getBuildSteps($this->getCreateDevelopmentSymlink());
         foreach ($buildSteps as $buildStep) {
             $currentStateResult = $buildStep->process($currentState);
             if ($currentStateResult->isErr()) {
@@ -93,14 +92,7 @@ class Manager implements ManagerInterface
             $currentState = $currentStateResult->unwrap();
         }
 
-        $createDevelopmentSymlink = $this->configurationProvider->getCreateSymlink()
-            && (BackendUserUtility::isUserLoggedIn() || $this->configurationProvider->getAllowCompileWithoutLogin());
-
-        if ($createDevelopmentSymlink) {
-            return Result::ok($this->symlinkService->getSymlinkPath($currentState->getOutputFilePathWithoutHash()));
-        } else {
-            return Result::ok($currentState->getFilePath());
-        }
+        return Result::ok($currentState->getFilePath());
     }
 
     /**
@@ -189,12 +181,23 @@ class Manager implements ManagerInterface
         $this->cacheManager->clearHashCache($this->getPathWOHash());
     }
 
+    private function getCreateDevelopmentSymlink(): bool
+    {
+        if (!$this->configurationProvider->getCreateSymlink()) {
+            return false;
+        }
+
+        return 'cli' === php_sapi_name()
+            || BackendUserUtility::isUserLoggedIn()
+            || $this->configurationProvider->getAllowCompileWithoutLogin();
+    }
+
     /**
      * @return BuildStepInterface[]
      */
-    private function getBuildSteps(): array
+    private function getBuildSteps(bool $createDevelopmentSymlink): array
     {
-        return [
+        $buildSteps = [
             // Collect old compiled files to clean up
             new BuildStep\CollectFilesToCleanUp($this->outputFileFinder),
 
@@ -212,9 +215,13 @@ class Manager implements ManagerInterface
 
             // Build hashed file
             new BuildStep\AddHashToFileName($this->outputFileHashService),
-
-            // Create new symlink
-            new BuildStep\CreateNewSymlink($this->symlinkService),
         ];
+
+        if ($createDevelopmentSymlink) {
+            // Create new symlink
+            $buildSteps[] = new BuildStep\CreateNewSymlink($this->symlinkService);
+        }
+
+        return $buildSteps;
     }
 }
