@@ -18,7 +18,7 @@ use const STDOUT;
 /**
  * General utility class for debugging and message printing
  */
-abstract class GeneralUtility
+final class GeneralUtility
 {
     /**
      * Defines if debugging is enabled
