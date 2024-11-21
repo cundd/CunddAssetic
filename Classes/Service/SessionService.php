@@ -11,7 +11,7 @@ class SessionService implements SessionServiceInterface
 {
     private const BUILD_ERROR_KEY = 'cundd_assetic_build_error';
 
-    public function storeErrorInSession(string $error)
+    public function storeErrorInSession(string $error): void
     {
         $this->getUser()->setAndSaveSessionData(self::BUILD_ERROR_KEY, $error);
     }
@@ -21,7 +21,7 @@ class SessionService implements SessionServiceInterface
         return $this->getUser()->getSessionData(self::BUILD_ERROR_KEY);
     }
 
-    public function clearErrorInSession()
+    public function clearErrorInSession(): void
     {
         $this->getUser()->setAndSaveSessionData(self::BUILD_ERROR_KEY, null);
     }

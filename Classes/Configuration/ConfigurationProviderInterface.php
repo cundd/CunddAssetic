@@ -48,7 +48,7 @@ interface ConfigurationProviderInterface
      *
      * @return array<string, mixed>|null
      */
-    public function getOptions(): mixed;
+    public function getOptions(): ?array;
 
     /**
      * Return the name of the compiled asset file or `NULL` if it should be generated automatically

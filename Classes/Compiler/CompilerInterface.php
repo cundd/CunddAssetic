@@ -16,14 +16,14 @@ use LogicException;
 interface CompilerInterface
 {
     /**
-     * Collect all the assets and adds them to the asset manager
+     * Collect all the assets and add them to the asset manager
      *
      * @throws LogicException if the assetic classes could not be found
      */
     public function collectAssets(): AssetCollection;
 
     /**
-     * Collect the files and tells assetic to compile the files
+     * Collect the files and tell assetic to compile the files
      *
      * @return Result Return `Ok<NULL>` if the files have been compiled successfully, otherwise an `Err<Exception>` containing the exception
      */

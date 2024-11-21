@@ -23,24 +23,18 @@ use function substr;
 
 class OutputFileHashService
 {
-    private CacheManagerInterface $cacheManager;
-
-    private ConfigurationProviderInterface $configurationProvider;
+    private readonly ConfigurationProviderInterface $configurationProvider;
 
     private string $previousHashFromCache;
 
     private array $wasWritten;
 
-    private OutputFileFinderInterface $outputFileFinder;
-
     public function __construct(
-        CacheManagerInterface $cacheManager,
+        private readonly CacheManagerInterface $cacheManager,
         ConfigurationProviderFactory $configurationProviderFactory,
-        OutputFileFinderInterface $outputFileFinder,
+        private readonly OutputFileFinderInterface $outputFileFinder,
     ) {
-        $this->cacheManager = $cacheManager;
         $this->configurationProvider = $configurationProviderFactory->build();
-        $this->outputFileFinder = $outputFileFinder;
     }
 
     /**
@@ -76,7 +70,7 @@ class OutputFileHashService
      * Check if the cache contains an entry with the hash for the current output file name. If no such entry exists, or
      * the file with the read hash does not exist, the directory will be searched for a matching file.
      *
-     * Warning: Other running PHP processes also may have updated the hash in between. This is not detected
+     * Warning: Other running PHP processes also may have updated the hash in between. This is not detected.
      *
      * @throws LogicException if the hash for the given output file was already updated by this instance
      */
@@ -104,7 +98,7 @@ class OutputFileHashService
         return substr($lastMatchingFile, strlen($publicUri) + 1, (-1 * strlen($suffix)));
     }
 
-    public function storeHash(PathWoHash $outputFilenameWithoutHash, string $fileHash)
+    public function storeHash(PathWoHash $outputFilenameWithoutHash, string $fileHash): void
     {
         $this->wasWritten[$outputFilenameWithoutHash->getAbsoluteUri()] = true;
         $this->cacheManager->setCache($outputFilenameWithoutHash, $fileHash);

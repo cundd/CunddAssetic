@@ -37,17 +37,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
     /**
      * Assetic asset manager
-     *
-     * @var AssetManager
      */
-    protected $assetManager;
+    protected AssetManager $assetManager;
 
     /**
      * Assetic filter manager
-     *
-     * @var FilterManager
      */
-    protected $filterManager;
+    protected FilterManager $filterManager;
 
     /**
      * Configuration from TYPO3
@@ -62,18 +58,12 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     protected $pluginLevelOptions = [];
 
     /**
-     * @var ConfigurationProviderInterface
-     */
-    private $configurationProvider;
-
-    /**
      * @param array<string,mixed> $pluginLevelOptions
      */
     public function __construct(
-        ConfigurationProviderInterface $configurationProvider,
+        private readonly ConfigurationProviderInterface $configurationProvider,
         array $pluginLevelOptions,
     ) {
-        $this->configurationProvider = $configurationProvider;
         $this->pluginLevelOptions = $pluginLevelOptions;
     }
 
@@ -191,11 +181,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      */
     public function getAssetManager(): AssetManager
     {
-        if (!$this->assetManager) {
-            $this->assetManager = new AssetManager();
-        }
-
-        return $this->assetManager;
+        return $this->assetManager ??= new AssetManager();
     }
 
     /**
@@ -310,10 +296,8 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * I.e. expands paths to their absolute path
      *
      * @param array $parameters Reference to the data array
-     *
-     * @return void
      */
-    protected function prepareFunctionParameters(array &$parameters)
+    protected function prepareFunctionParameters(array &$parameters): void
     {
         foreach ($parameters as &$parameter) {
             if (false !== strpos($parameter, '.') || false !== strpos($parameter, DIRECTORY_SEPARATOR)) {

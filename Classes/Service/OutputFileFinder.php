@@ -12,9 +12,6 @@ use function usort;
 
 class OutputFileFinder implements OutputFileFinderInterface
 {
-    /**
-     * Return an array of previously filtered Asset files
-     */
     public function findPreviousOutputFiles(string $filePath, string $suffix = '.css'): array
     {
         AsseticGeneralUtility::profile('Will call glob for previous filtered Asset files');

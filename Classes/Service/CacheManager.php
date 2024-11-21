@@ -25,7 +25,7 @@ class CacheManager implements CacheManagerInterface
      *
      * @param PathWoHash $identifier Identifier key
      */
-    public function getCache(PathWoHash $identifier)
+    public function getCache(PathWoHash $identifier): mixed
     {
         $identifier = $this->prepareIdentifier($identifier);
         if (is_callable('apc_fetch')) {
@@ -44,7 +44,7 @@ class CacheManager implements CacheManagerInterface
      * @param PathWoHash $identifier Identifier key
      * @param mixed      $value      Value to store
      */
-    public function setCache(PathWoHash $identifier, $value)
+    public function setCache(PathWoHash $identifier, $value): void
     {
         $identifier = $this->prepareIdentifier($identifier);
         if (is_callable('apc_store')) {

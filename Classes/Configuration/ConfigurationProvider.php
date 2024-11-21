@@ -58,10 +58,7 @@ class ConfigurationProvider implements ConfigurationProviderInterface
         return (bool) ($this->configuration['development'] ?? false);
     }
 
-    /**
-     * @return array|null
-     */
-    public function getOptions(): mixed
+    public function getOptions(): ?array
     {
         return $this->configuration['options.'] ?? null;
     }

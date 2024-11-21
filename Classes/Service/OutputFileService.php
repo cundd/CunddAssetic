@@ -16,16 +16,13 @@ use function is_array;
 
 class OutputFileService implements OutputFileServiceInterface
 {
-    private ConfigurationProviderInterface $configurationProvider;
-
-    private OutputFileHashService $outputFileHashService;
+    private readonly ConfigurationProviderInterface $configurationProvider;
 
     public function __construct(
         ConfigurationProviderFactory $configurationProviderFactory,
-        OutputFileHashService $outputFileHashService,
+        private readonly OutputFileHashService $outputFileHashService,
     ) {
         $this->configurationProvider = $configurationProviderFactory->build();
-        $this->outputFileHashService = $outputFileHashService;
     }
 
     /**

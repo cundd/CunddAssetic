@@ -9,10 +9,12 @@ use Throwable;
 /**
  * @template T
  * @template E extends Throwable
+ *
+ * @extends AbstractResult<T,E>
  */
 abstract class Result extends AbstractResult
 {
-    public static function ok($inner): Result
+    public static function ok(mixed $inner): Result
     {
         return new Result\Ok($inner);
     }

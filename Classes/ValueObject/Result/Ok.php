@@ -8,6 +8,12 @@ use Cundd\Assetic\ValueObject\Result;
 use RuntimeException;
 use Throwable;
 
+/**
+ * @template T
+ * @template E extends Throwable
+ *
+ * @extends Result<T,E>
+ */
 class Ok extends Result
 {
     public function __construct($value)
@@ -20,7 +26,10 @@ class Ok extends Result
         return true;
     }
 
-    public function unwrap()
+    /**
+     * @return T
+     */
+    public function unwrap(): mixed
     {
         return $this->inner;
     }

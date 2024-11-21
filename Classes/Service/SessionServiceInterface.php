@@ -8,10 +8,8 @@ interface SessionServiceInterface
 {
     /**
      * Store the given error message in the session
-     *
-     * @return void
      */
-    public function storeErrorInSession(string $error);
+    public function storeErrorInSession(string $error): void;
 
     /**
      * Return the last error message from the session
@@ -20,8 +18,6 @@ interface SessionServiceInterface
 
     /**
      * Clear the last error message
-     *
-     * @return void
      */
-    public function clearErrorInSession();
+    public function clearErrorInSession(): void;
 }

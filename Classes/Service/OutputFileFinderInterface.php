@@ -7,7 +7,9 @@ namespace Cundd\Assetic\Service;
 interface OutputFileFinderInterface
 {
     /**
-     * Return an array of previously filtered Asset files
+     * Return an array of previously compiled Asset files
+     *
+     * @return string[]
      */
     public function findPreviousOutputFiles(string $filePath, string $suffix = '.css'): array;
 }

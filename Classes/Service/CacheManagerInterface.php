@@ -13,7 +13,7 @@ interface CacheManagerInterface
      *
      * @param PathWoHash $identifier Identifier key
      */
-    public function getCache(PathWoHash $identifier);
+    public function getCache(PathWoHash $identifier): mixed;
 
     /**
      * Stores the value for the given identifier in the cache
@@ -21,7 +21,7 @@ interface CacheManagerInterface
      * @param PathWoHash $identifier Identifier key
      * @param mixed      $value      Value to store
      */
-    public function setCache(PathWoHash $identifier, $value);
+    public function setCache(PathWoHash $identifier, $value): void;
 
     /**
      * Remove the cached hash
