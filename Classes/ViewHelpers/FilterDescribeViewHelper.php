@@ -6,10 +6,8 @@ namespace Cundd\Assetic\ViewHelpers;
 
 use Assetic\Contracts\Filter\FilterInterface;
 use Assetic\Filter\BaseProcessFilter;
-use Closure;
 use ReflectionException;
 use ReflectionProperty;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 use function get_class;
@@ -22,13 +20,10 @@ class FilterDescribeViewHelper extends AbstractViewHelper
         $this->registerArgument('filter', FilterInterface::class, 'Filter to describe', false);
     }
 
-    public static function renderStatic(
-        array $arguments,
-        Closure $renderChildrenClosure,
-        RenderingContextInterface $renderingContext,
-    ) {
+    public function render(): string
+    {
         /** @var FilterInterface $filter */
-        $filter = $arguments['filter'] ?? $renderChildrenClosure();
+        $filter = $this->arguments['filter'] ?? $this->renderChildren();
 
         if ($filter instanceof BaseProcessFilter) {
             $binaryPath = static::extractBinaryPath($filter);
