@@ -61,7 +61,7 @@ class Compile implements BuildStepInterface
         }
     }
 
-    private function logException(Throwable $exception)
+    private function logException(Throwable $exception): void
     {
         $logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
         $logger->error('Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage());

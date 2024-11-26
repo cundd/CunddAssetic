@@ -29,7 +29,7 @@ class SessionService implements SessionServiceInterface
     private function getUser(): AbstractUserAuthentication
     {
         if (!isset($GLOBALS['BE_USER'])) {
-            throw new UnexpectedValueException('No valid backend user found');
+            throw new UnexpectedValueException('No valid backend user found', 5945346701);
         }
 
         return $GLOBALS['BE_USER'];

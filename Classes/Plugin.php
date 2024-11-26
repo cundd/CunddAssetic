@@ -59,7 +59,7 @@ class Plugin
         Autoloader::register();
 
         if (0 === count($this->manager->collectAssets()->all())) {
-            throw new MissingConfigurationException('No assets have been defined');
+            throw new MissingConfigurationException('No assets have been defined', 4491033249);
         }
 
         $collectAndCompileStart = microtime(true);

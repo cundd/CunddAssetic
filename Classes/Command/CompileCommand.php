@@ -17,7 +17,7 @@ use function sprintf;
  */
 class CompileCommand extends AbstractCommand
 {
-    public function configure()
+    public function configure(): void
     {
         $this
             ->setDescription('Compile the assets')

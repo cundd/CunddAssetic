@@ -28,7 +28,7 @@ class Err extends Result
 
     public function unwrap(): void
     {
-        throw new RuntimeException('Tried to unwrap an Err');
+        throw new RuntimeException('Tried to unwrap an Err', 6562984701);
     }
 
     public function unwrapErr(): Throwable

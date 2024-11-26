@@ -19,7 +19,7 @@ class WatchCommand extends AbstractWatchCommand
     /**
      * Configure the command by defining the name, options and arguments
      */
-    public function configure()
+    public function configure(): void
     {
         $this
             ->setDescription('Watch and re-compile assets')
@@ -44,7 +44,7 @@ class WatchCommand extends AbstractWatchCommand
     /**
      * Re-compiles the sources if needed
      */
-    private function recompileIfNeeded(OutputInterface $output, FileWatcherInterface $fileWatcher)
+    private function recompileIfNeeded(OutputInterface $output, FileWatcherInterface $fileWatcher): void
     {
         $changedFile = $this->needsRecompile($fileWatcher);
         if (!$changedFile) {

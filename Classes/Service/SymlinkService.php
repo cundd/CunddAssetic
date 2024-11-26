@@ -53,7 +53,7 @@ class SymlinkService implements SymlinkServiceInterface
                     throw new SymlinkException(sprintf('Could not create the symlink "%s" because %s', $symlinkPathString, PathUtility::getReasonForWriteFailure($symlinkPathString)), 1456396454);
                 }
             } else {
-                throw new SymlinkException(sprintf('Could not create the symlink because the file "%s" already exists and the manager is not the symlink\'s owner', $symlinkPathString));
+                throw new SymlinkException(sprintf('Could not create the symlink because the file "%s" already exists and the manager is not the symlink\'s owner', $symlinkPathString), 8096081149);
             }
         }
 
@@ -75,12 +75,12 @@ class SymlinkService implements SymlinkServiceInterface
                 $this->isOwnerOfSymlink = true;
             } else {
                 $this->isOwnerOfSymlink = false;
-                throw new SymlinkException(sprintf('Could not acquire ownership of symlink "%s"', $symlinkPath));
+                throw new SymlinkException(sprintf('Could not acquire ownership of symlink "%s"', $symlinkPath), 4792841029);
             }
         } elseif (!file_exists($symlinkPath)) {
             $this->isOwnerOfSymlink = true;
         } else {
-            throw new SymlinkException(sprintf('Could not acquire ownership of symlink "%s" because it exists but is no link', $symlinkPath));
+            throw new SymlinkException(sprintf('Could not acquire ownership of symlink "%s" because it exists but is no link', $symlinkPath), 2237181159);
         }
     }
 

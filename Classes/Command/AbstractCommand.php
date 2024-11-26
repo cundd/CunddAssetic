@@ -47,7 +47,7 @@ abstract class AbstractCommand extends Command
         $this->manager->forceCompile();
 
         if (0 === count($this->manager->collectAssets()->all())) {
-            throw new MissingConfigurationException('No assets have been found');
+            throw new MissingConfigurationException('No assets have been found', 1886548090);
         }
         $outputFileLinkResult = $this->manager->forceCompile()->collectAndCompile();
         $this->manager->clearHashCache();

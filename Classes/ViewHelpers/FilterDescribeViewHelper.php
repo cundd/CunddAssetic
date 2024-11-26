@@ -16,7 +16,7 @@ use function get_class;
 
 class FilterDescribeViewHelper extends AbstractViewHelper
 {
-    public function initializeArguments()
+    public function initializeArguments(): void
     {
         parent::initializeArguments();
         $this->registerArgument('filter', FilterInterface::class, 'Filter to describe', false);

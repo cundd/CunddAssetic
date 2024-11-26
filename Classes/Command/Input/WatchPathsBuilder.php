@@ -48,7 +48,7 @@ class WatchPathsBuilder
             function (string $inputPath) {
                 $resolvedPath = PathUtility::getAbsolutePath($inputPath);
                 if ('' === $resolvedPath) {
-                    throw new FilePathException(sprintf('Watch path "%s" could not be resolved', $inputPath));
+                    throw new FilePathException(sprintf('Watch path "%s" could not be resolved', $inputPath), 6952901911);
                 }
 
                 return $resolvedPath;

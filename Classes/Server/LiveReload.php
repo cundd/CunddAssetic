@@ -172,7 +172,7 @@ class LiveReload implements MessageComponentInterface
     /**
      * Attach the event loop to the server to allow sending delayed responses
      */
-    public function setEventLoop(LoopInterface $loop)
+    public function setEventLoop(LoopInterface $loop): void
     {
         $this->eventLoop = $loop;
     }
@@ -185,7 +185,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @throws Exception
      */
-    public function onMessage(ConnectionInterface $from, $msg)
+    public function onMessage(ConnectionInterface $from, $msg): void
     {
         /* @var WampConnection|Connection $from */
         $this->debugLine(
@@ -217,7 +217,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @throws Exception
      */
-    public function onOpen(ConnectionInterface $conn)
+    public function onOpen(ConnectionInterface $conn): void
     {
         /* @var WampConnection|Connection $conn */
         // Store the new connection to send messages to later
@@ -234,7 +234,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @throws Exception
      */
-    public function onClose(ConnectionInterface $conn)
+    public function onClose(ConnectionInterface $conn): void
     {
         /* @var WampConnection|Connection $conn */
         // The connection is closed, remove it, as we can no longer send it messages
@@ -248,7 +248,7 @@ class LiveReload implements MessageComponentInterface
      *
      * @throws Exception
      */
-    public function onError(ConnectionInterface $conn, Exception $e)
+    public function onError(ConnectionInterface $conn, Exception $e): void
     {
         $this->debugLine("An error has occurred: {$e->getMessage()}", self::LOG_LEVEL_ERROR);
         $conn->close();

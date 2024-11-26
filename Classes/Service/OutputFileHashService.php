@@ -77,7 +77,7 @@ class OutputFileHashService
     public function getPreviousHash(PathWoHash $currentOutputFilenameWithoutHash): string
     {
         if (isset($this->wasWritten[$currentOutputFilenameWithoutHash->getAbsoluteUri()])) {
-            throw new LogicException(sprintf('Data for the given output file was already updated. File path "%s"', $currentOutputFilenameWithoutHash->getAbsoluteUri()));
+            throw new LogicException(sprintf('Data for the given output file was already updated. File path "%s"', $currentOutputFilenameWithoutHash->getAbsoluteUri()), 9314654528);
         }
         $suffix = '.css';
         $publicUri = $currentOutputFilenameWithoutHash->getPublicUri();

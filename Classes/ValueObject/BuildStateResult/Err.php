@@ -22,7 +22,7 @@ class Err extends BuildStateResult
 
     public function unwrap()
     {
-        throw new RuntimeException('Tried to unwrap an Err');
+        throw new RuntimeException('Tried to unwrap an Err', 9949823916);
     }
 
     public function unwrapErr(): Throwable

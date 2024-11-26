@@ -198,7 +198,7 @@ class FileWatcher implements FileWatcherInterface
     private function findFilesBySuffix($suffix, string $startDirectory): array
     {
         if (!is_dir($startDirectory)) {
-            throw new InvalidArgumentException(sprintf('Start-directory "%s" is not a directory', $startDirectory));
+            throw new InvalidArgumentException(sprintf('Start-directory "%s" is not a directory', $startDirectory), 5407933418);
         }
 
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($startDirectory));

@@ -28,6 +28,6 @@ class Ok extends BuildStateResult
 
     public function unwrapErr(): Throwable
     {
-        throw new RuntimeException('Tried to unwrap an error in Ok');
+        throw new RuntimeException('Tried to unwrap an error in Ok', 6811690505);
     }
 }

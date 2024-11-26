@@ -116,7 +116,7 @@ class LiveReloadCommand extends AbstractWatchCommand
     /**
      * Re-compiles the sources if needed and additionally informs the LiveReload server about the changes
      */
-    public function recompileIfNeededAndInformLiveReloadServer()
+    public function recompileIfNeededAndInformLiveReloadServer(): void
     {
         $fileNeedsRecompile = $this->needsRecompile($this->getFileWatcher());
         if (!$fileNeedsRecompile) {
@@ -158,7 +158,7 @@ class LiveReloadCommand extends AbstractWatchCommand
     {
         $path = $input->getOption($optionName);
         if (!$path) {
-            throw new InvalidArgumentException(sprintf('Option "%s" is not given', $optionName));
+            throw new InvalidArgumentException(sprintf('Option "%s" is not given', $optionName), 7653682383);
         }
 
         $homeDirectory = $this->getHomeDirectory();
@@ -171,9 +171,9 @@ class LiveReloadCommand extends AbstractWatchCommand
         }
 
         if (file_exists($path)) {
-            throw new InvalidArgumentException(sprintf('File "%s" for configuration %s exists, but is not readable', $path, $optionName));
+            throw new InvalidArgumentException(sprintf('File "%s" for configuration %s exists, but is not readable', $path, $optionName), 1909396619);
         } else {
-            throw new InvalidArgumentException(sprintf('File "%s" for configuration %s does not exist', $path, $optionName));
+            throw new InvalidArgumentException(sprintf('File "%s" for configuration %s does not exist', $path, $optionName), 9185054796);
         }
     }
 

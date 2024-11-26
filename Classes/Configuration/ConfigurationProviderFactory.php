@@ -23,7 +23,7 @@ class ConfigurationProviderFactory
 
             return new ConfigurationProvider($configuration);
         } else {
-            throw new UnexpectedValueException('Could not read configuration for "plugin.CunddAssetic"');
+            throw new UnexpectedValueException('Could not read configuration for "plugin.CunddAssetic"', 2047991846);
         }
     }
 }

@@ -36,6 +36,6 @@ class Ok extends Result
 
     public function unwrapErr(): Throwable
     {
-        throw new RuntimeException('Tried to unwrap an error in Ok');
+        throw new RuntimeException('Tried to unwrap an error in Ok', 9462380717);
     }
 }

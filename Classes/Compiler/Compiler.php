@@ -256,7 +256,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         $originalStylesheet = $stylesheet;
         $stylesheet = PathUtility::getAbsolutePath($stylesheet);
         if (!$stylesheet) {
-            throw new FilePathException(sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet));
+            throw new FilePathException(sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet), 8511589451);
         }
 
         // Make sure the filter manager knows the filter
