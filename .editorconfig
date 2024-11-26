@@ -40,7 +40,7 @@ indent_size = 2
 [package.json]
 indent_size = 2
 
-[composer.json,cundd_composer.json]
+[{composer.json,cundd_composer.json}]
 indent_size = 2
 
 # TypoScript
