@@ -15,6 +15,7 @@ use Cundd\Assetic\Utility\BackendUserUtility;
 use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\ValueObject\FilePath;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use TYPO3\CMS\Core\Log\LogManager;
@@ -52,8 +53,10 @@ class Plugin
      * Output configured stylesheets as link tags
      *
      * Some processing will be done according to the TypoScript setup of the stylesheets.
+     *
+     * @param array<string,mixed> $conf
      */
-    public function main(): string
+    public function main(string $content, array $conf, ServerRequestInterface $request): string
     {
         AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
         Autoloader::register();
@@ -69,7 +72,7 @@ class Plugin
         if ($result->isErr()) {
             $exception = $result->unwrapErr();
 
-            return $this->handleBuildError($exception) . $this->getLiveReloadCode();
+            return $this->handleBuildError($request, $exception) . $this->getLiveReloadCode();
         }
 
         /** @var FilePath $filePath */
@@ -116,14 +119,10 @@ class Plugin
      * Handle exceptions
      *
      * @param FilterException|OutputFileException $exception
-     *
-     * @return void
      */
-    private function handleBuildError(Throwable $exception): string
+    private function handleBuildError(ServerRequestInterface $request, Throwable $exception): string
     {
-        /** @var TypoScriptFrontendController $typoScriptFrontendController */
-        $typoScriptFrontendController = $GLOBALS['TSFE'];
-        $typoScriptFrontendController->set_no_cache();
+        $this->disableCache($request);
 
         $this->logger->error('Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage());
 
@@ -139,6 +138,19 @@ class Plugin
         }
 
         return '<!-- Assetic error -->';
+    }
+
+    private function disableCache(ServerRequestInterface $request): void
+    {
+        /** @var \TYPO3\CMS\Frontend\Cache\CacheInstruction|null $frontendCacheInstruction */
+        $frontendCacheInstruction = $request->getAttribute('frontend.cache.instruction');
+        if ($frontendCacheInstruction) {
+            $frontendCacheInstruction->disableCache('Assetic error');
+        } else {
+            /** @var TypoScriptFrontendController $typoScriptFrontendController */
+            $typoScriptFrontendController = $GLOBALS['TSFE'];
+            $typoScriptFrontendController->set_no_cache();
+        }
     }
 
     private function addDebugInformation(float $collectAndCompileEnd, float $collectAndCompileStart): string
