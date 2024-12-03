@@ -10,7 +10,6 @@ use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Helper\LiveReloadHelper;
-use Cundd\Assetic\Utility\Autoloader;
 use Cundd\Assetic\Utility\BackendUserUtility;
 use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
@@ -59,7 +58,6 @@ class Plugin
     public function main(string $content, array $conf, ServerRequestInterface $request): string
     {
         AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
-        Autoloader::register();
 
         if (0 === count($this->manager->collectAssets()->all())) {
             throw new MissingConfigurationException('No assets have been defined', 4491033249);

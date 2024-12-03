@@ -6,7 +6,6 @@ namespace Cundd\Assetic\Command;
 
 use Cundd\Assetic\FileWatcher\FileCategories;
 use Cundd\Assetic\Server\LiveReload;
-use Cundd\Assetic\Utility\Autoloader;
 use InvalidArgumentException;
 use LogicException;
 use Ratchet\Http\HttpServer;
@@ -94,8 +93,6 @@ class LiveReloadCommand extends AbstractWatchCommand
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        Autoloader::register();
-
         if (false === $this->getConfigurationProvider()->getCreateSymlink()) {
             $io = new SymfonyStyle($input, $output);
             $io->warning(

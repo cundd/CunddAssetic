@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
-use Cundd\Assetic\Utility\Autoloader;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -30,7 +29,6 @@ class CompileCommand extends AbstractCommand
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        Autoloader::register();
         $destination = $input->getArgument('destination');
 
         $compileStart = microtime(true);

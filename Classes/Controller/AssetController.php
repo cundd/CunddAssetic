@@ -6,7 +6,6 @@ namespace Cundd\Assetic\Controller;
 
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Service\SessionServiceInterface;
-use Cundd\Assetic\Utility\Autoloader;
 use Cundd\Assetic\ValueObject\FilePath;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
@@ -30,7 +29,6 @@ class AssetController extends ActionController
         SessionServiceInterface $sessionService,
         ModuleTemplateFactory $moduleTemplateFactory,
     ) {
-        Autoloader::register();
         $this->manager = $manager;
         $this->cacheManager = $cacheManager;
         $this->sessionService = $sessionService;
