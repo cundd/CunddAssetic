@@ -20,7 +20,7 @@
   "require": {
     "php": "^8.1",
     "ext-ctype": "*",
-    "typo3/cms-core": "^11.5.34 || ^12.4.6",
+    "typo3/cms-core": "^12.4.6",
     "cundd/assetic_additions": "^2.0.0",
     "assetic/framework": "^3.1.2"
   },
