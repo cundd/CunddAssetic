@@ -5,7 +5,7 @@
     <f:layout name="Default" />
 
     <f:section name="Content">
-        <f:asset.css identifier="assetic" href="EXT:assetic/Resources/Public/Css/assetic.css" />
+        <f:asset.css identifier="assetic" href="EXT:assetic/Resources/Public/Css/assetic.css?2024-12-03" />
 
         <div class="assetic">
             <h1>Assets</h1>
@@ -42,9 +42,9 @@
             </table>
 
             <div class="button-group">
-                <f:link.action action="compile" class="button">Compile</f:link.action>
+                <f:link.action action="compile" class="button2 btn btn-default btn-sm">Compile</f:link.action>
 
-                <f:link.action action="compile" arguments="{clearPageCache:1}" class="button">
+                <f:link.action action="compile" arguments="{clearPageCache:1}" class="button2 btn btn-default btn-sm">
                     Compile and clear FE cache
                 </f:link.action>
             </div>
@@ -54,11 +54,13 @@
                     <div class="button-group">
                         <button
                             id="build-error-message-button"
-                            class="button"
+                            class="button2 btn btn-default btn-sm"
                             type="button"
                             aria-expanded="false"
                             aria-controls="build-error-message">
                             Show build errors
+
+                            <core:icon identifier="actions-caret-right" size="small" />
                         </button>
                     </div>
                     <div hidden="hidden" id="build-error-message">
