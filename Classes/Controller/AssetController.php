@@ -8,31 +8,21 @@ use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Service\SessionServiceInterface;
 use Cundd\Assetic\ValueObject\FilePath;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
+#[AsController]
 class AssetController extends ActionController
 {
-    private ManagerInterface $manager;
-
-    private CacheManager $cacheManager;
-
-    private SessionServiceInterface $sessionService;
-
-    private ModuleTemplateFactory $moduleTemplateFactory;
-
     public function __construct(
-        ManagerInterface $manager,
-        CacheManager $cacheManager,
-        SessionServiceInterface $sessionService,
-        ModuleTemplateFactory $moduleTemplateFactory,
+        private readonly ManagerInterface $manager,
+        private readonly CacheManager $cacheManager,
+        private readonly SessionServiceInterface $sessionService,
+        private readonly ModuleTemplateFactory $moduleTemplateFactory,
     ) {
-        $this->manager = $manager;
-        $this->cacheManager = $cacheManager;
-        $this->sessionService = $sessionService;
-        $this->moduleTemplateFactory = $moduleTemplateFactory;
     }
 
     /**
@@ -47,15 +37,13 @@ class AssetController extends ActionController
             $assetCollection = $this->manager->getCompiler()->getAssetManager()->get('cundd_assetic');
         }
         if (!empty($assetCollection)) {
-            $this->view->assign('assets', $assetCollection);
+            $moduleTemplate->assign('assets', $assetCollection);
         } else {
             $this->addFlashMessage('No assets found');
         }
-        $this->view->assign('lastBuildError', $this->sessionService->getErrorFromSession());
+        $moduleTemplate->assign('lastBuildError', $this->sessionService->getErrorFromSession());
 
-        $moduleTemplate->setContent($this->view->render());
-
-        return $this->htmlResponse($moduleTemplate->renderContent());
+        return $moduleTemplate->renderResponse('Asset/List');
     }
 
     /**
@@ -91,7 +79,7 @@ class AssetController extends ActionController
             $this->addFlashMessage(
                 $message,
                 '',
-                FlashMessage::ERROR
+                ContextualFeedbackSeverity::ERROR
             );
         }
     }
