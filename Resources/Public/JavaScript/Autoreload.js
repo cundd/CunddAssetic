@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Loading:
  *
@@ -17,17 +18,55 @@
  * ```
  */
 (function (exports) {
+    /**
+     * @enum string
+     */
+    const Monitor = {
+        CunddAssetic: "cundd_assetic",
+        Js: "js",
+        Css: "css",
+    };
+    /**
+     * @typedef {Object} Configuration
+     * @property {Monitor[]} monitor
+     * @property {number} reloadInterval
+     * @property {number} sleepInterval
+     * @property {HTMLLinkElement[]} stylesheetAssets
+     * @property {string[]} stylesheetAssetsOriginalUrls
+     * @property {HTMLScriptElement[]} javaScriptAssets
+     * @property {string[]} javaScriptAssetsOriginalUrls
+     * @property {boolean} debugMode
+     * @property {boolean} autostart
+     */
+
+    /* @ts-ignore */
     const tempAssetic = window.Assetic || {};
+    /** @type {Configuration} */
     const asseticConfiguration = {};
 
-    const currentScriptDataset = document.currentScript && document.currentScript.dataset || {}
-    asseticConfiguration.reloadInterval = tempAssetic.reloadInterval || currentScriptDataset.reloadInterval || 1750;
-    asseticConfiguration.monitor = tempAssetic.monitor || currentScriptDataset.monitor || ['cundd_assetic', 'js', 'css'];
-    asseticConfiguration.sleepInterval = tempAssetic.sleepInterval || currentScriptDataset.sleepInterval || 10000;
-    asseticConfiguration.autostart = tempAssetic.autostart || currentScriptDataset.autostart || false;
-    asseticConfiguration.replace = tempAssetic.replace || currentScriptDataset.replace || {};
+    const currentScriptDataset =
+        (document.currentScript && document.currentScript.dataset) || {};
+    asseticConfiguration.reloadInterval =
+        tempAssetic.reloadInterval ||
+        currentScriptDataset.reloadInterval ||
+        1750;
+    asseticConfiguration.monitor = tempAssetic.monitor ||
+        currentScriptDataset.monitor || [
+            Monitor.CunddAssetic,
+            Monitor.Js,
+            Monitor.Css,
+        ];
+    asseticConfiguration.sleepInterval =
+        tempAssetic.sleepInterval ||
+        currentScriptDataset.sleepInterval ||
+        10000;
+    asseticConfiguration.autostart =
+        tempAssetic.autostart || currentScriptDataset.autostart || false;
 
     class Autoreload {
+        /**
+         * @param {Configuration} configuration
+         */
         constructor(configuration) {
             /* BIND METHODS */
             this.reload = this.reload.bind(this);
@@ -35,28 +74,33 @@
             this.start = this.start.bind(this);
             this.stop = this.stop.bind(this);
             this.pageVisibilityChanged = this.pageVisibilityChanged.bind(this);
-            this.reloadCunddAssetic = this.reloadCunddAssetic.bind(this);
-            this.reloadRecentlyChangedStylesheetAsset = this.reloadRecentlyChangedStylesheetAsset.bind(this);
-            this.reloadStylesheetAssets = this.reloadStylesheetAssets.bind(this);
-            this.reloadJavaScriptAssets = this.reloadJavaScriptAssets.bind(this);
+            this.reloadCunddAsseticStylesheetAssets =
+                this.reloadCunddAsseticStylesheetAssets.bind(this);
+            this.reloadRecentlyChangedStylesheetAsset =
+                this.reloadRecentlyChangedStylesheetAsset.bind(this);
+            this.reloadStylesheetAssets =
+                this.reloadStylesheetAssets.bind(this);
+            this.reloadJavaScriptAssets =
+                this.reloadJavaScriptAssets.bind(this);
 
             /* ASSIGN CONFIGURATION */
             this.monitor = configuration.monitor;
             this.reloadInterval = configuration.reloadInterval;
             this.sleepInterval = configuration.sleepInterval;
-            this.replace = configuration.replace;
             this.isWatching = false;
             this.isVisible = true;
 
             /* Cundd assetic assets */
-            this.cunddAsseticStylesheets = [];
-            this.originalUrls = [];
+            this.cunddAsseticStylesheetAssets = [];
+            this.cunddAsseticStylesheetAssetsOriginalUrls = [];
 
             /* All assets */
             this.stylesheetAssets = configuration.stylesheetAssets || [];
-            this.stylesheetAssetsOriginalUrls = configuration.stylesheetAssetsOriginalUrls || [];
+            this.stylesheetAssetsOriginalUrls =
+                configuration.stylesheetAssetsOriginalUrls || [];
             this.javaScriptAssets = configuration.javaScriptAssets || [];
-            this.javaScriptAssetsOriginalUrls = configuration.javaScriptAssetsOriginalUrls || [];
+            this.javaScriptAssetsOriginalUrls =
+                configuration.javaScriptAssetsOriginalUrls || [];
 
             this.recentlyChangedStylesheetAsset = null;
 
@@ -65,62 +109,68 @@
             this.reloadStylesheetsEach = 5;
 
             this.lastIds = {};
-            this.startTime = (+new Date);
+            this.startTime = +new Date();
             this.lostFocusTime = null;
 
             this.debugMode = !!configuration.debugMode;
         }
 
         init() {
-            /*
-             * Find style assets with cundd_assetic in their URL
-             */
-            if (this.monitor.indexOf('cundd_assetic') !== -1 || this.monitor.indexOf('css') !== -1) {
-                this.cunddAsseticStylesheets = document.querySelectorAll('link[href*=cundd_assetic]');
-
-                const length = this.cunddAsseticStylesheets.length;
-                for (let i = 0; i < length; i++) {
-                    const stylesheet = this.cunddAsseticStylesheets[i];
-                    const originalUrl = stylesheet.href;
-                    const lastSlashPosition = originalUrl.lastIndexOf('/');
-                    const fileName = originalUrl.substring(lastSlashPosition + 1);
-                    if (fileName.startsWith('_debug_')) {
-                        this.originalUrls[i] = originalUrl;
-                    } else {
-                        const urlWithoutHash = originalUrl.replace(/_\w*\.css/, '.css');
-                        const path = urlWithoutHash.substr(0, lastSlashPosition);
-                        this.originalUrls[i] = path + '/_debug_' + fileName;
-                    }
-                }
+            if (
+                this.monitor.includes("cundd_assetic") ||
+                this.monitor.includes("css")
+            ) {
+                this.#findCunddAsseticStylesheetAssets();
             }
 
-            /*
-             * Find JavaScript assets
-             */
-            if (this.monitor.indexOf('js') !== -1) {
-                this.javaScriptAssets = filter(
-                    slice(document.querySelectorAll('script[src]')),
-                    this._isLocalAsset
-                );
-                this.javaScriptAssetsOriginalUrls = this.javaScriptAssets.map(function (element) {
-                    return element.src;
-                });
+            if (this.monitor.indexOf("js") !== -1) {
+                this.#findJavaScriptAssets();
             }
 
-            /*
-             * Find style assets
-             */
-            if (this.monitor.indexOf('css') !== -1) {
-                this.stylesheetAssets = filter(
-                    slice(document.querySelectorAll('link[rel=\'stylesheet\']:not([href*=cundd_assetic])')),
-                    this._isLocalAsset
-                );
-                this.stylesheetAssetsOriginalUrls = this.stylesheetAssets.map(function (element) {
-                    return element.href;
-                });
+            if (this.monitor.indexOf("css") !== -1) {
+                this.#findStylesheetAssets();
             }
 
             addEventListenerForPageVisibilityChange(this.pageVisibilityChanged);
+        }
+
+        /**
+         * Find style assets with cundd_assetic in their URL
+         */
+        #findCunddAsseticStylesheetAssets() {
+            this.cunddAsseticStylesheetAssets = [
+                ...document.querySelectorAll("link[href*=cundd_assetic]"),
+            ];
+
+            this.cunddAsseticStylesheetAssetsOriginalUrls =
+                this.cunddAsseticStylesheetAssets.map((element) => {
+                    /* Get the URL without any query parameters */
+                    const url = new URL(element.href);
+
+                    return url.protocol + "//" + url.host + url.pathname;
+                });
+        }
+
+        #findJavaScriptAssets() {
+            this.javaScriptAssets = /** @type {HTMLScriptElement[]} */ ([
+                ...document.querySelectorAll("script[src]"),
+            ]).filter(this.#isLocalAsset);
+
+            this.javaScriptAssetsOriginalUrls = this.javaScriptAssets.map(
+                (element) => element.src,
+            );
+        }
+
+        #findStylesheetAssets() {
+            this.stylesheetAssets = /** @type {HTMLLinkElement[]} */ ([
+                ...document.querySelectorAll(
+                    "link[rel='stylesheet']:not([href*=cundd_assetic])",
+                ),
+            ]).filter(this.#isLocalAsset);
+
+            this.stylesheetAssetsOriginalUrls = this.stylesheetAssets.map(
+                (element) => element.href,
+            );
         }
 
         run() {
@@ -129,24 +179,34 @@
 
         reload() {
             const _runCounter = this.runCounter++;
-            this.reloadCunddAssetic();
+            this.reloadCunddAsseticStylesheetAssets();
 
-            // Reload the JavaScript assets each X. time
-            if ((_runCounter % this.reloadJavaScriptEach) === 0) {
+            /* Reload the JavaScript assets each nth time */
+            if (_runCounter % this.reloadJavaScriptEach === 0) {
                 this.reloadJavaScriptAssets();
             }
 
-            // Reload the Stylesheet assets each X. time or if recentlyChangedStylesheetAsset is not defined
-            if ((_runCounter % this.reloadStylesheetsEach) === 0 || !this.recentlyChangedStylesheetAsset) {
+            /* Reload the Stylesheet assets each nth time or
+             * if recentlyChangedStylesheetAsset is not defined */
+            if (
+                _runCounter % this.reloadStylesheetsEach === 0 ||
+                !this.recentlyChangedStylesheetAsset
+            ) {
                 this.reloadStylesheetAssets();
             } else {
-                this.debug('reload recent css', this.recentlyChangedStylesheetAsset);
+                this.#debug(
+                    "reload recent css",
+                    this.recentlyChangedStylesheetAsset,
+                );
                 this.reloadRecentlyChangedStylesheetAsset();
             }
         }
 
         start() {
-            this.asseticIntervalCallback = window.setInterval(this.run, this.reloadInterval);
+            this.asseticIntervalCallback = window.setInterval(
+                this.run,
+                this.reloadInterval,
+            );
             this.isWatching = true;
         }
 
@@ -155,64 +215,71 @@
             this.isWatching = false;
         }
 
-        reloadCunddAssetic() {
-            const stylesheets = this.cunddAsseticStylesheets;
+        reloadCunddAsseticStylesheetAssets() {
+            const stylesheets = this.cunddAsseticStylesheetAssets;
             const length = stylesheets.length;
-            const originalUrls = this.originalUrls;
-            const timestamp = (+new Date);
+            const cunddAsseticStylesheetAssetsOriginalUrls =
+                this.cunddAsseticStylesheetAssetsOriginalUrls;
+            const timestamp = +new Date();
 
             for (let i = 0; i < length; i++) {
                 const stylesheet = stylesheets[i];
-                const originalUrl = originalUrls[i];
-                const newUrl = originalUrl + '?reload=' + timestamp;
-                this._reloadStylesheets(newUrl, originalUrl, stylesheet);
+                const originalUrl = cunddAsseticStylesheetAssetsOriginalUrls[i];
+                const newUrl = originalUrl + "?reload=" + timestamp;
+                this.#reloadStylesheets(newUrl, originalUrl, stylesheet);
             }
         }
 
         reloadRecentlyChangedStylesheetAsset() {
-            const _recentlyChangedStylesheetAsset = this.recentlyChangedStylesheetAsset;
+            const _recentlyChangedStylesheetAsset =
+                this.recentlyChangedStylesheetAsset;
             const assets = this.stylesheetAssets;
-            const originalUrls = this.stylesheetAssetsOriginalUrls;
+            const cunddAsseticStylesheetAssetsOriginalUrls =
+                this.stylesheetAssetsOriginalUrls;
             const length = assets.length;
-            const timestamp = (+new Date);
+            const timestamp = +new Date();
 
             for (let i = 0; i < length; i++) {
                 const asset = assets[i];
                 if (asset === _recentlyChangedStylesheetAsset) {
-                    const originalUrl = originalUrls[i];
-                    const newUrl = originalUrl + '?reload=' + timestamp;
-                    this._reloadStylesheets(newUrl, originalUrl, asset);
+                    const originalUrl =
+                        cunddAsseticStylesheetAssetsOriginalUrls[i];
+                    const newUrl = originalUrl + "?reload=" + timestamp;
+                    this.#reloadStylesheets(newUrl, originalUrl, asset);
                 }
             }
         }
 
         reloadStylesheetAssets() {
             const assets = this.stylesheetAssets;
-            const originalUrls = this.stylesheetAssetsOriginalUrls;
+            const cunddAsseticStylesheetAssetsOriginalUrls =
+                this.stylesheetAssetsOriginalUrls;
             const length = assets.length;
-            const timestamp = (+new Date);
+            const timestamp = +new Date();
 
             for (let i = 0; i < length; i++) {
                 const asset = assets[i];
-                const originalUrl = originalUrls[i];
-                const newUrl = originalUrl + '?reload=' + timestamp;
-                this._reloadStylesheets(newUrl, originalUrl, asset);
+                const originalUrl = cunddAsseticStylesheetAssetsOriginalUrls[i];
+                const newUrl = originalUrl + "?reload=" + timestamp;
+                this.#reloadStylesheets(newUrl, originalUrl, asset);
             }
         }
 
         reloadJavaScriptAssets() {
             const assets = this.javaScriptAssets;
-            const originalUrls = this.javaScriptAssetsOriginalUrls;
+            const cunddAsseticStylesheetAssetsOriginalUrls =
+                this.javaScriptAssetsOriginalUrls;
             const length = assets.length;
-            const timestamp = (+new Date);
+            const timestamp = +new Date();
 
             for (let i = 0; i < length; i++) {
-                const originalUrl = originalUrls[i];
-                const newUrl = originalUrl + '?reload=' + timestamp;
-                load(newUrl).then(response => {
-                    const responseHeaderKey = 'Last-Modified'; /* Or "Etag" */
-                    const responseHeaderValue = response.headers.get(responseHeaderKey);
-                    if (+new Date(responseHeaderValue) > this.startTime) {
+                const originalUrl = cunddAsseticStylesheetAssetsOriginalUrls[i];
+                const newUrl = originalUrl + "?reload=" + timestamp;
+                load(newUrl).then((response) => {
+                    const responseHeaderKey = "Last-Modified"; /* Or "Etag" */
+                    const responseHeaderValue =
+                        response.headers.get(responseHeaderKey);
+                    if (+new Date("" + responseHeaderValue) > this.startTime) {
                         /* this.log(xhr.getResponseHeader("Last-Modified")); */
                         /* this.log(xhr.getResponseHeader("ETag")); */
                         location.reload();
@@ -221,6 +288,9 @@
             }
         }
 
+        /**
+         * @param {boolean} pageHidden
+         */
         pageVisibilityChanged(pageHidden) {
             if (this.isWatching) {
                 if (pageHidden) {
@@ -233,19 +303,19 @@
         }
 
         /**
-         * @param newUrl
-         * @param originalUrl
-         * @param asset
-         * @private
+         * @param {string} newUrl
+         * @param {string} originalUrl
+         * @param {HTMLLinkElement} asset
          */
-        _reloadStylesheets(newUrl, originalUrl, asset) {
-            load(newUrl).then(response => {
-                const responseHeaderKey = 'Last-Modified'; /* Or "Etag" */
-                const responseHeaderValue = response.headers.get(responseHeaderKey);
+        #reloadStylesheets(newUrl, originalUrl, asset) {
+            load(newUrl).then((response) => {
+                const responseHeaderKey = "Last-Modified"; /* Or "Etag" */
+                const responseHeaderValue =
+                    response.headers.get(responseHeaderKey);
                 if (responseHeaderValue !== this.lastIds[originalUrl]) {
-                    const dateString = this._getCurrentDateString();
+                    const dateString = this.#getCurrentDateString();
                     this.lastIds[originalUrl] = responseHeaderValue;
-                    this.log('Reload at ' + dateString + ' -> ' + originalUrl);
+                    this.#log("Reload at " + dateString + " -> " + originalUrl);
                     asset.href = newUrl;
 
                     if (this.runCounter > 1) {
@@ -255,11 +325,18 @@
             });
         }
 
-        _getCurrentDateString() {
-            const leadingZero = value => (value < 10 ? '0' + value : value);
-            const date = new Date;
+        #getCurrentDateString() {
+            const leadingZero = (/** @type {number} */ value) =>
+                value < 10 ? "0" + value : value;
+            const date = new Date();
 
-            return leadingZero(date.getHours()) + ':' + leadingZero(date.getMinutes()) + ':' + leadingZero(date.getSeconds());
+            return (
+                leadingZero(date.getHours()) +
+                ":" +
+                leadingZero(date.getMinutes()) +
+                ":" +
+                leadingZero(date.getSeconds())
+            );
         }
 
         /**
@@ -270,68 +347,84 @@
         }
 
         /**
-         * @param asset
+         * @param {HTMLLinkElement|HTMLScriptElement} asset
          * @return {boolean}
-         * @private
          */
-        _isLocalAsset(asset) {
+        #isLocalAsset(asset) {
             const loc = document.location;
-            const reg = new RegExp('^\\.|^\/(?!\/)|^[\\w]((?!://).)*$|' + loc.protocol + '//' + loc.host);
-            const url = asset.src || asset.href;
+            const reg = new RegExp(
+                "^\\.|^/(?!/)|^[\\w]((?!://).)*$|" +
+                    loc.protocol +
+                    "//" +
+                    loc.host,
+            );
+            const url =
+                asset instanceof HTMLLinkElement ? asset.href : asset.src;
 
-            return url.match(reg);
+            return reg.test(url);
         }
 
         /**
-         * @param message
-         * @private
+         * @param {string} message
          */
-        log(message) {
-            console.log('%c Assetic ', 'background: blue; color: #fff', message);
+        #log(message) {
+            console.log(
+                "%c Assetic ",
+                "background: blue; color: #fff",
+                message,
+            );
         }
 
         /**
-         * @param message
-         * @private
+         * @param {string} message
+         * @param {any} rest
          */
-        debug(message) {
+        #debug(message, ...rest) {
             if (this.debugMode) {
-                console.debug('%c Assetic ', 'background: #8500ff; color: #fff', message);
+                console.debug(
+                    "%c Assetic ",
+                    "background: #8500ff; color: #fff",
+                    message,
+                    ...rest,
+                );
             }
         }
     }
 
+    /**
+     * @param {string} url
+     */
     const load = function (url) {
         return fetch(url, {
-            method: 'HEAD',
-            mode: 'no-cors',
-            cache: 'no-cache',
-            credentials: 'include',
-            redirect: 'follow',
-            referrerPolicy: 'no-referrer',
+            method: "HEAD",
+            mode: "no-cors",
+            cache: "no-cache",
+            credentials: "include",
+            redirect: "follow",
+            referrerPolicy: "no-referrer",
         });
     };
 
-    const filter = function (collection, callback) {
-        return Array.prototype.filter.call(collection, callback);
-    };
-
-    const slice = function (collection, start, end) {
-        return Array.prototype.slice.call(collection, start, end);
-    };
-
+    /**
+     * @param {function} callback
+     */
     const addEventListenerForPageVisibilityChange = function (callback) {
         let hidden;
         let visibilityChange;
-        if (typeof document.hidden !== 'undefined') { /* Opera 12.10 and Firefox 18 and later support */
-            hidden = 'hidden';
-            visibilityChange = 'visibilitychange';
-        } else if (typeof document.msHidden !== 'undefined') {
-            hidden = 'msHidden';
-            visibilityChange = 'msvisibilitychange';
-        } else if (typeof document.webkitHidden !== 'undefined') {
-            hidden = 'webkitHidden';
-            visibilityChange = 'webkitvisibilitychange';
+        /* @ts-ignore */
+        if (typeof document.hidden !== "undefined") {
+            /* Opera 12.10 and Firefox 18 and later support */
+            hidden = "hidden";
+            visibilityChange = "visibilitychange";
+        } else if (typeof document["msHidden"] !== "undefined") {
+            hidden = "msHidden";
+            visibilityChange = "msvisibilitychange";
+        } else if (typeof document["webkitHidden"] !== "undefined") {
+            hidden = "webkitHidden";
+            visibilityChange = "webkitvisibilitychange";
+        } else {
+            console.warn("No visibility change API found");
+            return;
         }
 
         const handleVisibilityChange = function () {
@@ -342,7 +435,11 @@
             }
         };
 
-        document.addEventListener(visibilityChange, handleVisibilityChange, false);
+        document.addEventListener(
+            visibilityChange,
+            handleVisibilityChange,
+            false,
+        );
     };
 
     if (asseticConfiguration.autostart) {
@@ -352,5 +449,5 @@
         autoreload.reload();
     }
 
-    exports.Autoreload = Autoreload;
+    exports["Autoreload"] = Autoreload;
 })(window);
