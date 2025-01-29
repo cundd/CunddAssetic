@@ -276,10 +276,14 @@
                 const originalUrl = cunddAsseticStylesheetAssetsOriginalUrls[i];
                 const newUrl = originalUrl + "?reload=" + timestamp;
                 load(newUrl).then((response) => {
+                    const contentType = response.headers.get("Content-Type");
                     const responseHeaderKey = "Last-Modified"; /* Or "Etag" */
                     const responseHeaderValue =
                         response.headers.get(responseHeaderKey);
-                    if (+new Date("" + responseHeaderValue) > this.startTime) {
+                    if (
+                        "application/javascript" === contentType &&
+                        +new Date("" + responseHeaderValue) > this.startTime
+                    ) {
                         /* this.log(xhr.getResponseHeader("Last-Modified")); */
                         /* this.log(xhr.getResponseHeader("ETag")); */
                         location.reload();
@@ -309,10 +313,14 @@
          */
         #reloadStylesheets(newUrl, originalUrl, asset) {
             load(newUrl).then((response) => {
+                const contentType = response.headers.get("Content-Type");
                 const responseHeaderKey = "Last-Modified"; /* Or "Etag" */
                 const responseHeaderValue =
                     response.headers.get(responseHeaderKey);
-                if (responseHeaderValue !== this.lastIds[originalUrl]) {
+                if (
+                    "text/css" === contentType &&
+                    responseHeaderValue !== this.lastIds[originalUrl]
+                ) {
                     const dateString = this.#getCurrentDateString();
                     this.lastIds[originalUrl] = responseHeaderValue;
                     this.#log("Reload at " + dateString + " -> " + originalUrl);
