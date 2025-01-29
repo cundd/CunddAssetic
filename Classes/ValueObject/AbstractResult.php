@@ -8,7 +8,7 @@ use Throwable;
 
 /**
  * @template T
- * @template E extends Throwable
+ * @template E of Throwable
  */
 abstract class AbstractResult
 {
@@ -53,7 +53,7 @@ abstract class AbstractResult
      *
      * @return R|X
      */
-    public function doMatch(callable $ok, callable $err)
+    public function doMatch(callable $ok, callable $err): mixed
     {
         if ($this->isOk()) {
             return $ok($this->inner);
