@@ -19,6 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Throwable;
 
 use function array_merge;
 use function class_exists;
@@ -128,19 +129,28 @@ class LiveReloadCommand extends AbstractWatchCommand
         if ($needFullPageReload) {
             $this->liveReloadServer->fileDidChange($fileNeedsRecompile, false);
         } else {
-            $changedFile = $this->compile(true, $error);
-            if ($error) {
+            $result = $this->compile();
+            if ($result->isErr()) {
+                /** @var Throwable $error */
+                $error = $result->unwrapErr();
                 $this->logger->error($error->getMessage(), ['error' => $error]);
-            }
-            if (null !== $changedFile && !$this->lastCompilationFailed) {
-                $this->liveReloadServer->fileDidChange($changedFile, true);
-            } else {
                 $this->liveReloadServer->fileDidChange('', false);
+            } else {
+                $compiledFile = $result->unwrap()->getPublicUri();
+                if (!$this->lastCompilationFailed) {
+                    $this->liveReloadServer->fileDidChange($compiledFile, true);
+                } else {
+                    $this->liveReloadServer->fileDidChange('', false);
+                }
             }
-            $this->lastCompilationFailed = null === $changedFile;
+
+            $this->lastCompilationFailed = $result->isErr();
         }
     }
 
+    /**
+     * @return array{local_cert: string, local_pk: string, allow_self_signed: true, verify_peer: false}
+     */
     private function buildSecureServerContext(InputInterface $input): array
     {
         return [

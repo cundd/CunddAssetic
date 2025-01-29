@@ -7,6 +7,7 @@ namespace Cundd\Assetic\Command;
 use Cundd\Assetic\FileWatcher\FileWatcherInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 use function usleep;
 
@@ -32,7 +33,7 @@ class WatchCommand extends AbstractWatchCommand
 
         $fileWatcher = $this->getFileWatcher();
         $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
-        while (true) {
+        while (true) { // @phpstan-ignore while.alwaysTrue
             $this->recompileIfNeeded($output, $fileWatcher);
             usleep((int) ($interval * 1000000));
         }
@@ -47,9 +48,16 @@ class WatchCommand extends AbstractWatchCommand
         if (!$changedFile) {
             return;
         }
-        // TODO: Handle the error
-        $compiledFile = (string) $this->compile(true);
 
-        $output->writeln("<info>File $changedFile has changed. Assets have been compiled into $compiledFile </info>");
+        $result = $this->compile();
+        if ($result->isErr()) {
+            /** @var Throwable $error */
+            $error = $result->unwrapErr();
+            $output->writeln("<error>File $changedFile has changed. But compilation failed: {$error->getMessage()} </error>");
+        } else {
+            $compiledFile = $result->unwrap()->getPublicUri();
+
+            $output->writeln("<info>File $changedFile has changed. Assets have been compiled into $compiledFile </info>");
+        }
     }
 }

@@ -9,6 +9,7 @@ use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\ValueObject\FilePath;
+use Cundd\Assetic\ValueObject\Result;
 use Symfony\Component\Console\Command\Command;
 use Throwable;
 
@@ -40,9 +41,9 @@ abstract class AbstractCommand extends Command
     /**
      * Compile the assets
      *
-     * @throws Throwable if an error occurred and `$graceful` is FALSE
+     * @return Result<FilePath,Throwable>
      */
-    protected function compile(bool $graceful, ?Throwable &$error = null): ?string
+    protected function compile(): Result
     {
         $this->manager->forceCompile();
 
@@ -51,19 +52,8 @@ abstract class AbstractCommand extends Command
         }
         $outputFileLinkResult = $this->manager->forceCompile()->collectAndCompile();
         $this->manager->clearHashCache();
-        if ($outputFileLinkResult->isErr()) {
-            $error = $outputFileLinkResult->unwrapErr();
-            if (!$graceful) {
-                throw $error;
-            }
 
-            return null;
-        }
-
-        /** @var FilePath $filePath */
-        $filePath = $outputFileLinkResult->unwrap();
-
-        return $filePath->getPublicUri();
+        return $outputFileLinkResult;
     }
 
     /**
