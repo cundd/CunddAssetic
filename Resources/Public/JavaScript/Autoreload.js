@@ -211,7 +211,7 @@
         }
 
         stop() {
-            this._stopTimer();
+            this.#stopTimer();
             this.isWatching = false;
         }
 
@@ -294,7 +294,7 @@
         pageVisibilityChanged(pageHidden) {
             if (this.isWatching) {
                 if (pageHidden) {
-                    this._stopTimer();
+                    this.#stopTimer();
                 } else {
                     this.start();
                 }
@@ -339,10 +339,7 @@
             );
         }
 
-        /**
-         * @private
-         */
-        _stopTimer() {
+        #stopTimer() {
             window.clearInterval(this.asseticIntervalCallback);
         }
 
