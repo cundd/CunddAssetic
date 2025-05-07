@@ -62,6 +62,7 @@
         10000;
     asseticConfiguration.autostart =
         tempAssetic.autostart || currentScriptDataset.autostart || false;
+    asseticConfiguration.debugMode = currentScriptDataset.debugMode === "true";
 
     class Autoreload {
         /**
@@ -280,10 +281,14 @@
                     const responseHeaderKey = "Last-Modified"; /* Or "Etag" */
                     const responseHeaderValue =
                         response.headers.get(responseHeaderKey);
-                    if (
-                        "application/javascript" === contentType &&
-                        +new Date("" + responseHeaderValue) > this.startTime
-                    ) {
+                    const didUpdate =
+                        contentType?.startsWith("application/javascript") &&
+                        +new Date("" + responseHeaderValue) > this.startTime;
+                    this.#debug(
+                        `Did JavaScript source update? ${didUpdate ? "yes" : "no"} (${responseHeaderKey}:${responseHeaderValue}, URL:${newUrl})`,
+                    );
+
+                    if (didUpdate) {
                         /* this.log(xhr.getResponseHeader("Last-Modified")); */
                         /* this.log(xhr.getResponseHeader("ETag")); */
                         location.reload();
@@ -298,12 +303,14 @@
         pageVisibilityChanged(pageHidden) {
             if (this.isWatching) {
                 if (pageHidden) {
+                    this.#log("Pause refresh");
                     this.#stopTimer();
                 } else {
+                    this.#log("Restart refresh");
                     this.start();
                 }
                 this.isVisible = !pageHidden;
-            }
+            } else this.#log("nowo");
         }
 
         /**
@@ -317,10 +324,14 @@
                 const responseHeaderKey = "Last-Modified"; /* Or "Etag" */
                 const responseHeaderValue =
                     response.headers.get(responseHeaderKey);
-                if (
-                    "text/css" === contentType &&
-                    responseHeaderValue !== this.lastIds[originalUrl]
-                ) {
+                const didUpdate =
+                    contentType?.startsWith("text/css") &&
+                    responseHeaderValue !== this.lastIds[originalUrl];
+                this.#debug(
+                    `Did stylesheet update? ${didUpdate ? "yes" : "no"} (${responseHeaderKey}:${responseHeaderValue}, URL:${newUrl})`,
+                );
+
+                if (didUpdate) {
                     const dateString = this.#getCurrentDateString();
                     this.lastIds[originalUrl] = responseHeaderValue;
                     this.#log("Reload at " + dateString + " -> " + originalUrl);
