@@ -29,7 +29,8 @@ class CompileCommand extends AbstractCommand
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $destination = $input->getArgument('destination');
+        // @phpstan-ignore cast.string
+        $destination = (string) $input->getArgument('destination');
 
         $compileStart = microtime(true);
         $result = $this->compile();
@@ -37,7 +38,7 @@ class CompileCommand extends AbstractCommand
             throw $result->unwrapErr();
         }
 
-        $usedPath = $result->unwrap();
+        $usedPath = $result->unwrap()->getAbsoluteUri();
         $compileEnd = microtime(true);
         if ($destination) {
             $usedPath = $this->copyToDestination($usedPath, $destination);
