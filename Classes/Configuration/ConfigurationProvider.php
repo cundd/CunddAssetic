@@ -82,7 +82,8 @@ class ConfigurationProvider implements ConfigurationProviderInterface
 
     public function getCreateSymlink(): bool
     {
-        return $this->configuration['create_symlink'] || $this->getLiveReloadConfiguration()->isEnabled();
+        return ($this->configuration['create_symlink'] ?? false)
+            || $this->getLiveReloadConfiguration()->isEnabled();
     }
 
     public function getFilterForType(): array
