@@ -202,7 +202,10 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
             AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
             if (is_callable([$filter, $function])) {
-                $filter->$function(...$data);
+                // `call_user_func_array` does remove the `strict_types` check
+                // Invoking `$filter->$function(...$data)` instead would require
+                // the function parameters to be prepared beforehand
+                call_user_func_array($filter->$function(...), array_values($data));
             } elseif ($this->configurationProvider->getStrictModeEnabled()) {
                 throw new FilterException(sprintf('Filter "%s" does not implement method "%s"', get_class($filter), $function), 1447161985);
             } else {
