@@ -10,8 +10,6 @@ use function php_sapi_name;
 
 class ConfigurationProvider implements ConfigurationProviderInterface
 {
-    private array $configuration;
-
     private LiveReloadConfiguration $liveReloadConfiguration;
 
     private string $outputFileDir = 'typo3temp/cundd_assetic/';
@@ -19,9 +17,8 @@ class ConfigurationProvider implements ConfigurationProviderInterface
     /**
      * @param array<string, mixed> $configuration
      */
-    public function __construct(array $configuration)
+    public function __construct(private readonly array $configuration)
     {
-        $this->configuration = $configuration;
     }
 
     public function getStylesheetConfigurations(): array
