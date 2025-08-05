@@ -6,11 +6,11 @@ namespace Cundd\Assetic\Service;
 
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\ValueObject\PathWoHash;
+use TYPO3\CMS\Core\Cache\CacheManager as TYPO3CacheManager;
 use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-use function is_callable;
 use function sha1;
 
 class CacheManager implements CacheManagerInterface
@@ -28,11 +28,6 @@ class CacheManager implements CacheManagerInterface
     public function getCache(PathWoHash $identifier): mixed
     {
         $identifier = $this->prepareIdentifier($identifier);
-        if (is_callable('apc_fetch')) {
-            /* @noinspection PhpComposerExtensionStubsInspection */
-            return apc_fetch($identifier);
-        }
-
         $cacheInstance = $this->getCacheInstance();
 
         return $cacheInstance ? $cacheInstance->get($identifier) : null;
@@ -47,17 +42,12 @@ class CacheManager implements CacheManagerInterface
     public function setCache(PathWoHash $identifier, $value): void
     {
         $identifier = $this->prepareIdentifier($identifier);
-        if (is_callable('apc_store')) {
-            /* @noinspection PhpComposerExtensionStubsInspection */
-            apc_store($identifier, $value);
-        } else {
-            $cacheInstance = $this->getCacheInstance();
-            if ($cacheInstance) {
-                $tags = [];
-                $lifetime = 60 * 60 * 24;
+        $cacheInstance = $this->getCacheInstance();
+        if ($cacheInstance) {
+            $tags = [];
+            $lifetime = 60 * 60 * 24;
 
-                $cacheInstance->set($identifier, $value, $tags, $lifetime);
-            }
+            $cacheInstance->set($identifier, $value, $tags, $lifetime);
         }
     }
 
@@ -72,7 +62,7 @@ class CacheManager implements CacheManagerInterface
     private function getCacheInstance(): ?FrontendInterface
     {
         try {
-            return GeneralUtility::makeInstance(\TYPO3\CMS\Core\Cache\CacheManager::class)->getCache('assetic_cache');
+            return GeneralUtility::makeInstance(TYPO3CacheManager::class)->getCache('assetic_cache');
         } catch (NoSuchCacheException $e) {
             return null;
         }
