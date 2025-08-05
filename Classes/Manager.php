@@ -177,7 +177,11 @@ class Manager implements ManagerInterface
 
     private function getCreateDevelopmentSymlink(): bool
     {
-        if (!$this->configurationProvider->getCreateSymlink()) {
+        $addLivereloadJavaScript = $this->configurationProvider
+            ->getLiveReloadConfiguration()
+            ->getAddJavascript();
+        $createSymlink = $this->configurationProvider->getCreateSymlink();
+        if (!$createSymlink && !$addLivereloadJavaScript) {
             return false;
         }
 
