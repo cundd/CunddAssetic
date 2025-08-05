@@ -49,11 +49,4 @@ interface ManagerInterface
      * Return the Compiler instance
      */
     public function getCompiler(): CompilerInterface;
-
-    /**
-     * Remove the cached hash
-     *
-     * @deprecated
-     */
-    public function clearHashCache(): void;
 }

@@ -175,11 +175,6 @@ class Manager implements ManagerInterface
         return $this->symlinkService->getSymlinkPath($this->getPathWOHash())->getPublicUri();
     }
 
-    public function clearHashCache(): void
-    {
-        $this->cacheManager->clearHashCache($this->getPathWOHash());
-    }
-
     private function getCreateDevelopmentSymlink(): bool
     {
         if (!$this->configurationProvider->getCreateSymlink()) {
