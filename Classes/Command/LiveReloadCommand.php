@@ -52,7 +52,7 @@ class LiveReloadCommand extends AbstractWatchCommand
 
     private ConsoleLogger $logger;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Start a LiveReload server');
         $this->registerDefaultArgumentsAndOptions();
@@ -153,18 +153,38 @@ class LiveReloadCommand extends AbstractWatchCommand
      */
     private function buildSecureServerContext(InputInterface $input): array
     {
-        return [
-            'local_cert'        => $this->assertTlsFilePath($input, self::OPTION_TLS_CERTIFICATE),
-            'local_pk'          => $this->assertTlsFilePath($input, self::OPTION_TLS_PRIVATE_KEY),
+        $context = [
+            'local_cert' => $this->getTLSFilePath(
+                $input,
+                self::OPTION_TLS_CERTIFICATE,
+                false
+            ),
             'allow_self_signed' => true,
             'verify_peer'       => false,
         ];
+
+        $privateKey = $this->getTLSFilePath(
+            $input,
+            self::OPTION_TLS_PRIVATE_KEY,
+            true
+        );
+        if ($privateKey) {
+            $context['local_pk'] = $privateKey;
+        }
+
+        return $context;
     }
 
-    private function assertTlsFilePath(InputInterface $input, string $optionName): string
-    {
+    private function getTLSFilePath(
+        InputInterface $input,
+        string $optionName,
+        bool $optional,
+    ): string {
         $path = $input->getOption($optionName);
         if (!$path) {
+            if ($optional) {
+                return '';
+            }
             throw new InvalidArgumentException(sprintf('Option "%s" is not given', $optionName), 7653682383);
         }
 
