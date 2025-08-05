@@ -26,7 +26,7 @@ class FilterDescribeViewHelper extends AbstractViewHelper
         $filter = $this->arguments['filter'] ?? $this->renderChildren();
 
         if ($filter instanceof BaseProcessFilter) {
-            $binaryPath = static::extractBinaryPath($filter);
+            $binaryPath = $this->extractBinaryPath($filter);
 
             return get_class($filter) . '(' . $binaryPath . ')';
         }
@@ -34,7 +34,7 @@ class FilterDescribeViewHelper extends AbstractViewHelper
         return get_class($filter);
     }
 
-    private static function extractBinaryPath(BaseProcessFilter $filter): ?string
+    private function extractBinaryPath(BaseProcessFilter $filter): ?string
     {
         try {
             $reflectionProperty = new ReflectionProperty($filter, 'binaryPath');

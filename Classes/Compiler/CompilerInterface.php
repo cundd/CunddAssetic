@@ -7,7 +7,9 @@ namespace Cundd\Assetic\Compiler;
 use Assetic\Asset\AssetCollection;
 use Assetic\Factory\AssetFactory;
 use Cundd\Assetic\ValueObject\Result;
+use Exception;
 use LogicException;
+use Throwable;
 
 /**
  * Interface for the compiler
@@ -24,7 +26,7 @@ interface CompilerInterface
     /**
      * Collect the files and tell assetic to compile the files
      *
-     * @return Result Return `Ok<NULL>` if the files have been compiled successfully, otherwise an `Err<Exception>` containing the exception
+     * @return Result<null,Throwable> Return `Ok` if the files have been compiled successfully, otherwise an `Err<Exception>` containing the exception
      */
     public function compile(): Result;
 

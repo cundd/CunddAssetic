@@ -21,13 +21,15 @@ use function strpos;
 
 /**
  * Build step to replace occurrences of `EXT:extension_name/Resources/Public/` with the correct `_assets/...` URI
+ *
+ * @implements BuildStepInterface<OutputFileException>
  */
 class PatchExtensionPath implements BuildStepInterface
 {
     public function process(BuildState $currentState): BuildStateResult
     {
         $compiledFileUri = $currentState->getFilePath()->getAbsoluteUri();
-        $contents = file_get_contents($compiledFileUri);
+        $contents = (string) file_get_contents($compiledFileUri);
         if (!preg_match_all('!EXT:([a-zA-Z0-9-_]+/Resources/Public/)!', $contents, $matches)) {
             return BuildStateResult::ok($currentState);
         }

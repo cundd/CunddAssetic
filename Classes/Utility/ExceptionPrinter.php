@@ -16,7 +16,7 @@ class ExceptionPrinter
     /**
      * Print the given exception to the screen
      *
-     * @param FilterException|Exception $exception
+     * @param FilterException|Exception|Throwable $exception
      */
     public function printException(Throwable $exception): string
     {
@@ -26,11 +26,11 @@ class ExceptionPrinter
 
         $heading = 'Caught Assetic error #' . $exception->getCode() . ': ' . $exception->getMessage();
         while ($step = current($backtrace)) {
-            $trace .= '#' . $i . ': ' . $step['file'] . '(' . $step['line'] . '): ';
-            if (isset($step['class'])) {
+            $trace .= '#' . $i . ': ' . ($step['file'] ?? 'unknown') . '(' . ($step['line'] ?? '0') . '): ';
+            if (isset($step['class']) && isset($step['type'])) {
                 $trace .= $step['class'] . $step['type'];
             }
-            $trace .= $step['function'] . '(arguments: ' . count($step['args']) . ')' . PHP_EOL;
+            $trace .= $step['function'] . '(arguments: ' . count($step['args'] ?? []) . ')' . PHP_EOL;
             next($backtrace);
             ++$i;
         }

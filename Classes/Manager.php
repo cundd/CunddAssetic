@@ -22,6 +22,7 @@ use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\PathWoHash;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
+use Throwable;
 
 use function file_exists;
 
@@ -74,7 +75,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * @return Result<FilePath>
+     * @return Result<FilePath,Throwable>
      */
     private function collectAssetsAndCompile(): Result
     {
@@ -152,9 +153,7 @@ class Manager implements ManagerInterface
         AsseticGeneralUtility::say(
             'Backend user detected: ' . ($isUserLoggedIn ? 'yes' : 'no')
         );
-        AsseticGeneralUtility::say(
-            'Development mode: ' . ($isDevelopment ? 'on' : 'off')
-        );
+        AsseticGeneralUtility::say('Development mode: off');
         if (!$isUserLoggedIn) {
             // If no backend user is logged in, check if compiling is still allowed
             return $this->configurationProvider->getAllowCompileWithoutLogin();
@@ -193,7 +192,7 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * @return BuildStepInterface[]
+     * @return BuildStepInterface<covariant Throwable>[]
      */
     private function getBuildSteps(bool $createDevelopmentSymlink): array
     {
@@ -205,7 +204,7 @@ class Manager implements ManagerInterface
             new BuildStep\RemoveOldSymlinks($this->symlinkService),
 
             // Compile
-            new BuildStep\Compile($this->compiler, new ConfigurationProviderFactory()),
+            new BuildStep\Compile($this->compiler),
 
             // Patch extension paths
             new BuildStep\PatchExtensionPath(),

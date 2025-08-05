@@ -195,7 +195,7 @@ class FileWatcher implements FileWatcherInterface
      *
      * @return string[]
      */
-    private function findFilesBySuffix($suffix, string $startDirectory): array
+    private function findFilesBySuffix(string|array $suffix, string $startDirectory): array
     {
         if (!is_dir($startDirectory)) {
             throw new InvalidArgumentException(sprintf('Start-directory "%s" is not a directory', $startDirectory), 5407933418);
@@ -204,7 +204,7 @@ class FileWatcher implements FileWatcherInterface
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($startDirectory));
         $regexIterator = new RegexIterator(
             $directoryIterator,
-            sprintf('/^.+\.(%s)$/i', implode('|', $suffix)),
+            sprintf('/^.+\.(%s)$/i', implode('|', (array) $suffix)),
             RecursiveRegexIterator::GET_MATCH
         );
 

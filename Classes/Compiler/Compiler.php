@@ -7,9 +7,9 @@ namespace Cundd\Assetic\Compiler;
 use Assetic\Asset\AssetCollection;
 use Assetic\AssetManager;
 use Assetic\AssetWriter;
+use Assetic\Contracts\Filter\FilterInterface;
 use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
-use Assetic\Filter;
 use Assetic\FilterManager;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\FilePathException;
@@ -44,13 +44,6 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * Assetic filter manager
      */
     protected FilterManager $filterManager;
-
-    /**
-     * Configuration from TYPO3
-     *
-     * @var array<string,mixed>
-     */
-    private $configuration = [];
 
     /**
      * @param array<string,mixed> $pluginLevelOptions
@@ -122,15 +115,11 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     // FILTERS
     // =========================================================================
     /**
-     * Return the right filter for the given file type
-     *
-     * @param string $type The file type
-     *
-     * @return Filter\FilterInterface The filter
+     * Return the  filter for the given file type
      *
      * @throws LogicException if the required filter class does not exist
      */
-    protected function getFilterForType(string $type): ?Filter\FilterInterface
+    protected function getFilterForType(string $type): ?FilterInterface
     {
         // If the filter manager has an according filter return it
         if ($this->filterManager->has($type)) {
@@ -162,6 +151,8 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
             throw new FilterException('Filter class ' . $filterClass . ' not found', 1355846301);
         }
 
+        assert($filter instanceof FilterInterface);
+
         // Store the just created filter
         $this->filterManager->set($type, $filter);
 
@@ -184,23 +175,19 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Invoke the functions of the filter
      *
-     * @param Filter\FilterInterface $filter                  The filter to apply to
-     * @param array                  $stylesheetConfiguration The stylesheet configuration
-     * @param string                 $stylesheetType          The stylesheet type
-     *
-     * @return Filter\FilterInterface Return the filter
+     * @param array<string,?array<non-empty-string,mixed>> $stylesheetConfiguration
      *
      * @throws UnexpectedValueException if the given stylesheet type is invalid
      */
     protected function applyFunctionsToFilterForType(
-        Filter\FilterInterface $filter,
+        FilterInterface $filter,
         array $stylesheetConfiguration,
         string $stylesheetType,
-    ): Filter\FilterInterface {
+    ): FilterInterface {
         if (!$stylesheetType) {
             throw new UnexpectedValueException('The given stylesheet type is invalid "' . $stylesheetType . '"', 1355910725);
         }
-        $functions = $stylesheetConfiguration['functions.'];
+        $functions = $stylesheetConfiguration['functions.'] ?? [];
         ksort($functions);
         foreach ($functions as $function => $data) {
             if (!is_array($data)) {
@@ -215,7 +202,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
             AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
             if (is_callable([$filter, $function])) {
-                call_user_func_array([$filter, $function], $data);
+                $filter->$function(...$data);
             } elseif ($this->configurationProvider->getStrictModeEnabled()) {
                 throw new FilterException(sprintf('Filter "%s" does not implement method "%s"', get_class($filter), $function), 1447161985);
             } else {
@@ -247,7 +234,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         if (isset($stylesheetConf['type'])) {
             $stylesheetType = (string) $stylesheetConf['type'];
         } else {
-            $stylesheetType = substr(strrchr($stylesheet, '.'), 1);
+            $stylesheetType = substr((string) strrchr($stylesheet, '.'), 1);
         }
 
         $originalStylesheet = $stylesheet;
@@ -265,7 +252,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         // Check if there are filter functions
-        if (isset($stylesheetConf['functions.'])) {
+        if ($filter && isset($stylesheetConf['functions.'])) {
             $this->applyFunctionsToFilterForType($filter, $stylesheetConf, $stylesheetType);
         }
 
@@ -292,7 +279,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      *
      * I.e. expands paths to their absolute path
      *
-     * @param array $parameters Reference to the data array
+     * @param array<string> $parameters Reference to the data array
      */
     protected function prepareFunctionParameters(array &$parameters): void
     {

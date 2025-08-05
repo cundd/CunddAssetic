@@ -101,6 +101,10 @@ abstract class AbstractWatchCommand extends AbstractCommand
         return $fileWatcher;
     }
 
+    /**
+     * @param array<non-empty-string> $paths
+     * @param array<non-empty-string> $suffixes
+     */
     protected function configureFileWatcher(
         FileWatcherInterface $fileWatcher,
         array $paths,
@@ -108,7 +112,9 @@ abstract class AbstractWatchCommand extends AbstractCommand
         array $suffixes,
     ): FileWatcherInterface {
         $fileWatcher->setWatchPaths($paths);
-        $fileWatcher->setFindFilesMaxDepth($maxDepth);
+        if ($fileWatcher instanceof FileWatcher) {
+            $fileWatcher->setFindFilesMaxDepth($maxDepth);
+        }
         if ($suffixes) {
             $fileWatcher->setAssetSuffixes(ArrayUtility::normalizeInput($suffixes));
         }
@@ -119,8 +125,10 @@ abstract class AbstractWatchCommand extends AbstractCommand
     /**
      * Print the watched paths
      */
-    protected function printWatchedPaths(OutputInterface $output, FileWatcherInterface $fileWatcher)
-    {
+    protected function printWatchedPaths(
+        OutputInterface $output,
+        FileWatcherInterface $fileWatcher,
+    ): void {
         $output->writeln(
             '<info>Watching path(s): ' . implode(', ', $fileWatcher->getWatchPaths()) . '</info>'
         );

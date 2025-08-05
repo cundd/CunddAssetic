@@ -52,8 +52,8 @@ JAVASCRIPT_CODE_TEMPLATE;
         return sprintf(
             '<!-- Could not connect to LiveReload server at port %d: Error %d: %s -->',
             $port,
-            $error->getCode(),
-            $error->getMessage()
+            $error?->getCode(),
+            $error?->getMessage()
         );
     }
 

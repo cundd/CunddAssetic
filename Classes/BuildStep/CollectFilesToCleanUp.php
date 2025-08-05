@@ -7,7 +7,11 @@ namespace Cundd\Assetic\BuildStep;
 use Cundd\Assetic\Service\OutputFileFinderInterface;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
+use Throwable;
 
+/**
+ * @implements BuildStepInterface<Throwable>
+ */
 class CollectFilesToCleanUp implements BuildStepInterface
 {
     private OutputFileFinderInterface $outputFileFinder;

@@ -149,7 +149,7 @@ class LiveReloadCommand extends AbstractWatchCommand
     }
 
     /**
-     * @return array{local_cert: string, local_pk: string, allow_self_signed: true, verify_peer: false}
+     * @return array{local_cert: string, local_pk?: string, allow_self_signed: true, verify_peer: false}
      */
     private function buildSecureServerContext(InputInterface $input): array
     {
@@ -212,7 +212,7 @@ class LiveReloadCommand extends AbstractWatchCommand
     private function buildServerFromInput(InputInterface $input, OutputInterface $output): IoServer
     {
         $address = $input->getOption(self::OPTION_ADDRESS);
-        $port = $input->getOption(self::OPTION_PORT);
+        $port = (int) $input->getOption(self::OPTION_PORT);
         $notificationDelay = (float) $input->getOption(self::OPTION_NOTIFICATION_DELAY);
         $interval = $this->getInterval($input, 0.5);
 
@@ -227,13 +227,12 @@ class LiveReloadCommand extends AbstractWatchCommand
     }
 
     /**
-     * @param int|string $port
-     * @param int|float  $interval the number of seconds to wait before execution
+     * @param int|float $interval the number of seconds to wait before execution
      */
     private function buildServer(
         InputInterface $input,
         string $address,
-        $port,
+        int $port,
         float $notificationDelay,
         bool $useTLS,
         $interval,
@@ -269,6 +268,8 @@ class LiveReloadCommand extends AbstractWatchCommand
 
             $server = new IoServer($component, $server, $loop);
         }
+
+        assert(null !== $server->loop);
 
         $server->loop->addPeriodicTimer($interval, [$this, 'recompileIfNeededAndInformLiveReloadServer']);
         $this->liveReloadServer->setEventLoop($server->loop);

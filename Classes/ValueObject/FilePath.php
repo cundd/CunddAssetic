@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\ValueObject;
 
-use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 
@@ -34,8 +33,6 @@ class FilePath
         string $fileName,
         ConfigurationProviderInterface $configurationProvider,
     ): self {
-        $configurationProvider = $configurationProvider ?? (new ConfigurationProviderFactory())->build();
-
         return new static(
             ConfigurationUtility::getDomainIdentifier() . $fileName,
             $configurationProvider->getOutputFileDir(),
@@ -45,6 +42,8 @@ class FilePath
 
     /**
      * Return the public web-URI
+     *
+     * @return non-empty-string
      */
     public function getPublicUri(): string
     {
@@ -53,6 +52,8 @@ class FilePath
 
     /**
      * Return the absolute file-system URI
+     *
+     * @return non-empty-string
      */
     public function getAbsoluteUri(): string
     {

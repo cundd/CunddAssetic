@@ -10,14 +10,14 @@ namespace Cundd\Assetic\FileWatcher;
 interface FileWatcherInterface
 {
     /**
-     * Returns the array of file suffix to watch for changes
+     * Return the array of file suffix to watch for changes
      *
      * @return string[]
      */
     public function getAssetSuffixes(): array;
 
     /**
-     * Sets the array of file suffix to watch for changes
+     * Set the array of file suffix to watch for changes
      *
      * @param string[] $assetSuffixes
      *
@@ -43,7 +43,7 @@ interface FileWatcherInterface
     public function getChangedFileSinceLastCheck(): ?string;
 
     /**
-     * Returns the files that are watched
+     * Return the files that are watched
      *
      * @return string[]
      */

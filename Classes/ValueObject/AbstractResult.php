@@ -20,13 +20,23 @@ abstract class AbstractResult
     /**
      * @param T|E $inner
      */
-    protected function __construct($inner)
+    protected function __construct(mixed $inner)
     {
         $this->inner = $inner;
     }
 
+    /**
+     * @phpstan-assert-if-true =T $this->inner
+     *
+     * @phpstan-assert-if-false =E $this->inner
+     */
     abstract public function isOk(): bool;
 
+    /**
+     * @phpstan-assert-if-true =E $this->inner
+     *
+     * @phpstan-assert-if-false =T $this->inner
+     */
     public function isErr(): bool
     {
         return !$this->isOk();
@@ -35,7 +45,7 @@ abstract class AbstractResult
     /**
      * @return T
      */
-    abstract public function unwrap();
+    abstract public function unwrap(): mixed;
 
     /**
      * @return E

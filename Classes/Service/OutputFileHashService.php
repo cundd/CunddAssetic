@@ -27,6 +27,9 @@ class OutputFileHashService
 
     private string $previousHashFromCache;
 
+    /**
+     * @var array<non-empty-string, bool>
+     */
     private array $wasWritten;
 
     public function __construct(

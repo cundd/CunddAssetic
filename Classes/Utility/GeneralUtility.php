@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Utility;
 
+use RuntimeException;
+
 use function date;
 use function defined;
 use function fopen;
@@ -22,10 +24,8 @@ final class GeneralUtility
 {
     /**
      * Defines if debugging is enabled
-     *
-     * @var bool
      */
-    protected static $willDebug = -1;
+    protected static ?bool $willDebug = null;
 
     /**
      * Return if a backend user is logged in
@@ -40,15 +40,15 @@ final class GeneralUtility
     /**
      * Dump a given variable (or the given variables) wrapped into a 'pre' tag.
      */
-    public static function pd($var1 = '__iresults_pd_noValue'): void
+    public static function pd(mixed $var1 = '__iresults_pd_noValue'): void
     {
         if (!self::willDebug()) {
             return;
         }
 
         $arguments = func_get_args();
-        if (class_exists('Tx_Iresults')) {
-            call_user_func_array(['Tx_Iresults', 'pd'], $arguments);
+        if (class_exists(Tx_Iresults::class)) {
+            Tx_Iresults::pd(...$arguments);
         } elseif ('cli' !== php_sapi_name()) {
             echo '<pre>';
             foreach ($arguments as $argument) {
@@ -88,6 +88,11 @@ final class GeneralUtility
             $currentTime = microtime(true);
             $requestTime = $_SERVER['REQUEST_TIME_FLOAT'] ?? 0;
             $outputStream = defined('STDOUT') ? STDOUT : fopen('php://output', 'a');
+
+            if (false === $outputStream) {
+                throw new RuntimeException('Could not open STDOUT for writing');
+            }
+
             fwrite(
                 $outputStream,
                 sprintf(
@@ -108,7 +113,7 @@ final class GeneralUtility
      */
     private static function willDebug(): bool
     {
-        if (-1 === self::$willDebug) {
+        if (null === self::$willDebug) {
             $key = 'cundd_assetic_debug';
             self::$willDebug = self::getRequestParameter($key) && BackendUserUtility::isUserLoggedIn();
         }
@@ -116,7 +121,7 @@ final class GeneralUtility
         return self::$willDebug;
     }
 
-    private static function getRequestParameter(string $key)
+    private static function getRequestParameter(string $key): mixed
     {
         return $_GET[$key] ?? $_POST[$key] ?? null;
     }

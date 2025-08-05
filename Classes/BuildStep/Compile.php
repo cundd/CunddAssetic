@@ -4,32 +4,18 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\BuildStep;
 
-use Assetic\Exception\FilterException;
 use Cundd\Assetic\Compiler\CompilerInterface;
-use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
-use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
-use Cundd\Assetic\Exception\OutputFileException;
-use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
 use Throwable;
-use TYPO3\CMS\Core\Log\LogManager;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-use function php_sapi_name;
-
+/**
+ * @implements BuildStepInterface<Throwable>
+ */
 class Compile implements BuildStepInterface
 {
-    private CompilerInterface $compiler;
-
-    private ConfigurationProviderInterface $configurationProvider;
-
-    public function __construct(
-        CompilerInterface $compiler,
-        ConfigurationProviderFactory $configurationProviderFactory,
-    ) {
-        $this->compiler = $compiler;
-        $this->configurationProvider = $configurationProviderFactory->build();
+    public function __construct(private readonly CompilerInterface $compiler)
+    {
     }
 
     public function process(BuildState $currentState): BuildStateResult
@@ -39,31 +25,5 @@ class Compile implements BuildStepInterface
         return $result->isOk()
             ? BuildStateResult::ok($currentState)
             : BuildStateResult::err($result->unwrapErr());
-    }
-
-    /**
-     * Handle exceptions
-     *
-     * @param FilterException|OutputFileException $exception
-     *
-     * @throws Throwable if run in CLI mode
-     */
-    private function handleCompilerException(Throwable $exception): void
-    {
-        if ($this->configurationProvider->isDevelopment()) {
-            if ('cli' == php_sapi_name()) {
-                throw $exception;
-            }
-            $exceptionPrinter = new ExceptionPrinter();
-            echo $exceptionPrinter->printException($exception);
-        } else {
-            $this->logException($exception);
-        }
-    }
-
-    private function logException(Throwable $exception): void
-    {
-        $logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        $logger->error('Caught exception #' . $exception->getCode() . ': ' . $exception->getMessage());
     }
 }

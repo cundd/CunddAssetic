@@ -9,6 +9,9 @@ use Cundd\Assetic\ValueObject\BuildStateResult;
 use RuntimeException;
 use Throwable;
 
+/**
+ * @extends BuildStateResult<never>
+ */
 class Ok extends BuildStateResult
 {
     public function __construct(BuildState $buildState)
@@ -23,6 +26,8 @@ class Ok extends BuildStateResult
 
     public function unwrap(): BuildState
     {
+        assert($this->isOk());
+
         return $this->inner;
     }
 

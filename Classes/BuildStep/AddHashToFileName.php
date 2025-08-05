@@ -17,6 +17,9 @@ use function rename;
 use function sprintf;
 use function unlink;
 
+/**
+ * @implements BuildStepInterface<OutputFileException>
+ */
 class AddHashToFileName implements BuildStepInterface
 {
     private OutputFileHashService $outputFileHashService;

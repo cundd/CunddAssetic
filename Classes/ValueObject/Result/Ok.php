@@ -10,13 +10,15 @@ use Throwable;
 
 /**
  * @template T
- * @template E extends Throwable
  *
- * @extends Result<T,E>
+ * @extends Result<T,never>
  */
 class Ok extends Result
 {
-    public function __construct($value)
+    /**
+     * @param T $value
+     */
+    public function __construct(mixed $value)
     {
         parent::__construct($value);
     }
@@ -31,6 +33,8 @@ class Ok extends Result
      */
     public function unwrap(): mixed
     {
+        assert($this->isOk());
+
         return $this->inner;
     }
 

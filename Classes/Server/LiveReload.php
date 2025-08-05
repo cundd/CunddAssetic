@@ -100,6 +100,8 @@ class LiveReload implements MessageComponentInterface
 
     /**
      * Reverse look up of log level to level name.
+     *
+     * @var array<int,string>
      */
     protected static array $logLevelPrefix = [
         self::LOG_LEVEL_EMERGENCY => '!!!',
@@ -120,12 +122,14 @@ class LiveReload implements MessageComponentInterface
     /**
      * All connected clients
      *
-     * @var SplObjectStorage|ConnectionInterface[]
+     * @var SplObjectStorage<ConnectionInterface,mixed>
      */
-    protected $clients;
+    protected SplObjectStorage $clients;
 
     /**
      * Handshake message
+     *
+     * @var array<string,mixed>
      */
     protected array $handshakeMessage = [
         'command'   => 'hello',
@@ -141,6 +145,8 @@ class LiveReload implements MessageComponentInterface
 
     /**
      * Reload message
+     *
+     * @var array<string,mixed>
      */
     protected array $reloadMessage = [
         'command' => 'reload',
@@ -150,6 +156,8 @@ class LiveReload implements MessageComponentInterface
 
     /**
      * Alert message
+     *
+     * @var array<string,mixed>
      */
     protected array $alertMessage = [
         'command' => 'alert',
@@ -158,14 +166,11 @@ class LiveReload implements MessageComponentInterface
 
     private LoopInterface $eventLoop;
 
-    private $notificationDelay;
-
     /**
      * @param int|float $notificationDelay Number of seconds to wait before sending the reload command to the clients
      */
-    public function __construct($notificationDelay)
+    public function __construct(private readonly int|float $notificationDelay)
     {
-        $this->notificationDelay = $notificationDelay;
         $this->clients = new SplObjectStorage();
     }
 
@@ -192,14 +197,14 @@ class LiveReload implements MessageComponentInterface
             sprintf(
                 'Received message "%s" from connection %d address %s',
                 $msg,
-                $from->resourceId,
-                $from->remoteAddress
+                $this->getResourceId($from),
+                $this->getRemoteAddress($from),
             ),
             self::LOG_LEVEL_DEBUG
         );
 
         // If the sender is the current host, pass the message to the clients
-        if ('127.0.0.1' === $from->remoteAddress) {
+        if ('127.0.0.1' === $this->getRemoteAddress($from)) {
             /** @var IoConnection $client */
             foreach ($this->clients as $client) {
                 if ($from !== $client) {
@@ -224,7 +229,7 @@ class LiveReload implements MessageComponentInterface
         $this->clients->attach($conn);
         $this->send($conn, $this->handshakeMessage);
 
-        $this->debugLine("New connection ({$conn->resourceId})", '+');
+        $this->debugLine("New connection ({$this->getResourceId($conn)})", '+');
     }
 
     /**
@@ -239,7 +244,7 @@ class LiveReload implements MessageComponentInterface
         /* @var WampConnection|Connection $conn */
         // The connection is closed, remove it, as we can no longer send it messages
         $this->clients->detach($conn);
-        $this->debugLine("Connection {$conn->resourceId} has disconnected", '-');
+        $this->debugLine("Connection {$this->getResourceId($conn)} has disconnected", '-');
     }
 
     /**
@@ -288,7 +293,7 @@ class LiveReload implements MessageComponentInterface
         );
     }
 
-    protected function send(ConnectionInterface $connection, $message): void
+    protected function send(ConnectionInterface $connection, mixed $message): void
     {
         if (is_string($message)) {
             if (self::MESSAGE_END !== substr($message, -strlen(self::MESSAGE_END))) {
@@ -315,9 +320,7 @@ class LiveReload implements MessageComponentInterface
             } elseif (is_string($logLevel)) {
                 $messagePrefix .= "($logLevel)";
             }
-            if ($messagePrefix) {
-                $message = $messagePrefix . ' ' . $message;
-            }
+            $message = $messagePrefix . ' ' . $message;
         }
         fwrite(STDOUT, $message);
     }
@@ -330,5 +333,17 @@ class LiveReload implements MessageComponentInterface
     protected function debugLine(string $message, $logLevel = null): void
     {
         $this->debug($message . PHP_EOL, $logLevel);
+    }
+
+    private function getResourceId(ConnectionInterface $connection): string
+    {
+        // @phpstan-ignore property.notFound
+        return (string) $connection->resourceId;
+    }
+
+    private function getRemoteAddress(ConnectionInterface $connection): string
+    {
+        // @phpstan-ignore property.notFound
+        return (string) $connection->remoteAddress;
     }
 }

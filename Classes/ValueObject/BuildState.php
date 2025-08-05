@@ -4,25 +4,16 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\ValueObject;
 
-class BuildState
+final class BuildState
 {
-    private FilePath $filePath;
-
-    private PathWoHash $outputFilePathWithoutHash;
-
-    private array $filesToCleanUp;
-
     /**
      * @param string[] $filesToCleanUp
      */
     public function __construct(
-        FilePath $filePath,
-        PathWoHash $outputFilePathWithoutHash,
-        array $filesToCleanUp,
+        private readonly FilePath $filePath,
+        private readonly PathWoHash $outputFilePathWithoutHash,
+        private readonly array $filesToCleanUp,
     ) {
-        $this->filePath = $filePath;
-        $this->filesToCleanUp = $filesToCleanUp;
-        $this->outputFilePathWithoutHash = $outputFilePathWithoutHash;
     }
 
     public function getFilePath(): FilePath
@@ -32,10 +23,11 @@ class BuildState
 
     public function withFilePath(FilePath $filePath): self
     {
-        $clone = clone $this;
-        $clone->filePath = $filePath;
-
-        return $clone;
+        return new self(
+            $filePath,
+            $this->outputFilePathWithoutHash,
+            $this->filesToCleanUp
+        );
     }
 
     public function getOutputFilePathWithoutHash(): PathWoHash
@@ -56,9 +48,10 @@ class BuildState
      */
     public function withFilesToCleanUp(array $filesToCleanUp): self
     {
-        $clone = clone $this;
-        $clone->filesToCleanUp = $filesToCleanUp;
-
-        return $clone;
+        return new self(
+            $this->filePath,
+            $this->outputFilePathWithoutHash,
+            $filesToCleanUp
+        );
     }
 }

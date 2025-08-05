@@ -18,7 +18,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use TYPO3\CMS\Core\Log\LogManager;
-use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
@@ -88,21 +87,6 @@ class Plugin
         return $content;
     }
 
-    private function includeCss(string $renderedStylesheet): void
-    {
-        $renderer = GeneralUtility::makeInstance(PageRenderer::class);
-        $renderer->addCssFile(
-            $renderedStylesheet,
-            'stylesheet',   // rel
-            'all',          // media
-            '',             // title
-            false,          // compress
-            true,           // forceOnTop
-            '',             // allWrap
-            true            // excludeFromConcatenation
-        );
-    }
-
     /**
      * Returns the code for "live reload"
      */
@@ -116,7 +100,7 @@ class Plugin
     /**
      * Handle exceptions
      *
-     * @param FilterException|OutputFileException $exception
+     * @param FilterException|OutputFileException|Throwable $exception
      */
     private function handleBuildError(ServerRequestInterface $request, Throwable $exception): string
     {

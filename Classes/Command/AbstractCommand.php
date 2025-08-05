@@ -41,7 +41,7 @@ abstract class AbstractCommand extends Command
     /**
      * Compile the assets
      *
-     * @return Result<FilePath,Throwable>
+     * @return Result<FilePath,covariant Throwable>
      */
     protected function compile(): Result
     {

@@ -17,9 +17,11 @@ use Throwable;
 abstract class Result extends AbstractResult
 {
     /**
-     * @param T $inner
+     * @template R
      *
-     * @return Ok<T,never>
+     * @param R $inner
+     *
+     * @return Ok<R>
      */
     public static function ok(mixed $inner): Result
     {
@@ -27,9 +29,11 @@ abstract class Result extends AbstractResult
     }
 
     /**
-     * @param E $inner
+     * @template TE of Throwable
      *
-     * @return Err<null, E>
+     * @param TE $inner
+     *
+     * @return Err<TE>
      */
     public static function err(Throwable $inner): Result
     {

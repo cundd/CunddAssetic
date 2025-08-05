@@ -18,6 +18,8 @@ class WatchPathsBuilder
      * Fetch the argument or option from the given CLI input and parse them as an array of absolute URLs
      *
      * @return string[]
+     *
+     * @phpstan-return non-empty-string[]
      */
     public function buildPathsFromInput(InputInterface $input, string $name): array
     {
@@ -41,6 +43,8 @@ class WatchPathsBuilder
      * @param string[] $paths
      *
      * @return string[]
+     *
+     * @phpstan-return non-empty-string[]
      */
     private function prepareWatchPaths(array $paths): array
     {
