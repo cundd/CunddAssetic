@@ -48,23 +48,18 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Configuration from TYPO3
      *
-     * @var array
+     * @var array<string,mixed>
      */
     private $configuration = [];
-
-    /**
-     * @var array
-     */
-    protected $pluginLevelOptions = [];
 
     /**
      * @param array<string,mixed> $pluginLevelOptions
      */
     public function __construct(
         private readonly ConfigurationProviderInterface $configurationProvider,
-        array $pluginLevelOptions,
+        protected array $pluginLevelOptions,
     ) {
-        $this->pluginLevelOptions = $pluginLevelOptions;
+        $this->assetManager = new AssetManager();
     }
 
     /**
@@ -81,7 +76,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         if (!class_exists(AssetCollection::class, true)) {
             throw new LogicException('The Assetic classes could not be found', 1356543545);
         }
-        $assetManager = $this->getAssetManager();
+
         $assetCollection = new AssetCollection();
         $factory = new AssetFactory($pathToWeb);
         $this->filterManager = new FilterManager();
@@ -98,7 +93,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         // Set the output file name
-        $assetManager->set('cundd_assetic', $assetCollection);
+        $this->assetManager->set('cundd_assetic', $assetCollection);
         AsseticGeneralUtility::profile('Did collect assets');
 
         return $assetCollection;
@@ -113,7 +108,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
         AsseticGeneralUtility::profile('Will compile asset');
         try {
-            $writer->writeManagerAssets($this->getAssetManager());
+            $writer->writeManagerAssets($this->assetManager);
         } catch (Throwable $exception) {
             return new Result\Err($exception);
         }
@@ -178,10 +173,12 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     // =========================================================================
     /**
      * Return the shared asset manager
+     *
+     * @deprecated
      */
     public function getAssetManager(): AssetManager
     {
-        return $this->assetManager ??= new AssetManager();
+        return $this->assetManager;
     }
 
     /**

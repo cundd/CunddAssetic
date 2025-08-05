@@ -31,15 +31,11 @@ class AssetController extends ActionController
     public function listAction(): ResponseInterface
     {
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $assetCollection = [];
-        $this->manager->collectAssets();
-        if ($this->manager->getCompiler()->getAssetManager()->has('cundd_assetic')) {
-            $assetCollection = $this->manager->getCompiler()->getAssetManager()->get('cundd_assetic');
-        }
-        if (!empty($assetCollection)) {
+        $assetCollection = $this->manager->collectAssets();
+        if (!empty($assetCollection->all())) {
             $moduleTemplate->assign('assets', $assetCollection);
         } else {
-            $this->addFlashMessage('No assets found');
+            $this->addFlashMessage('No assets found', '', ContextualFeedbackSeverity::WARNING);
         }
         $moduleTemplate->assign('lastBuildError', $this->sessionService->getErrorFromSession());
 

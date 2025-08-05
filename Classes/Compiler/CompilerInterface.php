@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Compiler;
 
 use Assetic\Asset\AssetCollection;
-use Assetic\AssetManager;
 use Assetic\Factory\AssetFactory;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
@@ -28,11 +27,6 @@ interface CompilerInterface
      * @return Result Return `Ok<NULL>` if the files have been compiled successfully, otherwise an `Err<Exception>` containing the exception
      */
     public function compile(): Result;
-
-    /**
-     * Return the shared asset manager
-     */
-    public function getAssetManager(): AssetManager;
 
     /**
      * Create and collect the Asset with the given key and stylesheet
