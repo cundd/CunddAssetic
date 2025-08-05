@@ -23,7 +23,7 @@ class ConfigurationProvider implements ConfigurationProviderInterface
 
     public function getStylesheetConfigurations(): array
     {
-        return (array) $this->configuration['stylesheets.'];
+        return (array) ($this->configuration['stylesheets.'] ?? []);
     }
 
     public function getAllowCompileWithoutLogin(): bool
