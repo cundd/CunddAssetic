@@ -9,7 +9,6 @@ plugin.CunddAssetic {
     development = 0
 
     # Configure stylesheets
-    stylesheets =< plugin.CunddAsseticStylesheets
     stylesheets {
         #    ### Example
         #    ### Define the stylesheet to include
