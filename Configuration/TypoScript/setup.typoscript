@@ -47,7 +47,7 @@ plugin.CunddAssetic {
 }
 
 # If the TypoScript constant `developmentMode` is set, use CunddAssetic in development mode too
-[0 < {$developmentMode}]
+["{$developmentMode}"]
     plugin.CunddAssetic = USER_INT
     plugin.CunddAssetic.development = {$developmentMode}
 [end]
