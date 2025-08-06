@@ -25,16 +25,13 @@ use function substr;
 
 abstract class AbstractCommand extends Command
 {
-    private ManagerInterface $manager;
-
-    private ConfigurationProviderInterface $configurationProvider;
+    private readonly ConfigurationProviderInterface $configurationProvider;
 
     public function __construct(
-        ManagerInterface $manager,
+        private readonly ManagerInterface $manager,
         ConfigurationProviderFactory $configurationProviderFactory,
     ) {
         parent::__construct();
-        $this->manager = $manager;
         $this->configurationProvider = $configurationProviderFactory->build();
     }
 
