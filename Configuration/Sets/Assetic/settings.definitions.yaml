@@ -1,0 +1,52 @@
+categories:
+  Assetic:
+    label: Assetic Configuration
+  Assetic.general:
+    label: General
+    parent: Assetic
+  Assetic.livereload:
+    label: LiveReload
+    parent: Assetic
+
+settings:
+  assetic.settings.create_symlink:
+    type: bool
+    default: false
+    label: Symlink
+    description: Always create a symlink to the compiled file
+    category: Assetic.general
+
+  assetic.settings.allow_compile_without_login:
+    type: bool
+    default: false
+    label: Compile if no backend user is logged in
+    description: ""
+    category: Assetic.general
+
+  assetic.settings.strict:
+    type: bool
+    default: false
+    label: Strict mode
+    description: Throw exceptions for missing filter functions
+    category: Assetic.general
+
+  assetic.settings.livereload.add_javascript:
+    type: bool
+    default: false
+    label: Add LiveReload JavaScript
+    description: ""
+    category: Assetic.livereload
+
+  assetic.settings.livereload.port:
+    type: int
+    default: 35729
+    label: LiveReload port
+    description: ""
+    category: Assetic.livereload
+
+  assetic.settings.livereload.skip_server_test:
+    type: bool
+    default: false
+    label: Skip LiveReload test connection
+    description: ""
+    category: Assetic.livereload
