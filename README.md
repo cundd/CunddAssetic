@@ -115,7 +115,7 @@ vendor/bin/typo3 assetic:watch
 
 ### assetic:livereload
 
-Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed. The TypoScript constant `module.tx_assetic.settings.livereload.add_javascript` should be set to 1.
+Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed. The TypoScript constant `assetic.settings.livereload.add_javascript` should be set to 1.
 
 ```bash
 vendor/bin/typo3 assetic:livereload

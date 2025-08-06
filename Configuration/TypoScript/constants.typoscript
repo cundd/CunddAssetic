@@ -1,33 +1,34 @@
 # customsubcategory=livereload=LiveReload
-module.tx_assetic {
+assetic {
     view {
-        # cat=module.tx_assetic/file; type=string; label=Path to template root (BE)
+        # cat=assetic/file; type=string; label=Path to template root (BE)
         templateRootPath = EXT:assetic/Resources/Private/Backend/Templates/
-        # cat=module.tx_assetic/file; type=string; label=Path to template partials (BE)
+        # cat=assetic/file; type=string; label=Path to template partials (BE)
         partialRootPath = EXT:assetic/Resources/Private/Backend/Partials/
-        # cat=module.tx_assetic/file; type=string; label=Path to template layouts (BE)
+        # cat=assetic/file; type=string; label=Path to template layouts (BE)
         layoutRootPath = EXT:assetic/Resources/Private/Backend/Layouts/
     }
 
     settings {
-        # cat=module.tx_assetic/enable/a; type=boolean; label=Strict mode: Throw exceptions for missing filter functions
+        # cat=assetic/enable/a; type=boolean; label=Strict mode: Throw exceptions for missing filter functions
         strict = 0
 
-        # cat=module.tx_assetic/enable/b; type=boolean; label=Symlink: Always create a symlink to the compiled file
+        # cat=assetic/enable/b; type=boolean; label=Symlink: Always create a symlink to the compiled file
         create_symlink = 0
 
-        # cat=module.tx_assetic/enable/c; type=boolean; label=Compile if no backend user is logged in
+        # cat=assetic/enable/c; type=boolean; label=Compile if no backend user is logged in
         allow_compile_without_login = 0
 
         livereload {
-            # cat=module.tx_assetic/livereload/a; type=boolean; label=Add LiveReload JavaScript
+            # cat=assetic/livereload/a; type=boolean; label=Add LiveReload JavaScript
             add_javascript = 0
 
-            # cat=module.tx_assetic/livereload/b; type=int+; label=LiveReload port
+            # cat=assetic/livereload/b; type=int+; label=LiveReload port
             port = 35729
 
-            # cat=module.tx_assetic/livereload/c; type=boolean; label=Skip LiveReload test connection
+            # cat=assetic/livereload/c; type=boolean; label=Skip LiveReload test connection
             skip_server_test = 0
         }
     }
 }
+
