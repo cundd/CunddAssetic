@@ -87,7 +87,9 @@ final class GeneralUtility
             }
             $currentTime = microtime(true);
             $requestTime = $_SERVER['REQUEST_TIME_FLOAT'] ?? 0;
-            $outputStream = defined('STDOUT') ? STDOUT : fopen('php://output', 'a');
+            $outputStream = defined('STDOUT')
+                ? STDOUT
+                : fopen('php://output', 'a');
 
             if (false === $outputStream) {
                 throw new RuntimeException('Could not open STDOUT for writing');
@@ -115,7 +117,8 @@ final class GeneralUtility
     {
         if (null === self::$willDebug) {
             $key = 'cundd_assetic_debug';
-            self::$willDebug = self::getRequestParameter($key) && BackendUserUtility::isUserLoggedIn();
+            self::$willDebug = self::getRequestParameter($key)
+                && BackendUserUtility::isUserLoggedIn();
         }
 
         return self::$willDebug;

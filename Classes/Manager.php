@@ -61,13 +61,14 @@ class Manager implements ManagerInterface
         }
 
         $pathWOHash = $this->getPathWOHash();
-        $expectedPath = $this->outputFileService->getExpectedPathWithHash($pathWOHash);
+        $expectedPath = $this->outputFileService
+            ->getExpectedPathWithHash($pathWOHash);
         if ($expectedPath && file_exists($expectedPath->getAbsoluteUri())) {
             return Result::ok($expectedPath);
         }
 
-        // If expected output file does not exist clear the internal cache, set `willCompile` to TRUE
-        // and call the main routine again
+        // If expected output file does not exist clear the internal cache,
+        // set `willCompile` to TRUE and call the main routine again
         $this->forceCompile();
         $this->cacheManager->clearHashCache($pathWOHash);
 
@@ -82,7 +83,11 @@ class Manager implements ManagerInterface
         $this->collectAssetsAndSetTarget();
 
         $outputFilePathWithoutHash = $this->outputFileService->getPathWoHash();
-        $currentState = new BuildState($outputFilePathWithoutHash, $outputFilePathWithoutHash, []);
+        $currentState = new BuildState(
+            $outputFilePathWithoutHash,
+            $outputFilePathWithoutHash,
+            []
+        );
 
         $buildSteps = $this->getBuildSteps($this->getCreateDevelopmentSymlink());
         foreach ($buildSteps as $buildStep) {
@@ -121,7 +126,9 @@ class Manager implements ManagerInterface
     {
         $assetCollection = $this->getCompiler()->collectAssets();
 
-        AsseticGeneralUtility::profile('Set output file ' . $this->getPathWOHash()->getFileName());
+        AsseticGeneralUtility::profile(
+            'Set output file ' . $this->getPathWOHash()->getFileName()
+        );
         $assetCollection->setTargetPath($this->getPathWOHash()->getFileName());
 
         return $assetCollection;
@@ -172,7 +179,9 @@ class Manager implements ManagerInterface
      */
     public function getSymlinkUri(): string
     {
-        return $this->symlinkService->getSymlinkPath($this->getPathWOHash())->getPublicUri();
+        return $this->symlinkService
+            ->getSymlinkPath($this->getPathWOHash())
+            ->getPublicUri();
     }
 
     private function getCreateDevelopmentSymlink(): bool
