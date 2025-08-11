@@ -28,15 +28,12 @@ abstract class AbstractWatchCommand extends AbstractCommand
     private const OPTION_SUFFIXES = 'suffixes';
     private const OPTION_MAX_DEPTH = 'max-depth';
 
-    private FileWatcherInterface $fileWatcher;
-
     public function __construct(
         ManagerInterface $manager,
-        FileWatcher $fileWatcher,
         ConfigurationProviderFactory $configurationProviderFactory,
+        private readonly FileWatcherInterface $fileWatcher,
     ) {
         parent::__construct($manager, $configurationProviderFactory);
-        $this->fileWatcher = $fileWatcher;
     }
 
     protected function registerDefaultArgumentsAndOptions(): self

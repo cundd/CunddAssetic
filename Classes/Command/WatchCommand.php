@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\FileWatcher\FileWatcherInterface;
+use Cundd\Assetic\ManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
+use TYPO3\CMS\Core\Cache\CacheManager;
 
 use function usleep;
 
@@ -16,6 +20,19 @@ use function usleep;
  */
 class WatchCommand extends AbstractWatchCommand
 {
+    public function __construct(
+        ManagerInterface $manager,
+        ConfigurationProviderFactory $configurationProviderFactory,
+        FileWatcherInterface $fileWatcher,
+        private readonly CacheManager $cacheManager,
+    ) {
+        parent::__construct(
+            $manager,
+            $configurationProviderFactory,
+            $fileWatcher
+        );
+    }
+
     /**
      * Configure the command by defining the name, options and arguments
      */
@@ -24,17 +41,28 @@ class WatchCommand extends AbstractWatchCommand
         $this
             ->setDescription('Watch and re-compile assets')
             ->setHelp('Automatically re-compiles the assets if files changed');
-        $this->registerDefaultArgumentsAndOptions();
+
+        $this->registerDefaultArgumentsAndOptions()
+            ->addOption(
+                'clear-page-cache',
+                'x',
+                InputOption::VALUE_NONE,
+                'Clear the page cache after compilation'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $interval = $this->getInterval($input, 1);
+        $clearPageCache = (bool) $input->getOption('clear-page-cache');
 
         $fileWatcher = $this->getFileWatcher();
         $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
         while (true) { // @phpstan-ignore while.alwaysTrue
-            $this->recompileIfNeeded($output, $fileWatcher);
+            $didRecompile = $this->recompileIfNeeded($output, $fileWatcher);
+            if ($didRecompile && $clearPageCache) {
+                $this->cacheManager->flushCachesInGroup('pages');
+            }
             usleep((int) ($interval * 1000000));
         }
     }
@@ -42,11 +70,13 @@ class WatchCommand extends AbstractWatchCommand
     /**
      * Re-compiles the sources if needed
      */
-    private function recompileIfNeeded(OutputInterface $output, FileWatcherInterface $fileWatcher): void
-    {
+    private function recompileIfNeeded(
+        OutputInterface $output,
+        FileWatcherInterface $fileWatcher,
+    ): bool {
         $changedFile = $this->needsRecompile($fileWatcher);
         if (!$changedFile) {
-            return;
+            return false;
         }
 
         $result = $this->compile();
@@ -59,5 +89,7 @@ class WatchCommand extends AbstractWatchCommand
 
             $output->writeln("<info>File $changedFile has changed. Assets have been compiled into $compiledFile </info>");
         }
+
+        return true;
     }
 }
