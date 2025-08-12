@@ -9,7 +9,7 @@ use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\Exception\OutputFileException;
-use Cundd\Assetic\Helper\LiveReloadHelper;
+use Cundd\Assetic\Service\LiveReloadServiceInterface;
 use Cundd\Assetic\Utility\BackendUserUtility;
 use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
@@ -36,15 +36,13 @@ class Plugin
 
     private LoggerInterface $logger;
 
-    public function __construct(
-        ?ManagerInterface $manager = null,
-        ?ConfigurationProviderFactory $configurationProviderFactory = null,
-        ?LoggerInterface $logger = null,
-    ) {
-        $configurationProviderFactory = $configurationProviderFactory ?? new ConfigurationProviderFactory();
-        $this->manager = $manager ?? GeneralUtility::makeInstance(Manager::class);
-        $this->configurationProvider = $configurationProviderFactory->build();
-        $this->logger = $logger ?? GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
+    public function __construct()
+    {
+        $this->manager = GeneralUtility::makeInstance(Manager::class);
+        $this->configurationProvider = (new ConfigurationProviderFactory())
+            ->build();
+        $this->logger = GeneralUtility::makeInstance(LogManager::class)
+            ->getLogger(__CLASS__);
     }
 
     /**
@@ -69,13 +67,13 @@ class Plugin
         if ($result->isErr()) {
             $exception = $result->unwrapErr();
 
-            return $this->handleBuildError($request, $exception) . $this->getLiveReloadCode();
+            return $this->handleBuildError($request, $exception) . $this->getLiveReloadCode($request);
         }
 
         /** @var FilePath $filePath */
         $filePath = $result->unwrap();
         $publicUri = $filePath->getPublicUri() . ($filePath->isSymlink() ? '?' . time() : '');
-        $content = $this->getLiveReloadCode();
+        $content = $this->getLiveReloadCode($request);
         $content .= $this->addDebugInformation($collectAndCompileEnd, $collectAndCompileStart);
         $content .= sprintf(
             '<link rel="stylesheet" type="text/css" href="%s" media="all">',
@@ -90,11 +88,11 @@ class Plugin
     /**
      * Returns the code for "live reload"
      */
-    private function getLiveReloadCode(): string
+    private function getLiveReloadCode(ServerRequestInterface $request): string
     {
-        $helper = new LiveReloadHelper($this->configurationProvider);
+        $liveReloadService = GeneralUtility::makeInstance(LiveReloadServiceInterface::class);
 
-        return $helper->getLiveReloadCodeIfEnabled();
+        return $liveReloadService->loadLiveReloadCodeIfEnabled($request);
     }
 
     /**

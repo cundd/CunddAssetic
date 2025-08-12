@@ -5,24 +5,28 @@ services:
     public: false
 
   Cundd\Assetic\:
-    resource: '../Classes/*'
-    exclude: '../Classes/{Exception,Configuration/ConfigurationProvider.php}'
+    resource: "../Classes/*"
+    exclude: "../Classes/{Exception,Configuration/ConfigurationProvider.php}"
 
   Cundd\Assetic\Manager:
     public: true
 
+  Cundd\Assetic\Service\LiveReloadServiceInterface:
+    alias: Cundd\Assetic\Service\LiveReloadService
+    public: true
+
   Cundd\Assetic\Command\CompileCommand:
     tags:
-      - name: 'console.command'
-        command: 'assetic:compile'
-        description: 'Compile the assets'
+      - name: "console.command"
+        command: "assetic:compile"
+        description: "Compile the assets"
   Cundd\Assetic\Command\WatchCommand:
     tags:
-      - name: 'console.command'
-        command: 'assetic:watch'
-        description: 'Watch and re-compile assets'
+      - name: "console.command"
+        command: "assetic:watch"
+        description: "Watch and re-compile assets"
   Cundd\Assetic\Command\LiveReloadCommand:
     tags:
-      - name: 'console.command'
-        command: 'assetic:livereload'
-        description: 'Start a LiveReload server'
+      - name: "console.command"
+        command: "assetic:livereload"
+        description: "Start a LiveReload server"

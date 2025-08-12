@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\Helper;
+namespace Cundd\Assetic\Service;
 
+use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\BackendUserUtility;
 use Exception;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Domain\ConsumableString;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility as Typo3PathUtility;
 
 use function fclose;
 
-/**
- * Helper class to generate the Live Reload code
- */
-class LiveReloadHelper
+class LiveReloadService implements LiveReloadServiceInterface
 {
     private const JAVASCRIPT_CODE_TEMPLATE = /* @lang JavaScript */
         <<<JAVASCRIPT_CODE_TEMPLATE
@@ -29,11 +29,14 @@ class LiveReloadHelper
 })();
 JAVASCRIPT_CODE_TEMPLATE;
 
-    public function __construct(private readonly ConfigurationProviderInterface $configurationProvider)
+    private readonly ConfigurationProviderInterface $configurationProvider;
+
+    public function __construct(ConfigurationProviderFactory $configurationProviderFactory)
     {
+        $this->configurationProvider = $configurationProviderFactory->build();
     }
 
-    public function getLiveReloadCodeIfEnabled(): string
+    public function loadLiveReloadCodeIfEnabled(ServerRequestInterface $request): string
     {
         if (!$this->isEnabled()) {
             return '';
@@ -44,7 +47,17 @@ JAVASCRIPT_CODE_TEMPLATE;
             $resource = $this->getJavaScriptFileUri();
             $code = sprintf(self::JAVASCRIPT_CODE_TEMPLATE, $resource, $port);
 
-            return "<script>$code</script>";
+            /** @var ConsumableString|null $nonceAttribute */
+            $nonceAttribute = $request->getAttribute('nonce');
+            if ($nonceAttribute instanceof ConsumableString) {
+                // TODO: Set the correct CSP headers
+                //       This is not easy, because the hostname and port must be known during configuration
+                $nonce = $nonceAttribute->consume();
+
+                return sprintf('<script nonce="%s">%s</script>', $nonce, $code);
+            }
+
+            return sprintf('<script>%s</script>', $code);
         }
 
         /* @var Exception $error */
@@ -91,7 +104,14 @@ JAVASCRIPT_CODE_TEMPLATE;
      */
     private function isServerRunning(?Exception &$error = null): bool
     {
-        $connection = @fsockopen('localhost', $this->getPort(), $errorNumber, $errorString, 0.1);
+        $errorNumber = null;
+        $connection = @fsockopen(
+            'localhost',
+            $this->getPort(),
+            $errorNumber,
+            $errorString,
+            0.1
+        );
 
         if (is_resource($connection)) {
             fclose($connection);

@@ -121,6 +121,22 @@ Starts a [LiveReload](http://livereload.com/) compatible server that watches for
 vendor/bin/typo3 assetic:livereload
 ```
 
+## CSP & LiveReload
+
+To use LiveReload with CSP enabled add `wss://your-domain.tld:35729/livereload` to `connect-src` in the site's CSP configuration file (`config/sites/your-site/csp.yaml`).
+
+See the [TYPO3 documentation](https://docs.typo3.org/permalink/t3coreapi:content-security-policy-site) for further details.
+
+### Example
+
+```yaml
+mutations:
+    - mode: "extend"
+      directive: "connect-src"
+      sources:
+          - "wss://your-domain.tld:35729/livereload"
+```
+
 ## Additional tools
 
 ### Standalone auto-refresh tool
