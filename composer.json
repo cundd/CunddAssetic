@@ -35,7 +35,7 @@
   "suggest": {
     "leafo/lessphp": "Allows to compile LESS with PHP",
     "leafo/scssphp": "Allows to compile SCSS 3.x with PHP",
-    "cboden/ratchet": "For livereload support (^0.4.3)"
+    "cboden/ratchet": "For livereload support (0.4.x-dev)"
   },
   "extra": {
     "typo3/cms": {
