@@ -25,7 +25,7 @@
     "assetic/framework": "^3.1.2"
   },
   "require-dev": {
-    "cboden/ratchet": "^0.4.3"
+    "cboden/ratchet": "^0.4.x-dev"
   },
   "autoload": {
     "psr-4": {
