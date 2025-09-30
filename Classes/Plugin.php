@@ -22,7 +22,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 use function count;
-use function microtime;
+use function hrtime;
 use function sprintf;
 
 /**
@@ -60,9 +60,9 @@ class Plugin
             throw new MissingConfigurationException('No assets have been defined', 4491033249);
         }
 
-        $collectAndCompileStart = microtime(true);
+        $collectAndCompileStart = hrtime(true);
         $result = $this->manager->collectAndCompile();
-        $collectAndCompileEnd = microtime(true);
+        $collectAndCompileEnd = hrtime(true);
 
         if ($result->isErr()) {
             $exception = $result->unwrapErr();
@@ -140,11 +140,14 @@ class Plugin
             return '';
         }
 
-        $collectAndCompileTime = $collectAndCompileEnd - $collectAndCompileStart;
+        $duration = sprintf(
+            '%.6fs',
+            ($collectAndCompileEnd - $collectAndCompileStart) / 1_000 / 1_000 / 1_000
+        );
         if ($this->manager->willCompile()) {
-            return sprintf('<!-- Compiled assets in %0.4fs -->', $collectAndCompileTime);
+            return sprintf('<!-- Compiled assets in %s -->', $duration);
         } else {
-            return sprintf('<!-- Use pre-compiled assets in %0.4fs -->', $collectAndCompileTime);
+            return sprintf('<!-- Use pre-compiled assets in %s -->', $duration);
         }
     }
 }
