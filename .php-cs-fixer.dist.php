@@ -21,6 +21,7 @@ return (new PhpCsFixer\Config())
             'phpdoc_annotation_without_dot'                    => true,
             'phpdoc_summary'                                   => false,
             'simplified_if_return'                             => true,
+            'single_line_throw'                                => false,
         ],
     )
 

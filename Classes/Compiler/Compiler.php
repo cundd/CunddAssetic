@@ -175,19 +175,18 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Invoke the functions of the filter
      *
-     * @param array<string,?array<non-empty-string,mixed>> $stylesheetConfiguration
+     * @param array<non-empty-string,string|string[]> $functions
      *
      * @throws UnexpectedValueException if the given stylesheet type is invalid
      */
     protected function applyFunctionsToFilterForType(
         FilterInterface $filter,
-        array $stylesheetConfiguration,
+        array $functions,
         string $stylesheetType,
     ): FilterInterface {
         if (!$stylesheetType) {
             throw new UnexpectedValueException('The given stylesheet type is invalid "' . $stylesheetType . '"', 1355910725);
         }
-        $functions = $stylesheetConfiguration['functions.'] ?? [];
         ksort($functions);
         foreach ($functions as $function => $data) {
             if (!is_array($data)) {
@@ -234,7 +233,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
             : [];
 
         // Get the type to find the according filter
-        if (isset($stylesheetConf['type'])) {
+        if (isset($stylesheetConf['type']) && is_scalar($stylesheetConf['type'])) {
             $stylesheetType = (string) $stylesheetConf['type'];
         } else {
             $stylesheetType = substr((string) strrchr($stylesheet, '.'), 1);
@@ -255,8 +254,10 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         // Check if there are filter functions
-        if ($filter && isset($stylesheetConf['functions.'])) {
-            $this->applyFunctionsToFilterForType($filter, $stylesheetConf, $stylesheetType);
+        /** @var array<non-empty-string, string|string[]> $functions */
+        $functions = $stylesheetConf['functions.'] ?? [];
+        if ($filter && !empty($functions) && is_array($functions)) {
+            $this->applyFunctionsToFilterForType($filter, $functions, $stylesheetType);
         }
 
         // Check if there are special options for this stylesheet
@@ -267,6 +268,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
         AsseticGeneralUtility::pd($currentOptions);
 
+        assert(is_array($currentOptions));
         $asset = $factory->createAsset(
             [$stylesheet],
             $assetFilters,

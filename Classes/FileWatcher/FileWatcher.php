@@ -211,7 +211,10 @@ class FileWatcher implements FileWatcherInterface
         return array_filter(
             array_map(
                 function ($pathCollection) {
-                    return $pathCollection[0];
+                    assert(is_array($pathCollection));
+                    assert(is_scalar($pathCollection[0]));
+
+                    return (string) $pathCollection[0];
                 },
                 iterator_to_array($regexIterator)
             ),

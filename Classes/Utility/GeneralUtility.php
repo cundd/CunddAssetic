@@ -86,7 +86,9 @@ final class GeneralUtility
                 $profilerStart = microtime(true);
             }
             $currentTime = microtime(true);
-            $requestTime = $_SERVER['REQUEST_TIME_FLOAT'] ?? 0;
+            $requestTime = isset($_SERVER['REQUEST_TIME_FLOAT']) && is_numeric($_SERVER['REQUEST_TIME_FLOAT'])
+                ? (float) $_SERVER['REQUEST_TIME_FLOAT']
+                : 0;
             $outputStream = defined('STDOUT')
                 ? STDOUT
                 : fopen('php://output', 'a');

@@ -63,7 +63,7 @@ class PatchExtensionPath implements BuildStepInterface
         return BuildStateResult::ok($currentState);
     }
 
-    private function getPublicResourceWebPath(mixed $extensionPath): string
+    private function getPublicResourceWebPath(string $extensionPath): string
     {
         $path = PathUtility::getPublicResourceWebPath($extensionPath);
 

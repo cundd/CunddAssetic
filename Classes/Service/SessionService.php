@@ -18,7 +18,9 @@ class SessionService implements SessionServiceInterface
 
     public function getErrorFromSession(): ?string
     {
-        return $this->getUser()->getSessionData(self::BUILD_ERROR_KEY);
+        $value = $this->getUser()->getSessionData(self::BUILD_ERROR_KEY);
+
+        return is_scalar($value) ? (string) $value : null;
     }
 
     public function clearErrorInSession(): void
@@ -30,6 +32,12 @@ class SessionService implements SessionServiceInterface
     {
         if (!isset($GLOBALS['BE_USER'])) {
             throw new UnexpectedValueException('No valid backend user found', 5945346701);
+        }
+        if (!$GLOBALS['BE_USER'] instanceof AbstractUserAuthentication) {
+            throw new UnexpectedValueException(
+                'Backend user must be an instance of ' . AbstractUserAuthentication::class,
+                5945346702
+            );
         }
 
         return $GLOBALS['BE_USER'];

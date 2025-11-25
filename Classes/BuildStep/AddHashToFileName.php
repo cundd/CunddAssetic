@@ -36,7 +36,8 @@ class AddHashToFileName implements BuildStepInterface
         // Create the file hash and store it in the cache
         AsseticGeneralUtility::profile('Will create file hash');
 
-        $finalFileNameResult = $this->outputFileHashService->buildAndStoreFileHash($outputFilenameWithoutHash);
+        $finalFileNameResult = $this->outputFileHashService
+            ->buildAndStoreFileHash($outputFilenameWithoutHash);
         if ($finalFileNameResult->isErr()) {
             $finalFileNameErr = $finalFileNameResult->unwrapErr();
 

@@ -8,6 +8,7 @@ use Assetic\Contracts\Filter\FilterInterface;
 use Assetic\Filter\BaseProcessFilter;
 use ReflectionException;
 use ReflectionProperty;
+use Stringable;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 use function get_class;
@@ -43,7 +44,14 @@ class FilterDescribeViewHelper extends AbstractViewHelper
         }
         $reflectionProperty->setAccessible(true);
         $value = $reflectionProperty->getValue($filter);
+        if (!$value) {
+            return null;
+        }
 
-        return $value ? (string) $value : null;
+        if (!is_string($value) && !$value instanceof Stringable) {
+            return null;
+        }
+
+        return (string) $value;
     }
 }

@@ -80,7 +80,13 @@ class OutputFileHashService
     public function getPreviousHash(PathWoHash $currentOutputFilenameWithoutHash): string
     {
         if (isset($this->wasWritten[$currentOutputFilenameWithoutHash->getAbsoluteUri()])) {
-            throw new LogicException(sprintf('Data for the given output file was already updated. File path "%s"', $currentOutputFilenameWithoutHash->getAbsoluteUri()), 9314654528);
+            throw new LogicException(
+                sprintf(
+                    'Data for the given output file was already updated. File path "%s"',
+                    $currentOutputFilenameWithoutHash->getAbsoluteUri()
+                ),
+                9314654528
+            );
         }
         $suffix = '.css';
         $publicUri = $currentOutputFilenameWithoutHash->getPublicUri();
@@ -110,7 +116,9 @@ class OutputFileHashService
     private function getCachedPreviousHash(PathWoHash $currentOutputFilenameWithoutHash): string
     {
         if (!isset($this->previousHashFromCache)) {
-            $this->previousHashFromCache = (string) $this->cacheManager->getCache($currentOutputFilenameWithoutHash);
+            $cachedValue = $this->cacheManager->getCache($currentOutputFilenameWithoutHash);
+            assert(is_string($cachedValue));
+            $this->previousHashFromCache = $cachedValue;
         }
 
         return $this->previousHashFromCache;
