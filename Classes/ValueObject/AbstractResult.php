@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\ValueObject;
 
-use Throwable;
-
 /**
  * @template T
- * @template E of Throwable
+ * @template E
  */
 abstract class AbstractResult
 {
     /**
      * @var T|E
      */
-    protected $inner;
+    protected readonly mixed $inner;
 
     /**
      * @param T|E $inner
@@ -50,7 +48,7 @@ abstract class AbstractResult
     /**
      * @return E
      */
-    abstract public function unwrapErr(): Throwable;
+    abstract public function unwrapErr(): mixed;
 
     /**
      * Invoke `$ok()` if this instance is `Ok`. Invoke `$err()` if this instance is `Err`

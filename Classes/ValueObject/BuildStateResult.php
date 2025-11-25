@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\ValueObject;
 
-use Cundd\Assetic\ValueObject\BuildStateResult\Err;
-use Cundd\Assetic\ValueObject\BuildStateResult\Ok;
+use Cundd\Assetic\ValueObject\BuildStateResult\BuildErr;
+use Cundd\Assetic\ValueObject\BuildStateResult\BuildOk;
 use Throwable;
 
 /**
@@ -15,9 +15,9 @@ use Throwable;
  */
 abstract class BuildStateResult extends AbstractResult
 {
-    public static function ok(BuildState $inner): Ok
+    public static function ok(BuildState $inner): BuildOk
     {
-        return new Ok($inner);
+        return new BuildOk($inner);
     }
 
     /**
@@ -25,10 +25,10 @@ abstract class BuildStateResult extends AbstractResult
      *
      * @param R $inner
      *
-     * @return BuildStateResult<R>
+     * @return BuildErr<R>
      */
-    public static function err(Throwable $inner): BuildStateResult
+    public static function err(Throwable $inner): BuildErr
     {
-        return new Err($inner);
+        return new BuildErr($inner);
     }
 }

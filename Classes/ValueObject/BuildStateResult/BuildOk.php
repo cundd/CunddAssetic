@@ -6,24 +6,26 @@ namespace Cundd\Assetic\ValueObject\BuildStateResult;
 
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
+use Override;
 use RuntimeException;
-use Throwable;
 
 /**
  * @extends BuildStateResult<never>
  */
-class Ok extends BuildStateResult
+class BuildOk extends BuildStateResult
 {
     public function __construct(BuildState $buildState)
     {
         parent::__construct($buildState);
     }
 
+    #[Override]
     public function isOk(): bool
     {
         return true;
     }
 
+    #[Override]
     public function unwrap(): BuildState
     {
         assert($this->isOk());
@@ -31,7 +33,8 @@ class Ok extends BuildStateResult
         return $this->inner;
     }
 
-    public function unwrapErr(): Throwable
+    #[Override]
+    public function unwrapErr(): never
     {
         throw new RuntimeException('Tried to unwrap an error in Ok', 6811690505);
     }

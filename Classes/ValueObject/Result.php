@@ -10,7 +10,7 @@ use Throwable;
 
 /**
  * @template T
- * @template E of Throwable
+ * @template E
  *
  * @extends AbstractResult<T,E>
  */
@@ -23,7 +23,7 @@ abstract class Result extends AbstractResult
      *
      * @return Ok<R>
      */
-    public static function ok(mixed $inner): Result
+    public static function ok(mixed $inner): Ok
     {
         return new Ok($inner);
     }
@@ -35,7 +35,7 @@ abstract class Result extends AbstractResult
      *
      * @return Err<TE>
      */
-    public static function err(Throwable $inner): Result
+    public static function err(Throwable $inner): Err
     {
         return new Err($inner);
     }

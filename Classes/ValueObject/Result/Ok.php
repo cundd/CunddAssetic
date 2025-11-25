@@ -5,32 +5,34 @@ declare(strict_types=1);
 namespace Cundd\Assetic\ValueObject\Result;
 
 use Cundd\Assetic\ValueObject\Result;
+use Override;
 use RuntimeException;
-use Throwable;
 
 /**
- * @template T
+ * @template U
  *
- * @extends Result<T,never>
+ * @extends Result<U,never>
  */
 class Ok extends Result
 {
     /**
-     * @param T $value
+     * @param U $value
      */
     public function __construct(mixed $value)
     {
         parent::__construct($value);
     }
 
+    #[Override]
     public function isOk(): bool
     {
         return true;
     }
 
     /**
-     * @return T
+     * @return U
      */
+    #[Override]
     public function unwrap(): mixed
     {
         assert($this->isOk());
@@ -38,7 +40,8 @@ class Ok extends Result
         return $this->inner;
     }
 
-    public function unwrapErr(): Throwable
+    #[Override]
+    public function unwrapErr(): never
     {
         throw new RuntimeException('Tried to unwrap an error in Ok', 9462380717);
     }
