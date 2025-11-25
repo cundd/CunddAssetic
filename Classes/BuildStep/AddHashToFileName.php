@@ -6,8 +6,8 @@ namespace Cundd\Assetic\BuildStep;
 
 use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Service\OutputFileHashService;
-use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\Utility\PathUtility;
+use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
 
@@ -34,7 +34,7 @@ class AddHashToFileName implements BuildStepInterface
         $outputFilenameWithoutHash = $currentState->getOutputFilePathWithoutHash();
 
         // Create the file hash and store it in the cache
-        AsseticGeneralUtility::profile('Will create file hash');
+        ProfilingUtility::profile('Will create file hash');
 
         $finalFileNameResult = $this->outputFileHashService
             ->buildAndStoreFileHash($outputFilenameWithoutHash);
@@ -53,7 +53,7 @@ class AddHashToFileName implements BuildStepInterface
         $outputFileFinalPath = $finalFileName->getAbsoluteUri();
 
         // Move the temp file to the new file
-        AsseticGeneralUtility::profile('Will move compiled asset');
+        ProfilingUtility::profile('Will move compiled asset');
 
         clearstatcache(true, $outputFileFinalPath);
         if (is_link($outputFileFinalPath) && !unlink($outputFileFinalPath)) {
@@ -80,7 +80,7 @@ class AddHashToFileName implements BuildStepInterface
                 )
             );
         }
-        AsseticGeneralUtility::profile('Did move compiled asset');
+        ProfilingUtility::profile('Did move compiled asset');
 
         return BuildStateResult::ok($currentState->withFilePath($finalFileName));
     }

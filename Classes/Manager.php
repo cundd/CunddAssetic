@@ -16,7 +16,7 @@ use Cundd\Assetic\Service\OutputFileHashService;
 use Cundd\Assetic\Service\OutputFileServiceInterface;
 use Cundd\Assetic\Service\SymlinkServiceInterface;
 use Cundd\Assetic\Utility\BackendUserUtility;
-use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\PathWithoutHash;
@@ -126,7 +126,7 @@ class Manager implements ManagerInterface
     {
         $assetCollection = $this->getCompiler()->collectAssets();
 
-        AsseticGeneralUtility::profile(
+        ProfilingUtility::profile(
             'Set output file ' . $this->getPathWithoutHash()->getFileName()
         );
         $assetCollection->setTargetPath($this->getPathWithoutHash()->getFileName());
@@ -156,11 +156,6 @@ class Manager implements ManagerInterface
         }
 
         $isUserLoggedIn = BackendUserUtility::isUserLoggedIn();
-
-        AsseticGeneralUtility::say(
-            'Backend user detected: ' . ($isUserLoggedIn ? 'yes' : 'no')
-        );
-        AsseticGeneralUtility::say('Development mode: off');
         if (!$isUserLoggedIn) {
             // If no backend user is logged in, check if compiling is still allowed
             return $this->configurationProvider->getAllowCompileWithoutLogin();

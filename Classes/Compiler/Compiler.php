@@ -13,8 +13,8 @@ use Assetic\Factory\AssetFactory;
 use Assetic\FilterManager;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Exception\FilePathException;
-use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\Utility\PathUtility;
+use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 use Psr\Log\LoggerAwareInterface;
@@ -62,7 +62,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      */
     public function collectAssets(): AssetCollection
     {
-        AsseticGeneralUtility::profile('Will collect assets');
+        ProfilingUtility::profile('Will collect assets');
         $pathToWeb = $this->configurationProvider->getPublicPath();
 
         // Check if the Assetic classes are available
@@ -87,7 +87,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
         // Set the output file name
         $this->assetManager->set('cundd_assetic', $assetCollection);
-        AsseticGeneralUtility::profile('Did collect assets');
+        ProfilingUtility::profile('Did collect assets');
 
         return $assetCollection;
     }
@@ -99,14 +99,14 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
         $writer = new AssetWriter($outputDirectory);
 
-        AsseticGeneralUtility::profile('Will compile asset');
+        ProfilingUtility::profile('Will compile asset');
         try {
             $writer->writeManagerAssets($this->assetManager);
         } catch (Throwable $exception) {
             return new Result\Err($exception);
         }
 
-        AsseticGeneralUtility::profile('Did compile asset');
+        ProfilingUtility::profile('Did compile asset');
 
         return new Result\Ok(null);
     }
@@ -199,20 +199,26 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
                 $function = $matches[1];
             }
 
-            AsseticGeneralUtility::pd("Call function $function on filter", $filter, $data);
+            $this->logger?->debug(
+                "Call function `$function` on filter",
+                ['filter' => $filter, 'data' => $data]
+            );
             if (is_callable([$filter, $function])) {
                 // `call_user_func_array` does remove the `strict_types` check
                 // Invoking `$filter->$function(...$data)` instead would require
                 // the function parameters to be prepared beforehand
                 call_user_func_array($filter->$function(...), array_values($data));
             } elseif ($this->configurationProvider->getStrictModeEnabled()) {
-                throw new FilterException(sprintf('Filter "%s" does not implement method "%s"', get_class($filter), $function), 1447161985);
+                throw new FilterException(sprintf(
+                    'Filter "%s" does not implement method "%s"',
+                    get_class($filter),
+                    $function
+                ), 1447161985);
             } else {
                 trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
             }
         }
 
-        AsseticGeneralUtility::pd($filter);
         $this->filterManager->set($stylesheetType, $filter);
 
         return $filter;
@@ -242,7 +248,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         $originalStylesheet = $stylesheet;
         $stylesheet = PathUtility::getAbsolutePath($stylesheet);
         if (!$stylesheet) {
-            throw new FilePathException(sprintf('Could not determine absolute path for asset file "%s"', $originalStylesheet), 8511589451);
+            throw new FilePathException(
+                sprintf(
+                    'Could not determine absolute path for asset file "%s"',
+                    $originalStylesheet
+                ),
+                8511589451
+            );
         }
 
         // Make sure the filter manager knows the filter
@@ -266,7 +278,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         } else {
             $currentOptions = $this->pluginLevelOptions;
         }
-        AsseticGeneralUtility::pd($currentOptions);
+        $this->logger?->debug('Use stylesheet configuration options', ['options' => $currentOptions]);
 
         assert(is_array($currentOptions));
         $asset = $factory->createAsset(

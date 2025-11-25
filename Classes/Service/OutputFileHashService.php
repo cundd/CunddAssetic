@@ -6,7 +6,7 @@ namespace Cundd\Assetic\Service;
 
 use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
-use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\FinalOutputFilePath;
 use Cundd\Assetic\ValueObject\PathWithoutHash;
 use Cundd\Assetic\ValueObject\Result;
@@ -59,7 +59,7 @@ class OutputFileHashService
             return Result::err(new UnexpectedValueException('Could not create hash of compiled destination path'));
         }
 
-        AsseticGeneralUtility::profile('Did create file hash');
+        ProfilingUtility::profile('Did create file hash');
         $this->storeHash($outputFilenameWithoutHash, $fileHash);
 
         $finalFileName = $outputFilenameWithoutHash->getFileName() . '_' . $fileHash . '.css';

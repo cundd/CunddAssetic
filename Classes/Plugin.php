@@ -12,7 +12,7 @@ use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Service\LiveReloadServiceInterface;
 use Cundd\Assetic\Utility\BackendUserUtility;
 use Cundd\Assetic\Utility\ExceptionPrinter;
-use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
+use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\FilePath;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -54,7 +54,7 @@ class Plugin
      */
     public function main(string $content, array $conf, ServerRequestInterface $request): string
     {
-        AsseticGeneralUtility::profile('Cundd Assetic plugin begin');
+        ProfilingUtility::profile('Cundd Assetic plugin begin');
 
         if (0 === count($this->manager->collectAssets()->all())) {
             throw new MissingConfigurationException('No assets have been defined', 4491033249);
@@ -80,7 +80,7 @@ class Plugin
             $publicUri
         );
 
-        AsseticGeneralUtility::profile('Cundd Assetic plugin end');
+        ProfilingUtility::profile('Cundd Assetic plugin end');
 
         return $content;
     }
