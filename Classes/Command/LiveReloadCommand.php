@@ -6,6 +6,7 @@ namespace Cundd\Assetic\Command;
 
 use Cundd\Assetic\FileWatcher\FileCategories;
 use Cundd\Assetic\Server\LiveReload;
+use Cundd\Assetic\Utility\PathUtility;
 use InvalidArgumentException;
 use LogicException;
 use Ratchet\Http\HttpServer;
@@ -181,14 +182,14 @@ class LiveReloadCommand extends AbstractWatchCommand
         bool $optional,
     ): string {
         $path = $input->getOption($optionName);
-        if (!$path) {
+        if (!is_string($path) || '' === $path) {
             if ($optional) {
                 return '';
             }
             throw new InvalidArgumentException(sprintf('Option "%s" is not given', $optionName), 7653682383);
         }
 
-        $homeDirectory = $this->getHomeDirectory();
+        $homeDirectory = PathUtility::getHomeDirectory();
         if ('~/' === substr($path, 0, 2) && $homeDirectory) {
             $path = rtrim($homeDirectory, '/') . '/' . substr($path, 2);
         }
@@ -204,14 +205,9 @@ class LiveReloadCommand extends AbstractWatchCommand
         }
     }
 
-    private function getHomeDirectory(): string
-    {
-        return $_SERVER['HOME'] ?? '';
-    }
-
     private function buildServerFromInput(InputInterface $input, OutputInterface $output): IoServer
     {
-        $address = $input->getOption(self::OPTION_ADDRESS);
+        $address = (string) $input->getOption(self::OPTION_ADDRESS);
         $port = (int) $input->getOption(self::OPTION_PORT);
         $notificationDelay = (float) $input->getOption(self::OPTION_NOTIFICATION_DELAY);
         $interval = $this->getInterval($input, 0.5);

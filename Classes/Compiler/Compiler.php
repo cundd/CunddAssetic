@@ -306,25 +306,12 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
         $filterBinaryPath = $filterBinaries[$filterClassIdentifier];
         if ('~' === $filterBinaryPath[0]) {
-            $homeDirectory = $this->getHomeDirectory();
+            $homeDirectory = PathUtility::getHomeDirectory();
             $filterBinaryPath = $homeDirectory . substr($filterBinaryPath, 1);
         } elseif ('EXT:' === substr($filterBinaryPath, 0, 4)) {
             $filterBinaryPath = PathUtility::getAbsolutePath($filterBinaryPath);
         }
 
         return $filterBinaryPath;
-    }
-
-    private function getHomeDirectory(): string
-    {
-        $homeDirectory = getenv('HOME');
-        if ($homeDirectory) {
-            return (string) $homeDirectory;
-        }
-        if (isset($_SERVER['HOME'])) {
-            return (string) $_SERVER['HOME'];
-        }
-
-        return isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . '/..' : '';
     }
 }

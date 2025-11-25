@@ -21,7 +21,9 @@ class PathUtility
     public static function getAbsolutePath(string $path): string
     {
         if ('~' === $path[0]) {
-            return ($_SERVER['HOME'] ?? '') . substr($path, 1);
+            $homePath = self::getHomeDirectory();
+
+            return $homePath . substr($path, 1);
         }
 
         if ('EXT:' === substr($path, 0, 4)) {
@@ -53,5 +55,29 @@ class PathUtility
         }
 
         return $reason;
+    }
+
+    public static function getHomeDirectory(): string
+    {
+        $homeDirectory = getenv('HOME');
+        if ($homeDirectory) {
+            return (string) $homeDirectory;
+        }
+
+        $homeDirectory = $_SERVER['HOME'] ?? '';
+        if ($homeDirectory) {
+            assert(is_string($homeDirectory));
+
+            return $homeDirectory;
+        }
+
+        $homeDirectory = $_SERVER['DOCUMENT_ROOT'] ?? '';
+        if ($homeDirectory) {
+            assert(is_string($homeDirectory));
+
+            return $homeDirectory . '/..';
+        }
+
+        return '';
     }
 }
