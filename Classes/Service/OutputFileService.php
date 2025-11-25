@@ -8,7 +8,7 @@ use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\ValueObject\FilePath;
-use Cundd\Assetic\ValueObject\PathWoHash;
+use Cundd\Assetic\ValueObject\PathWithoutHash;
 
 use function basename;
 use function implode;
@@ -25,18 +25,12 @@ class OutputFileService implements OutputFileServiceInterface
         $this->configurationProvider = $configurationProviderFactory->build();
     }
 
-    /**
-     * Return the current output filename without the hash
-     *
-     * If an output file name is set in the configuration use it, otherwise create it by combining the file names of the
-     * assets.
-     */
-    public function getPathWoHash(): PathWoHash
+    public function getPathWithoutHash(): PathWithoutHash
     {
         // Get the output name from the configuration
         $absoluteDirectoryPath = $this->configurationProvider->getAbsoluteOutputFileDir();
         if ($this->configurationProvider->getOutputFileName()) {
-            return new PathWoHash(
+            return new PathWithoutHash(
                 ConfigurationUtility::getDomainIdentifier() . $this->configurationProvider->getOutputFileName(),
                 $this->configurationProvider->getOutputFileDir(),
                 $absoluteDirectoryPath
@@ -48,8 +42,8 @@ class OutputFileService implements OutputFileServiceInterface
         // Loop through all configured stylesheets
         $stylesheets = $this->configurationProvider->getStylesheetConfigurations();
         foreach ($stylesheets as $assetKey => $stylesheet) {
-            // If the current value of $stylesheet is an array it's the detailed configuration of a stylesheet, not
-            // the stylesheet path itself
+            // If the current value of $stylesheet is an array it's the detailed
+            // configuration of a stylesheet, not the stylesheet path itself
             if (!is_array($stylesheet)) {
                 $stylesheetFileName = basename($stylesheet);
                 $stylesheetFileName = preg_replace('![^0-9a-zA-Z-_]!', '', $stylesheetFileName);
@@ -57,14 +51,14 @@ class OutputFileService implements OutputFileServiceInterface
             }
         }
 
-        return new PathWoHash(
+        return new PathWithoutHash(
             ConfigurationUtility::getDomainIdentifier() . implode('_', $outputFileNameParts),
             $this->configurationProvider->getOutputFileDir(),
             $absoluteDirectoryPath
         );
     }
 
-    public function getExpectedPathWithHash(PathWoHash $outputFilenameWithoutHash): ?FilePath
+    public function getExpectedPathWithHash(PathWithoutHash $outputFilenameWithoutHash): ?FilePath
     {
         $previousHash = $this->outputFileHashService->getPreviousHash($outputFilenameWithoutHash);
 

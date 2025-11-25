@@ -11,7 +11,7 @@ final class BuildState
      */
     public function __construct(
         private readonly FilePath $filePath,
-        private readonly PathWoHash $outputFilePathWithoutHash,
+        private readonly PathWithoutHash $outputFilePathWithoutHash,
         private readonly array $filesToCleanUp,
     ) {
     }
@@ -30,7 +30,7 @@ final class BuildState
         );
     }
 
-    public function getOutputFilePathWithoutHash(): PathWoHash
+    public function getOutputFilePathWithoutHash(): PathWithoutHash
     {
         return $this->outputFilePathWithoutHash;
     }

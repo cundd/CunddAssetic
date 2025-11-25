@@ -19,7 +19,7 @@ use Cundd\Assetic\Utility\BackendUserUtility;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\FilePath;
-use Cundd\Assetic\ValueObject\PathWoHash;
+use Cundd\Assetic\ValueObject\PathWithoutHash;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 use Throwable;
@@ -36,7 +36,7 @@ class Manager implements ManagerInterface
      */
     private bool $forceCompilation = false;
 
-    private CompilerInterface $compiler;
+    private readonly CompilerInterface $compiler;
 
     private readonly ConfigurationProviderInterface $configurationProvider;
 
@@ -60,9 +60,9 @@ class Manager implements ManagerInterface
             return $this->collectAssetsAndCompile();
         }
 
-        $pathWOHash = $this->getPathWOHash();
+        $pathWithoutHash = $this->getPathWithoutHash();
         $expectedPath = $this->outputFileService
-            ->getExpectedPathWithHash($pathWOHash);
+            ->getExpectedPathWithHash($pathWithoutHash);
         if ($expectedPath && file_exists($expectedPath->getAbsoluteUri())) {
             return Result::ok($expectedPath);
         }
@@ -70,7 +70,7 @@ class Manager implements ManagerInterface
         // If expected output file does not exist clear the internal cache,
         // set `willCompile` to TRUE and call the main routine again
         $this->forceCompile();
-        $this->cacheManager->clearHashCache($pathWOHash);
+        $this->cacheManager->clearHashCache($pathWithoutHash);
 
         return $this->collectAssetsAndCompile();
     }
@@ -82,7 +82,7 @@ class Manager implements ManagerInterface
     {
         $this->collectAssetsAndSetTarget();
 
-        $outputFilePathWithoutHash = $this->outputFileService->getPathWoHash();
+        $outputFilePathWithoutHash = $this->outputFileService->getPathWithoutHash();
         $currentState = new BuildState(
             $outputFilePathWithoutHash,
             $outputFilePathWithoutHash,
@@ -127,9 +127,9 @@ class Manager implements ManagerInterface
         $assetCollection = $this->getCompiler()->collectAssets();
 
         AsseticGeneralUtility::profile(
-            'Set output file ' . $this->getPathWOHash()->getFileName()
+            'Set output file ' . $this->getPathWithoutHash()->getFileName()
         );
-        $assetCollection->setTargetPath($this->getPathWOHash()->getFileName());
+        $assetCollection->setTargetPath($this->getPathWithoutHash()->getFileName());
 
         return $assetCollection;
     }
@@ -169,9 +169,9 @@ class Manager implements ManagerInterface
         }
     }
 
-    public function getPathWOHash(): PathWoHash
+    private function getPathWithoutHash(): PathWithoutHash
     {
-        return $this->outputFileService->getPathWoHash();
+        return $this->outputFileService->getPathWithoutHash();
     }
 
     /**
@@ -180,7 +180,7 @@ class Manager implements ManagerInterface
     public function getSymlinkUri(): string
     {
         return $this->symlinkService
-            ->getSymlinkPath($this->getPathWOHash())
+            ->getSymlinkPath($this->getPathWithoutHash())
             ->getPublicUri();
     }
 

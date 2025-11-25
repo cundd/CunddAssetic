@@ -8,7 +8,7 @@ use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
 use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Utility\GeneralUtility as AsseticGeneralUtility;
 use Cundd\Assetic\ValueObject\FinalOutputFilePath;
-use Cundd\Assetic\ValueObject\PathWoHash;
+use Cundd\Assetic\ValueObject\PathWithoutHash;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
 use UnexpectedValueException;
@@ -44,7 +44,7 @@ class OutputFileHashService
      * @return Result<FinalOutputFilePath,UnexpectedValueException>
      */
     public function buildAndStoreFileHash(
-        PathWoHash $outputFilenameWithoutHash,
+        PathWithoutHash $outputFilenameWithoutHash,
         string $hashAlgorithm = 'md5',
     ): Result {
         // $hashAlgorithm = 'crc32';
@@ -77,7 +77,7 @@ class OutputFileHashService
      *
      * @throws LogicException if the hash for the given output file was already updated by this instance
      */
-    public function getPreviousHash(PathWoHash $currentOutputFilenameWithoutHash): string
+    public function getPreviousHash(PathWithoutHash $currentOutputFilenameWithoutHash): string
     {
         if (isset($this->wasWritten[$currentOutputFilenameWithoutHash->getAbsoluteUri()])) {
             throw new LogicException(
@@ -107,13 +107,13 @@ class OutputFileHashService
         return substr($lastMatchingFile, strlen($publicUri) + 1, (-1 * strlen($suffix)));
     }
 
-    public function storeHash(PathWoHash $outputFilenameWithoutHash, string $fileHash): void
+    public function storeHash(PathWithoutHash $outputFilenameWithoutHash, string $fileHash): void
     {
         $this->wasWritten[$outputFilenameWithoutHash->getAbsoluteUri()] = true;
         $this->cacheManager->setCache($outputFilenameWithoutHash, $fileHash);
     }
 
-    private function getCachedPreviousHash(PathWoHash $currentOutputFilenameWithoutHash): string
+    private function getCachedPreviousHash(PathWithoutHash $currentOutputFilenameWithoutHash): string
     {
         if (!isset($this->previousHashFromCache)) {
             $cachedValue = $this->cacheManager->getCache($currentOutputFilenameWithoutHash);

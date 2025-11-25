@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Service;
 
 use Cundd\Assetic\Utility\ConfigurationUtility;
-use Cundd\Assetic\ValueObject\PathWoHash;
+use Cundd\Assetic\ValueObject\PathWithoutHash;
 use TYPO3\CMS\Core\Cache\CacheManager as TYPO3CacheManager;
 use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
@@ -20,12 +20,7 @@ class CacheManager implements CacheManagerInterface
      */
     private const CACHE_IDENTIFIER_HASH = 'cundd_assetic_cache_identifier_hash';
 
-    /**
-     * Return the value for the given identifier in the cache
-     *
-     * @param PathWoHash $identifier Identifier key
-     */
-    public function getCache(PathWoHash $identifier): mixed
+    public function getCache(PathWithoutHash $identifier): mixed
     {
         $identifier = $this->prepareIdentifier($identifier);
         $cacheInstance = $this->getCacheInstance();
@@ -33,13 +28,7 @@ class CacheManager implements CacheManagerInterface
         return $cacheInstance ? $cacheInstance->get($identifier) : null;
     }
 
-    /**
-     * Stores the value for the given identifier in the cache
-     *
-     * @param PathWoHash $identifier Identifier key
-     * @param mixed      $value      Value to store
-     */
-    public function setCache(PathWoHash $identifier, $value): void
+    public function setCache(PathWithoutHash $identifier, $value): void
     {
         $identifier = $this->prepareIdentifier($identifier);
         $cacheInstance = $this->getCacheInstance();
@@ -51,24 +40,23 @@ class CacheManager implements CacheManagerInterface
         }
     }
 
-    /**
-     * Remove the cached hash
-     */
-    public function clearHashCache(PathWoHash $currentOutputFilenameWithoutHash): void
-    {
+    public function clearHashCache(
+        PathWithoutHash $currentOutputFilenameWithoutHash,
+    ): void {
         $this->setCache($currentOutputFilenameWithoutHash, '');
     }
 
     private function getCacheInstance(): ?FrontendInterface
     {
         try {
-            return GeneralUtility::makeInstance(TYPO3CacheManager::class)->getCache('assetic_cache');
+            return GeneralUtility::makeInstance(TYPO3CacheManager::class)
+                ->getCache('assetic_cache');
         } catch (NoSuchCacheException $e) {
             return null;
         }
     }
 
-    private function prepareIdentifier(PathWoHash $identifier): string
+    private function prepareIdentifier(PathWithoutHash $identifier): string
     {
         return sha1(
             ConfigurationUtility::getDomainIdentifier()
