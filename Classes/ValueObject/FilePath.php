@@ -19,20 +19,20 @@ class FilePath
 
     private string $absoluteDirectoryPath;
 
-    final public function __construct(string $fileName, string $relativeDirectoryPath, string $absoluteDirectoryPath)
-    {
+    final public function __construct(
+        string $fileName,
+        string $relativeDirectoryPath,
+        string $absoluteDirectoryPath,
+    ) {
         $this->fileName = $fileName;
         $this->relativeDirectoryPath = rtrim($relativeDirectoryPath, DIRECTORY_SEPARATOR);
         $this->absoluteDirectoryPath = rtrim($absoluteDirectoryPath, DIRECTORY_SEPARATOR);
     }
 
-    /**
-     * @return static
-     */
     public static function fromFileName(
         string $fileName,
         ConfigurationProviderInterface $configurationProvider,
-    ): self {
+    ): static {
         return new static(
             ConfigurationUtility::getDomainIdentifier() . $fileName,
             $configurationProvider->getOutputFileDir(),
