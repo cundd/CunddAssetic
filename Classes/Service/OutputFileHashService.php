@@ -117,8 +117,8 @@ class OutputFileHashService
     {
         if (!isset($this->previousHashFromCache)) {
             $cachedValue = $this->cacheManager->getCache($currentOutputFilenameWithoutHash);
-            assert(is_string($cachedValue));
-            $this->previousHashFromCache = $cachedValue;
+            assert(is_scalar($cachedValue) || is_null($cachedValue));
+            $this->previousHashFromCache = (string) $cachedValue;
         }
 
         return $this->previousHashFromCache;
