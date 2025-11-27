@@ -46,7 +46,16 @@ class OutputFileService implements OutputFileServiceInterface
             // configuration of a stylesheet, not the stylesheet path itself
             if (!is_array($stylesheet)) {
                 $stylesheetFileName = basename($stylesheet);
-                $stylesheetFileName = preg_replace('![^0-9a-zA-Z-_]!', '', $stylesheetFileName);
+                $stylesheetFileName = str_replace(
+                    ['.css', '.scss', '.sass', '.less'],
+                    '',
+                    $stylesheetFileName
+                );
+                $stylesheetFileName = preg_replace(
+                    '![^0-9a-zA-Z-_]!',
+                    '',
+                    $stylesheetFileName
+                );
                 $outputFileNameParts[] = $stylesheetFileName;
             }
         }
