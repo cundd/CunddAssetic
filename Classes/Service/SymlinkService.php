@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Service;
 
-use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
-use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
+use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Exception\SymlinkException;
 use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\ValueObject\FilePath;
@@ -28,24 +27,21 @@ class SymlinkService implements SymlinkServiceInterface
      */
     private bool $isOwnerOfSymlink = false;
 
-    private ConfigurationProviderInterface $configurationProvider;
-
-    public function __construct(ConfigurationProviderFactory $configurationProviderFactory)
-    {
-        $this->configurationProvider = $configurationProviderFactory->build();
-    }
-
     /**
      * Create the symlink to the given final path
      */
     public function createSymlinkToFinalPath(
+        Configuration $configuration,
         FilePath $fileFinalPath,
         PathWithoutHash $outputFilePathWithoutHash,
     ): ?FilePath {
-        if (!$this->configurationProvider->getCreateSymlink()) {
+        if (!$configuration->createSymlink) {
             return null;
         }
-        $symlinkPath = $this->getSymlinkPath($outputFilePathWithoutHash);
+        $symlinkPath = $this->getSymlinkPath(
+            $configuration,
+            $outputFilePathWithoutHash
+        );
         $symlinkPathString = $symlinkPath->getAbsoluteUri();
         if ($fileFinalPath->getAbsoluteUri() !== $symlinkPathString) {
             clearstatcache(true, $symlinkPathString);
@@ -78,13 +74,17 @@ class SymlinkService implements SymlinkServiceInterface
      * Remove the symlink
      */
     public function removeSymlink(
+        Configuration $configuration,
         PathWithoutHash $outputFilePathWithoutHash,
     ): void {
-        if (!$this->configurationProvider->getCreateSymlink()) {
+        if (!$configuration->createSymlink) {
             return;
         }
         // Unlink the symlink
-        $symlinkPath = $this->getSymlinkPath($outputFilePathWithoutHash)
+        $symlinkPath = $this->getSymlinkPath(
+            $configuration,
+            $outputFilePathWithoutHash
+        )
             ->getAbsoluteUri();
         if (is_link($symlinkPath)) {
             if (@unlink($symlinkPath)) {
@@ -116,12 +116,13 @@ class SymlinkService implements SymlinkServiceInterface
      * Return the symlink URI
      */
     public function getSymlinkPath(
+        Configuration $configuration,
         PathWithoutHash $outputFilePathWithoutHash,
     ): FilePath {
         $fileName = '_debug_'
             . $outputFilePathWithoutHash->getFileName()
             . '.css';
 
-        return FilePath::fromFileName($fileName, $this->configurationProvider);
+        return FilePath::fromFileName($fileName, $configuration);
     }
 }

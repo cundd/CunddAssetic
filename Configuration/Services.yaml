@@ -6,7 +6,7 @@ services:
 
   Cundd\Assetic\:
     resource: "../Classes/*"
-    exclude: "../Classes/{Exception,Configuration/ConfigurationProvider.php}"
+    exclude: "../Classes/Exception"
 
   Cundd\Assetic\Manager:
     public: true

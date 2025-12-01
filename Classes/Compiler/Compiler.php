@@ -11,7 +11,7 @@ use Assetic\Contracts\Filter\FilterInterface;
 use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
 use Assetic\FilterManager;
-use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
+use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\Utility\ProfilingUtility;
@@ -20,6 +20,7 @@ use LogicException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Throwable;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use UnexpectedValueException;
 
@@ -45,13 +46,8 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      */
     protected FilterManager $filterManager;
 
-    /**
-     * @param array<string,mixed> $pluginLevelOptions
-     */
-    public function __construct(
-        private readonly ConfigurationProviderInterface $configurationProvider,
-        protected array $pluginLevelOptions,
-    ) {
+    public function __construct()
+    {
         $this->assetManager = new AssetManager();
     }
 
@@ -60,28 +56,36 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      *
      * @throws LogicException if the Assetic classes could not be found
      */
-    public function collectAssets(): AssetCollection
+    public function collectAssets(Configuration $configuration): AssetCollection
     {
         ProfilingUtility::profile('Will collect assets');
-        $pathToWeb = $this->configurationProvider->getPublicPath();
 
         // Check if the Assetic classes are available
         if (!class_exists(AssetCollection::class, true)) {
-            throw new LogicException('The Assetic classes could not be found', 1356543545);
+            throw new LogicException(
+                'The Assetic classes could not be found',
+                1356543545
+            );
         }
 
         $assetCollection = new AssetCollection();
-        $factory = new AssetFactory($pathToWeb);
+        $factory = new AssetFactory(Environment::getPublicPath() . '/');
         $this->filterManager = new FilterManager();
 
         // Register the filter manager
         $factory->setFilterManager($this->filterManager);
 
         // Loop through all configured stylesheets
-        $stylesheets = $this->configurationProvider->getStylesheetConfigurations();
+        $stylesheets = $configuration->stylesheetConfigurations;
         foreach ($stylesheets as $assetKey => $stylesheet) {
             if (!is_array($stylesheet)) {
-                $this->createAsset($assetKey, $stylesheet, $assetCollection, $factory);
+                $this->createAsset(
+                    $configuration,
+                    $assetKey,
+                    $stylesheet,
+                    $assetCollection,
+                    $factory
+                );
             }
         }
 
@@ -92,9 +96,10 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         return $assetCollection;
     }
 
-    public function compile(): Result
+    public function compile(Configuration $configuration): Result
     {
-        $outputDirectory = $this->configurationProvider->getAbsoluteOutputFileDir();
+        $outputDirectory = Environment::getPublicPath()
+            . '/' . $configuration->outputFileDir;
         GeneralUtility::mkdir($outputDirectory);
 
         $writer = new AssetWriter($outputDirectory);
@@ -119,15 +124,17 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      *
      * @throws LogicException if the required filter class does not exist
      */
-    protected function getFilterForType(string $type): ?FilterInterface
-    {
+    protected function getFilterForType(
+        Configuration $configuration,
+        string $type,
+    ): ?FilterInterface {
         // If the filter manager has an according filter return it
         if ($this->filterManager->has($type)) {
             return $this->filterManager->get($type);
         }
 
         $filterClass = ucfirst($type) . 'Filter';
-        $filterForTypeDefinitions = $this->configurationProvider->getFilterForType();
+        $filterForTypeDefinitions = $configuration->filterForType;
 
         // Check which filter should be used for the given type. This allows the
         // user i.e. to use lessphp for LESS files.
@@ -141,14 +148,20 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         if (class_exists($filterClass)) {
-            $filterBinaryPath = $this->getFilterBinaryPath($filterClass);
+            $filterBinaryPath = $this->getFilterBinaryPath(
+                $configuration,
+                $filterClass
+            );
             if ($filterBinaryPath) {
                 $filter = new $filterClass($filterBinaryPath);
             } else {
                 $filter = new $filterClass();
             }
         } else {
-            throw new FilterException('Filter class ' . $filterClass . ' not found', 1355846301);
+            throw new FilterException(
+                'Filter class ' . $filterClass . ' not found',
+                1355846301
+            );
         }
 
         assert($filter instanceof FilterInterface);
@@ -180,12 +193,16 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * @throws UnexpectedValueException if the given stylesheet type is invalid
      */
     protected function applyFunctionsToFilterForType(
+        Configuration $configuration,
         FilterInterface $filter,
         array $functions,
         string $stylesheetType,
     ): FilterInterface {
         if (!$stylesheetType) {
-            throw new UnexpectedValueException('The given stylesheet type is invalid "' . $stylesheetType . '"', 1355910725);
+            throw new UnexpectedValueException(
+                'The given stylesheet type is invalid "' . $stylesheetType . '"',
+                1355910725
+            );
         }
         ksort($functions);
         foreach ($functions as $function => $data) {
@@ -208,7 +225,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
                 // Invoking `$filter->$function(...$data)` instead would require
                 // the function parameters to be prepared beforehand
                 call_user_func_array($filter->$function(...), array_values($data));
-            } elseif ($this->configurationProvider->getStrictModeEnabled()) {
+            } elseif ($configuration->strictModeEnabled) {
                 throw new FilterException(sprintf(
                     'Filter "%s" does not implement method "%s"',
                     get_class($filter),
@@ -228,12 +245,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * Create and collect the Asset with the given key and stylesheet
      */
     public function createAsset(
+        Configuration $configuration,
         string $assetKey,
         string $stylesheet,
         AssetCollection $assetCollection,
         AssetFactory $factory,
     ): ?AssetCollection {
-        $allStylesheetConfiguration = $this->configurationProvider->getStylesheetConfigurations();
+        $allStylesheetConfiguration = $configuration->stylesheetConfigurations;
         $stylesheetConf = is_array($allStylesheetConfiguration[$assetKey . '.'])
             ? $allStylesheetConfiguration[$assetKey . '.']
             : [];
@@ -258,7 +276,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         // Make sure the filter manager knows the filter
-        $filter = $this->getFilterForType($stylesheetType);
+        $filter = $this->getFilterForType($configuration, $stylesheetType);
         if ($filter) {
             $assetFilters = [$stylesheetType];
         } else {
@@ -269,18 +287,22 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         /** @var array<non-empty-string, string|string[]> $functions */
         $functions = $stylesheetConf['functions.'] ?? [];
         if ($filter && !empty($functions) && is_array($functions)) {
-            $this->applyFunctionsToFilterForType($filter, $functions, $stylesheetType);
+            $this->applyFunctionsToFilterForType(
+                $configuration,
+                $filter,
+                $functions,
+                $stylesheetType
+            );
         }
 
         // Check if there are special options for this stylesheet
-        if (isset($stylesheetConf['options.'])) {
-            $currentOptions = $stylesheetConf['options.'];
-        } else {
-            $currentOptions = $this->pluginLevelOptions;
-        }
-        $this->logger?->debug('Use stylesheet configuration options', ['options' => $currentOptions]);
-
+        $currentOptions = $stylesheetConf['options.'] ?? [];
+        $this->logger?->debug(
+            'Use stylesheet configuration options',
+            ['options' => $currentOptions]
+        );
         assert(is_array($currentOptions));
+
         $asset = $factory->createAsset(
             [$stylesheet],
             $assetFilters,
@@ -308,9 +330,11 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
     }
 
-    private function getFilterBinaryPath(string $filterClass): ?string
-    {
-        $filterBinaries = $this->configurationProvider->getFilterBinaries();
+    private function getFilterBinaryPath(
+        Configuration $configuration,
+        string $filterClass,
+    ): ?string {
+        $filterBinaries = $configuration->filterBinaries;
 
         // Replace the backslash in the filter class with an underscore
         $filterClassIdentifier = strtolower(str_replace('\\', '_', $filterClass));

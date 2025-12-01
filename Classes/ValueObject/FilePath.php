@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\ValueObject;
 
-use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
-use Cundd\Assetic\Utility\ConfigurationUtility;
+use Cundd\Assetic\Configuration;
+use TYPO3\CMS\Core\Core\Environment;
 
 use function rtrim;
 
@@ -17,27 +17,19 @@ class FilePath
 
     private string $relativeDirectoryPath;
 
-    private string $absoluteDirectoryPath;
-
     final public function __construct(
         string $fileName,
         string $relativeDirectoryPath,
-        string $absoluteDirectoryPath,
     ) {
         $this->fileName = $fileName;
         $this->relativeDirectoryPath = rtrim($relativeDirectoryPath, DIRECTORY_SEPARATOR);
-        $this->absoluteDirectoryPath = rtrim($absoluteDirectoryPath, DIRECTORY_SEPARATOR);
     }
 
     public static function fromFileName(
         string $fileName,
-        ConfigurationProviderInterface $configurationProvider,
+        Configuration $configuration,
     ): static {
-        return new static(
-            ConfigurationUtility::getDomainIdentifier() . $fileName,
-            $configurationProvider->getOutputFileDir(),
-            $configurationProvider->getAbsoluteOutputFileDir()
-        );
+        return new static($fileName, $configuration->outputFileDir);
     }
 
     /**
@@ -57,7 +49,9 @@ class FilePath
      */
     public function getAbsoluteUri(): string
     {
-        return $this->absoluteDirectoryPath . '/' . $this->fileName;
+        return Environment::getPublicPath()
+            . '/' . $this->relativeDirectoryPath
+            . '/' . $this->fileName;
     }
 
     public function getFileName(): string

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cundd\Assetic\BuildStep;
 
 use Cundd\Assetic\Compiler\CompilerInterface;
+use Cundd\Assetic\Configuration;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
 use Throwable;
@@ -18,9 +19,11 @@ class Compile implements BuildStepInterface
     {
     }
 
-    public function process(BuildState $currentState): BuildStateResult
-    {
-        $result = $this->compiler->compile();
+    public function process(
+        Configuration $configuration,
+        BuildState $currentState,
+    ): BuildStateResult {
+        $result = $this->compiler->compile($configuration);
 
         return $result->isOk()
             ? BuildStateResult::ok($currentState)

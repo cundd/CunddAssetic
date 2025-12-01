@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Controller;
 
+use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Service\SessionServiceInterface;
+use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
@@ -22,6 +25,8 @@ class AssetController extends ActionController
         private readonly CacheManager $cacheManager,
         private readonly SessionServiceInterface $sessionService,
         private readonly ModuleTemplateFactory $moduleTemplateFactory,
+        private readonly ConfigurationFactory $configurationFactory,
+        private readonly Context $context,
     ) {
     }
 
@@ -30,8 +35,11 @@ class AssetController extends ActionController
      */
     public function listAction(): ResponseInterface
     {
+        $compilationContext = $this->buildCompilationContext();
+        $configuration = $this->configurationFactory
+            ->buildFromRequest($this->request, $compilationContext);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $assetCollection = $this->manager->collectAssets();
+        $assetCollection = $this->manager->collectAssets($configuration);
         if (!empty($assetCollection->all())) {
             $moduleTemplate->assign('assets', $assetCollection);
         } else {
@@ -57,7 +65,14 @@ class AssetController extends ActionController
      */
     private function compile(bool $clearPageCache): void
     {
-        $result = $this->manager->forceCompile()->collectAndCompile();
+        $compilationContext = $this->buildCompilationContext();
+        $configuration = $this->configurationFactory
+            ->buildFromRequest($this->request, $compilationContext);
+
+        $result = $this->manager->forceCompile()->collectAndCompile(
+            $configuration,
+            $compilationContext
+        );
         if ($result->isOk()) {
             /** @var FilePath $outputFilePath */
             $outputFilePath = $result->unwrap();
@@ -78,5 +93,17 @@ class AssetController extends ActionController
                 ContextualFeedbackSeverity::ERROR
             );
         }
+    }
+
+    private function buildCompilationContext(): CompilationContext
+    {
+        return new CompilationContext(
+            site: $this->request->getAttribute('site'),
+            isBackendUserLoggedIn: $this->context->getPropertyFromAspect(
+                'backend.user',
+                'isLoggedIn'
+            ),
+            isCliEnvironment: false
+        );
     }
 }

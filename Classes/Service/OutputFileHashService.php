@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Service;
 
-use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
-use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
+use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\FinalOutputFilePath;
 use Cundd\Assetic\ValueObject\PathWithoutHash;
@@ -23,8 +22,6 @@ use function substr;
 
 class OutputFileHashService
 {
-    private readonly ConfigurationProviderInterface $configurationProvider;
-
     private string $previousHashFromCache;
 
     /**
@@ -34,51 +31,58 @@ class OutputFileHashService
 
     public function __construct(
         private readonly CacheManagerInterface $cacheManager,
-        ConfigurationProviderFactory $configurationProviderFactory,
         private readonly OutputFileFinderInterface $outputFileFinder,
     ) {
-        $this->configurationProvider = $configurationProviderFactory->build();
     }
 
     /**
      * @return Result<FinalOutputFilePath,UnexpectedValueException>
      */
     public function buildAndStoreFileHash(
+        Configuration $configuration,
         PathWithoutHash $outputFilenameWithoutHash,
         string $hashAlgorithm = 'md5',
     ): Result {
-        // $hashAlgorithm = 'crc32';
-        // $hashAlgorithm = 'sha1';
-        // $hashAlgorithm = 'md5';
         $compileDestinationPath = $outputFilenameWithoutHash->getAbsoluteUri();
         if (!is_readable($compileDestinationPath)) {
-            return Result::err(new UnexpectedValueException('Compiled destination path can not be read'));
+            return Result::err(new UnexpectedValueException(
+                'Compiled destination path can not be read'
+            ));
         }
+
         $fileHash = hash_file($hashAlgorithm, $compileDestinationPath);
         if (false === $fileHash) {
-            return Result::err(new UnexpectedValueException('Could not create hash of compiled destination path'));
+            return Result::err(new UnexpectedValueException(
+                'Could not create hash of compiled destination path'
+            ));
         }
 
         ProfilingUtility::profile('Did create file hash');
         $this->storeHash($outputFilenameWithoutHash, $fileHash);
 
-        $finalFileName = $outputFilenameWithoutHash->getFileName() . '_' . $fileHash . '.css';
+        $finalFileName = $outputFilenameWithoutHash->getFileName()
+            . OutputFileService::NAME_PART_SEPARATOR
+            . $fileHash . '.css';
 
-        return Result::ok(FinalOutputFilePath::fromFileName($finalFileName, $this->configurationProvider));
+        return Result::ok(FinalOutputFilePath::fromFileName($finalFileName, $configuration));
     }
 
     /**
      * Return the hash for the last compiled version of the output file
      *
-     * Check if the cache contains an entry with the hash for the current output file name. If no such entry exists, or
-     * the file with the read hash does not exist, the directory will be searched for a matching file.
+     * Check if the cache contains an entry with the hash for the current
+     * output file name. If no such entry exists, or the file with the read hash
+     * does not exist, the directory will be searched for a matching file.
      *
-     * Warning: Other running PHP processes also may have updated the hash in between. This is not detected.
+     * Warning: Other running PHP processes also may have updated the hash in
+     * between. This is not detected.
      *
-     * @throws LogicException if the hash for the given output file was already updated by this instance
+     * @throws LogicException if the hash for the given output file was already
+     *                        updated by this instance
      */
-    public function getPreviousHash(PathWithoutHash $currentOutputFilenameWithoutHash): string
-    {
+    public function getPreviousHash(
+        PathWithoutHash $currentOutputFilenameWithoutHash,
+    ): string {
         if (isset($this->wasWritten[$currentOutputFilenameWithoutHash->getAbsoluteUri()])) {
             throw new LogicException(
                 sprintf(
@@ -89,32 +93,46 @@ class OutputFileHashService
             );
         }
         $suffix = '.css';
-        $publicUri = $currentOutputFilenameWithoutHash->getPublicUri();
 
+        ProfilingUtility::profile('Get previous hash from cache');
         $previousHash = $this->getCachedPreviousHash($currentOutputFilenameWithoutHash);
-        $previousHashFilePath = $currentOutputFilenameWithoutHash->getAbsoluteUri() . '_' . $previousHash . $suffix;
+        $previousHashFilePath = $currentOutputFilenameWithoutHash->getAbsoluteUri()
+            . OutputFileService::NAME_PART_SEPARATOR . $previousHash . $suffix;
 
         if ($previousHash && file_exists($previousHashFilePath)) {
+            ProfilingUtility::profile('Get previous hash from cache: Hit');
+
             return $previousHash;
+        } else {
+            ProfilingUtility::profile('Get previous hash from cache: Miss');
         }
 
+        ProfilingUtility::profile('Find previous output files');
+        $publicUri = $currentOutputFilenameWithoutHash->getPublicUri();
         $matchingFiles = $this->outputFileFinder->findPreviousOutputFiles($publicUri, $suffix);
         if (!$matchingFiles) {
+            ProfilingUtility::profile('Find previous output files: None found');
+
             return '';
         }
+
+        ProfilingUtility::profile('Find previous output files: Found ' . count($matchingFiles));
         $lastMatchingFile = end($matchingFiles);
 
         return substr($lastMatchingFile, strlen($publicUri) + 1, (-1 * strlen($suffix)));
     }
 
-    public function storeHash(PathWithoutHash $outputFilenameWithoutHash, string $fileHash): void
-    {
+    public function storeHash(
+        PathWithoutHash $outputFilenameWithoutHash,
+        string $fileHash,
+    ): void {
         $this->wasWritten[$outputFilenameWithoutHash->getAbsoluteUri()] = true;
         $this->cacheManager->setCache($outputFilenameWithoutHash, $fileHash);
     }
 
-    private function getCachedPreviousHash(PathWithoutHash $currentOutputFilenameWithoutHash): string
-    {
+    private function getCachedPreviousHash(
+        PathWithoutHash $currentOutputFilenameWithoutHash,
+    ): string {
         if (!isset($this->previousHashFromCache)) {
             $cachedValue = $this->cacheManager->getCache($currentOutputFilenameWithoutHash);
             assert(is_scalar($cachedValue) || is_null($cachedValue));

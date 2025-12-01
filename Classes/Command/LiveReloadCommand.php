@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\Configuration;
+use Cundd\Assetic\Configuration\LiveReloadConfiguration;
 use Cundd\Assetic\FileWatcher\FileCategories;
 use Cundd\Assetic\Server\LiveReload;
 use Cundd\Assetic\Utility\PathUtility;
+use Cundd\Assetic\ValueObject\CompilationContext;
 use InvalidArgumentException;
 use LogicException;
 use Ratchet\Http\HttpServer;
@@ -21,6 +24,8 @@ use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
+use TYPO3\CMS\Core\Utility\MathUtility;
+use UnexpectedValueException;
 
 use function array_merge;
 use function class_exists;
@@ -95,17 +100,28 @@ class LiveReloadCommand extends AbstractWatchCommand
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (false === $this->getConfigurationProvider()->getCreateSymlink()) {
+        $compilationContext = $this->getCompilationContext($input);
+        $configuration = $this->getConfigurationWithPort(
+            $compilationContext,
+            $input,
+        );
+        if (false === $configuration->createSymlink) {
             $io = new SymfonyStyle($input, $output);
             $io->warning(
-                'Creation of required symlinks is not yet configured in TypoScript' . PHP_EOL . 'LiveReload may not work properly'
+                'Creation of required symlinks is not yet configured in TypoScript' . PHP_EOL
+                    . 'LiveReload may not work properly'
             );
         }
         $this->logger = new ConsoleLogger($output);
         $fileWatcher = $this->getFileWatcher();
         $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
 
-        $server = $this->buildServerFromInput($input, $output);
+        $server = $this->buildServerFromInput(
+            $configuration,
+            $compilationContext,
+            $input,
+            $output
+        );
 
         $server->run();
 
@@ -115,8 +131,10 @@ class LiveReloadCommand extends AbstractWatchCommand
     /**
      * Re-compiles the sources if needed and additionally informs the LiveReload server about the changes
      */
-    public function recompileIfNeededAndInformLiveReloadServer(): void
-    {
+    public function recompileIfNeededAndInformLiveReloadServer(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+    ): void {
         $fileNeedsRecompile = $this->needsRecompile($this->getFileWatcher());
         if (!$fileNeedsRecompile) {
             $this->logger->debug('No files changed');
@@ -130,7 +148,7 @@ class LiveReloadCommand extends AbstractWatchCommand
         if ($needFullPageReload) {
             $this->liveReloadServer->fileDidChange($fileNeedsRecompile, false);
         } else {
-            $result = $this->compile();
+            $result = $this->compile($configuration, $compilationContext);
             if ($result->isErr()) {
                 /** @var Throwable $error */
                 $error = $result->unwrapErr();
@@ -186,7 +204,10 @@ class LiveReloadCommand extends AbstractWatchCommand
             if ($optional) {
                 return '';
             }
-            throw new InvalidArgumentException(sprintf('Option "%s" is not given', $optionName), 7653682383);
+            throw new InvalidArgumentException(
+                sprintf('Option "%s" is not given', $optionName),
+                7653682383
+            );
         }
 
         $homeDirectory = PathUtility::getHomeDirectory();
@@ -199,21 +220,51 @@ class LiveReloadCommand extends AbstractWatchCommand
         }
 
         if (file_exists($path)) {
-            throw new InvalidArgumentException(sprintf('File "%s" for configuration %s exists, but is not readable', $path, $optionName), 1909396619);
+            throw new InvalidArgumentException(
+                sprintf(
+                    'File "%s" for configuration %s exists, but is not readable',
+                    $path,
+                    $optionName
+                ),
+                1909396619
+            );
         } else {
-            throw new InvalidArgumentException(sprintf('File "%s" for configuration %s does not exist', $path, $optionName), 9185054796);
+            throw new InvalidArgumentException(
+                sprintf(
+                    'File "%s" for configuration %s does not exist',
+                    $path,
+                    $optionName
+                ),
+                9185054796
+            );
         }
     }
 
-    private function buildServerFromInput(InputInterface $input, OutputInterface $output): IoServer
-    {
+    private function buildServerFromInput(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+        InputInterface $input,
+        OutputInterface $output,
+    ): IoServer {
         $address = (string) $input->getOption(self::OPTION_ADDRESS);
+
         $port = (int) $input->getOption(self::OPTION_PORT);
+        $port = $configuration->liveReloadConfiguration->port;
+
         $notificationDelay = (float) $input->getOption(self::OPTION_NOTIFICATION_DELAY);
         $interval = $this->getInterval($input, 0.5);
 
         $useTLS = (bool) $input->getOption(self::OPTION_TLS_CERTIFICATE);
-        $server = $this->buildServer($input, $address, $port, $notificationDelay, $useTLS, $interval);
+        $server = $this->buildServer(
+            $configuration,
+            $compilationContext,
+            $input,
+            $address,
+            $port,
+            $notificationDelay,
+            $useTLS,
+            $interval
+        );
         $prefix = $useTLS ? 'Secure ' : '';
         $output->writeln(
             "<info>{$prefix}Websocket server listening on $address:$port running under PHP version " . PHP_VERSION . '</info>'
@@ -226,6 +277,8 @@ class LiveReloadCommand extends AbstractWatchCommand
      * @param int|float $interval the number of seconds to wait before execution
      */
     private function buildServer(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
         InputInterface $input,
         string $address,
         int $port,
@@ -267,7 +320,13 @@ class LiveReloadCommand extends AbstractWatchCommand
 
         assert(null !== $server->loop);
 
-        $server->loop->addPeriodicTimer($interval, [$this, 'recompileIfNeededAndInformLiveReloadServer']);
+        $server->loop->addPeriodicTimer(
+            $interval,
+            fn () => $this->recompileIfNeededAndInformLiveReloadServer(
+                $configuration,
+                $compilationContext
+            ),
+        );
         $this->liveReloadServer->setEventLoop($server->loop);
 
         return $server;
@@ -278,6 +337,38 @@ class LiveReloadCommand extends AbstractWatchCommand
         return in_array(
             pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION),
             array_merge(FileCategories::$scriptAssetSuffixes, FileCategories::$otherAssetSuffixes)
+        );
+    }
+
+    protected function getConfigurationWithPort(
+        CompilationContext $compilationContext,
+        InputInterface $input,
+    ): Configuration {
+        $configuration = $this->getConfiguration($compilationContext);
+
+        // Check if the "port" option was given, when building the `Configuration`
+        $port = $input->getOption(LiveReloadCommand::OPTION_PORT);
+        if (!is_numeric($port) || !MathUtility::canBeInterpretedAsInteger($port) || (int) $port < 0) {
+            throw new UnexpectedValueException('Invalid port option given');
+        }
+        $liveReloadConfiguration = new LiveReloadConfiguration(
+            isEnabled: $configuration->liveReloadConfiguration->isEnabled,
+            skipServerTest: $configuration->liveReloadConfiguration->skipServerTest,
+            port: (int) $port,
+        );
+
+        return new Configuration(
+            site: $configuration->site,
+            stylesheetConfigurations: $configuration->stylesheetConfigurations,
+            outputFileDir: $configuration->outputFileDir,
+            outputFileName: $configuration->outputFileName,
+            filterForType: $configuration->filterForType,
+            filterBinaries: $configuration->filterBinaries,
+            liveReloadConfiguration: $liveReloadConfiguration,
+            isDevelopment: $configuration->isDevelopment,
+            createSymlink: $configuration->createSymlink,
+            allowCompileWithoutLogin: $configuration->allowCompileWithoutLogin,
+            strictModeEnabled: $configuration->strictModeEnabled,
         );
     }
 }

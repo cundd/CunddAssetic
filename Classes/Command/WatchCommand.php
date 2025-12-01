@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
-use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
+use Cundd\Assetic\Configuration;
+use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\FileWatcher\FileWatcherInterface;
 use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\ValueObject\CompilationContext;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Site\SiteFinder;
 
 use function usleep;
 
@@ -22,14 +25,16 @@ class WatchCommand extends AbstractWatchCommand
 {
     public function __construct(
         ManagerInterface $manager,
-        ConfigurationProviderFactory $configurationProviderFactory,
+        ConfigurationFactory $configurationFactory,
+        SiteFinder $siteFinder,
         FileWatcherInterface $fileWatcher,
         private readonly CacheManager $cacheManager,
     ) {
         parent::__construct(
             $manager,
-            $configurationProviderFactory,
-            $fileWatcher
+            $configurationFactory,
+            $siteFinder,
+            $fileWatcher,
         );
     }
 
@@ -51,15 +56,22 @@ class WatchCommand extends AbstractWatchCommand
             );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output): never
     {
+        $compilationContext = $this->getCompilationContext($input);
+        $configuration = $this->getConfiguration($compilationContext);
         $interval = $this->getInterval($input, 1);
         $clearPageCache = (bool) $input->getOption('clear-page-cache');
 
         $fileWatcher = $this->getFileWatcher();
         $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
         while (true) { // @phpstan-ignore while.alwaysTrue
-            $didRecompile = $this->recompileIfNeeded($output, $fileWatcher);
+            $didRecompile = $this->recompileIfNeeded(
+                $configuration,
+                $compilationContext,
+                $output,
+                $fileWatcher
+            );
             if ($didRecompile && $clearPageCache) {
                 $this->cacheManager->flushCachesInGroup('pages');
             }
@@ -71,6 +83,8 @@ class WatchCommand extends AbstractWatchCommand
      * Re-compiles the sources if needed
      */
     private function recompileIfNeeded(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
         OutputInterface $output,
         FileWatcherInterface $fileWatcher,
     ): bool {
@@ -79,7 +93,7 @@ class WatchCommand extends AbstractWatchCommand
             return false;
         }
 
-        $result = $this->compile();
+        $result = $this->compile($configuration, $compilationContext);
         if ($result->isErr()) {
             /** @var Throwable $error */
             $error = $result->unwrapErr();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\BuildStep;
 
+use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Service\SymlinkServiceInterface;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
@@ -18,9 +19,12 @@ class CreateNewSymlink implements BuildStepInterface
     {
     }
 
-    public function process(BuildState $currentState): BuildStateResult
-    {
+    public function process(
+        Configuration $configuration,
+        BuildState $currentState,
+    ): BuildStateResult {
         $filePath = $this->symlinkService->createSymlinkToFinalPath(
+            $configuration,
             $currentState->getFilePath(),
             $currentState->getOutputFilePathWithoutHash()
         );

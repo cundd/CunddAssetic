@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
-use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
-use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
+use Cundd\Assetic\Configuration;
+use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\Result;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Throwable;
+use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Site\SiteFinder;
 
 use function basename;
 use function copy;
@@ -25,14 +30,24 @@ use function substr;
 
 abstract class AbstractCommand extends Command
 {
-    private readonly ConfigurationProviderInterface $configurationProvider;
+    protected const ARGUMENT_SITE = 'site';
 
     public function __construct(
         private readonly ManagerInterface $manager,
-        ConfigurationProviderFactory $configurationProviderFactory,
+        private readonly ConfigurationFactory $configurationFactory,
+        private readonly SiteFinder $siteFinder,
     ) {
         parent::__construct();
-        $this->configurationProvider = $configurationProviderFactory->build();
+    }
+
+    protected function registerDefaultArgumentsAndOptions(): static
+    {
+        return $this
+            ->addArgument(
+                self::ARGUMENT_SITE,
+                InputArgument::REQUIRED,
+                'Site for which to load the configuration'
+            );
     }
 
     /**
@@ -40,15 +55,23 @@ abstract class AbstractCommand extends Command
      *
      * @return Result<FilePath,covariant Throwable>
      */
-    protected function compile(): Result
-    {
+    protected function compile(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+    ): Result {
         $this->manager->forceCompile();
 
-        if (0 === count($this->manager->collectAssets()->all())) {
-            throw new MissingConfigurationException('No assets have been found', 1886548090);
+        if (0 === count($this->manager->collectAssets($configuration)->all())) {
+            throw new MissingConfigurationException(
+                'No assets have been found',
+                1886548090
+            );
         }
 
-        return $this->manager->forceCompile()->collectAndCompile();
+        return $this->manager->forceCompile()->collectAndCompile(
+            $configuration,
+            $compilationContext
+        );
     }
 
     /**
@@ -56,8 +79,11 @@ abstract class AbstractCommand extends Command
      *
      * @return string Returns the used path
      */
-    protected function copyToDestination(string $source, string $destination): string
-    {
+    protected function copyToDestination(
+        Configuration $configuration,
+        string $source,
+        string $destination,
+    ): string {
         if (!$destination) {
             return $source;
         }
@@ -69,7 +95,7 @@ abstract class AbstractCommand extends Command
             $destination .= '/' . basename($source);
         }
 
-        $destination = $this->getConfigurationProvider()->getPublicPath() . '/' . $destination;
+        $destination = Environment::getPublicPath() . '/' . $destination;
         if (!file_exists(dirname($destination))) {
             mkdir(dirname($destination), 0775, true);
         }
@@ -80,8 +106,22 @@ abstract class AbstractCommand extends Command
         return $source;
     }
 
-    protected function getConfigurationProvider(): ConfigurationProviderInterface
-    {
-        return $this->configurationProvider;
+    protected function getCompilationContext(
+        InputInterface $input,
+    ): CompilationContext {
+        $siteIdentifier = $input->getArgument(self::ARGUMENT_SITE);
+        $site = $this->siteFinder->getSiteByIdentifier($siteIdentifier);
+
+        return new CompilationContext(
+            site: $site,
+            isBackendUserLoggedIn: false,
+            isCliEnvironment: true,
+        );
+    }
+
+    final protected function getConfiguration(
+        CompilationContext $compilationContext,
+    ): Configuration {
+        return $this->configurationFactory->buildFromCli($compilationContext);
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Service;
 
-use Cundd\Assetic\Utility\ConfigurationUtility;
 use Cundd\Assetic\ValueObject\PathWithoutHash;
 use TYPO3\CMS\Core\Cache\CacheManager as TYPO3CacheManager;
 use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
@@ -59,8 +58,7 @@ class CacheManager implements CacheManagerInterface
     private function prepareIdentifier(PathWithoutHash $identifier): string
     {
         return sha1(
-            ConfigurationUtility::getDomainIdentifier()
-            . '-' . self::CACHE_IDENTIFIER_HASH
+            self::CACHE_IDENTIFIER_HASH
             . '_' . $identifier->getFileName()
         );
     }

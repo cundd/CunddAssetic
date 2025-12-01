@@ -6,7 +6,7 @@ namespace Cundd\Assetic\Command;
 
 use Cundd\Assetic\Command\Input\ArrayUtility;
 use Cundd\Assetic\Command\Input\WatchPathsBuilder;
-use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
+use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\FileWatcher\FileWatcher;
 use Cundd\Assetic\FileWatcher\FileWatcherInterface;
 use Cundd\Assetic\ManagerInterface;
@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Core\Site\SiteFinder;
 
 use function implode;
 use function max;
@@ -30,15 +31,20 @@ abstract class AbstractWatchCommand extends AbstractCommand
 
     public function __construct(
         ManagerInterface $manager,
-        ConfigurationProviderFactory $configurationProviderFactory,
+        ConfigurationFactory $configurationFactory,
+        SiteFinder $siteFinder,
         private readonly FileWatcherInterface $fileWatcher,
     ) {
-        parent::__construct($manager, $configurationProviderFactory);
+        parent::__construct(
+            $manager,
+            $configurationFactory,
+            $siteFinder
+        );
     }
 
-    protected function registerDefaultArgumentsAndOptions(): self
+    protected function registerDefaultArgumentsAndOptions(): static
     {
-        return $this
+        return parent::registerDefaultArgumentsAndOptions()
             ->addArgument(
                 self::PATHS,
                 InputArgument::IS_ARRAY,

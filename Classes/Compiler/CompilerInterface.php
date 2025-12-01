@@ -6,8 +6,8 @@ namespace Cundd\Assetic\Compiler;
 
 use Assetic\Asset\AssetCollection;
 use Assetic\Factory\AssetFactory;
+use Cundd\Assetic\Configuration;
 use Cundd\Assetic\ValueObject\Result;
-use Exception;
 use LogicException;
 use Throwable;
 
@@ -21,19 +21,23 @@ interface CompilerInterface
      *
      * @throws LogicException if the assetic classes could not be found
      */
-    public function collectAssets(): AssetCollection;
+    public function collectAssets(Configuration $configuration): AssetCollection;
 
     /**
      * Collect the files and tell assetic to compile the files
      *
-     * @return Result<null,Throwable> Return `Ok` if the files have been compiled successfully, otherwise an `Err<Exception>` containing the exception
+     * Return `Ok` if the files have been compiled successfully, otherwise an
+     * `Err<Exception>` containing the exception
+     *
+     * @return Result<null,Throwable>
      */
-    public function compile(): Result;
+    public function compile(Configuration $configuration): Result;
 
     /**
      * Create and collect the Asset with the given key and stylesheet
      */
     public function createAsset(
+        Configuration $configuration,
         string $assetKey,
         string $stylesheet,
         AssetCollection $assetCollection,

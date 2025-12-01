@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\BuildStep;
 
+use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Service\OutputFileHashService;
 use Cundd\Assetic\Utility\PathUtility;
@@ -29,15 +30,17 @@ class AddHashToFileName implements BuildStepInterface
         $this->outputFileHashService = $outputFileHashService;
     }
 
-    public function process(BuildState $currentState): BuildStateResult
-    {
+    public function process(
+        Configuration $configuration,
+        BuildState $currentState,
+    ): BuildStateResult {
         $outputFilenameWithoutHash = $currentState->getOutputFilePathWithoutHash();
 
         // Create the file hash and store it in the cache
         ProfilingUtility::profile('Will create file hash');
 
         $finalFileNameResult = $this->outputFileHashService
-            ->buildAndStoreFileHash($outputFilenameWithoutHash);
+            ->buildAndStoreFileHash($configuration, $outputFilenameWithoutHash, 'md5');
         if ($finalFileNameResult->isErr()) {
             $finalFileNameErr = $finalFileNameResult->unwrapErr();
 

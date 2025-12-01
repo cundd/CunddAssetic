@@ -6,6 +6,7 @@ namespace Cundd\Assetic;
 
 use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\Compiler\CompilerInterface;
+use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
@@ -21,14 +22,17 @@ interface ManagerInterface
      *
      * @throws LogicException if the assetic classes could not be found
      */
-    public function collectAssets(): AssetCollection;
+    public function collectAssets(Configuration $configuration): AssetCollection;
 
     /**
      * Collect and compile Assets and return a Result with the path to the compiled stylesheet
      *
      * @return Result<FilePath,Throwable>
      */
-    public function collectAndCompile(): Result;
+    public function collectAndCompile(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+    );
 
     /**
      * Force asset re-compilation
@@ -38,12 +42,15 @@ interface ManagerInterface
     /**
      * Return if the files should be compiled
      */
-    public function willCompile(): bool;
+    public function willCompile(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+    ): bool;
 
     /**
      * Return the symlink URI
      */
-    public function getSymlinkUri(): string;
+    public function getSymlinkUri(Configuration $configuration): string;
 
     /**
      * Return the Compiler instance

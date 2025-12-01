@@ -8,16 +8,14 @@ use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\BuildStep\BuildStepInterface;
 use Cundd\Assetic\Compiler\CompilerFactory;
 use Cundd\Assetic\Compiler\CompilerInterface;
-use Cundd\Assetic\Configuration\ConfigurationProviderFactory;
-use Cundd\Assetic\Configuration\ConfigurationProviderInterface;
 use Cundd\Assetic\Service\CacheManagerInterface;
 use Cundd\Assetic\Service\OutputFileFinderInterface;
 use Cundd\Assetic\Service\OutputFileHashService;
 use Cundd\Assetic\Service\OutputFileServiceInterface;
 use Cundd\Assetic\Service\SymlinkServiceInterface;
-use Cundd\Assetic\Utility\BackendUserUtility;
 use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\BuildState;
+use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\PathWithoutHash;
 use Cundd\Assetic\ValueObject\Result;
@@ -38,10 +36,7 @@ class Manager implements ManagerInterface
 
     private readonly CompilerInterface $compiler;
 
-    private readonly ConfigurationProviderInterface $configurationProvider;
-
     public function __construct(
-        ConfigurationProviderFactory $configurationProviderFactory,
         CompilerFactory $compilerFactory,
         private readonly CacheManagerInterface $cacheManager,
         private readonly OutputFileHashService $outputFileHashService,
@@ -50,19 +45,23 @@ class Manager implements ManagerInterface
         private readonly OutputFileFinderInterface $outputFileFinder,
     ) {
         $this->compiler = $compilerFactory->build();
-        $this->configurationProvider = $configurationProviderFactory->build();
     }
 
-    public function collectAndCompile(): Result
-    {
+    public function collectAndCompile(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+    ): Result {
         // Check if the assets should be compiled
-        if ($this->willCompile()) {
-            return $this->collectAssetsAndCompile();
+        if ($this->willCompile($configuration, $compilationContext)) {
+            return $this->collectAssetsAndCompile(
+                $configuration,
+                $compilationContext
+            );
         }
 
-        $pathWithoutHash = $this->getPathWithoutHash();
+        $pathWithoutHash = $this->getPathWithoutHash($configuration);
         $expectedPath = $this->outputFileService
-            ->getExpectedPathWithHash($pathWithoutHash);
+            ->getExpectedPathWithHash($configuration, $pathWithoutHash);
         if ($expectedPath && file_exists($expectedPath->getAbsoluteUri())) {
             return Result::ok($expectedPath);
         }
@@ -72,26 +71,34 @@ class Manager implements ManagerInterface
         $this->forceCompile();
         $this->cacheManager->clearHashCache($pathWithoutHash);
 
-        return $this->collectAssetsAndCompile();
+        return $this->collectAssetsAndCompile(
+            $configuration,
+            $compilationContext
+        );
     }
 
     /**
      * @return Result<FilePath,Throwable>
      */
-    private function collectAssetsAndCompile(): Result
-    {
-        $this->collectAssetsAndSetTarget();
+    private function collectAssetsAndCompile(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+    ): Result {
+        $this->collectAssetsAndSetTarget($configuration);
 
-        $outputFilePathWithoutHash = $this->outputFileService->getPathWithoutHash();
+        $outputFilePathWithoutHash = $this->outputFileService->getPathWithoutHash($configuration);
         $currentState = new BuildState(
             $outputFilePathWithoutHash,
             $outputFilePathWithoutHash,
             []
         );
 
-        $buildSteps = $this->getBuildSteps($this->getCreateDevelopmentSymlink());
+        $buildSteps = $this->getBuildSteps($this->getCreateDevelopmentSymlink(
+            $configuration,
+            $compilationContext
+        ));
         foreach ($buildSteps as $buildStep) {
-            $currentStateResult = $buildStep->process($currentState);
+            $currentStateResult = $buildStep->process($configuration, $currentState);
             if ($currentStateResult->isErr()) {
                 return Result::err($currentStateResult->unwrapErr());
             }
@@ -114,22 +121,23 @@ class Manager implements ManagerInterface
      *
      * @throws LogicException if the Assetic classes could not be found
      */
-    public function collectAssets(): AssetCollection
+    public function collectAssets(Configuration $configuration): AssetCollection
     {
-        return $this->collectAssetsAndSetTarget();
+        return $this->collectAssetsAndSetTarget($configuration);
     }
 
     /**
      * Collect the assets and set the target path
      */
-    protected function collectAssetsAndSetTarget(): AssetCollection
-    {
-        $assetCollection = $this->getCompiler()->collectAssets();
+    protected function collectAssetsAndSetTarget(
+        Configuration $configuration,
+    ): AssetCollection {
+        $assetCollection = $this->getCompiler()->collectAssets($configuration);
 
-        ProfilingUtility::profile(
-            'Set output file ' . $this->getPathWithoutHash()->getFileName()
-        );
-        $assetCollection->setTargetPath($this->getPathWithoutHash()->getFileName());
+        $pathWithoutHashFileName = $this->getPathWithoutHash($configuration)
+            ->getFileName();
+        ProfilingUtility::profile('Set output file ' . $pathWithoutHashFileName);
+        $assetCollection->setTargetPath($pathWithoutHashFileName);
 
         return $assetCollection;
     }
@@ -144,54 +152,58 @@ class Manager implements ManagerInterface
     /**
      * Return if the files should be compiled
      */
-    public function willCompile(): bool
-    {
+    public function willCompile(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+    ): bool {
         if ($this->forceCompilation) {
             return true;
         }
 
-        $isDevelopment = $this->configurationProvider->isDevelopment();
-        if ($isDevelopment) {
+        if ($configuration->isDevelopment) {
             return true;
         }
 
-        $isUserLoggedIn = BackendUserUtility::isUserLoggedIn();
-        if (!$isUserLoggedIn) {
+        if (!$compilationContext->isBackendUserLoggedIn) {
             // If no backend user is logged in, check if compiling is still allowed
-            return $this->configurationProvider->getAllowCompileWithoutLogin();
+            return $configuration->allowCompileWithoutLogin;
         } else {
             return false;
         }
     }
 
-    private function getPathWithoutHash(): PathWithoutHash
+    private function getPathWithoutHash(Configuration $configuration): PathWithoutHash
     {
-        return $this->outputFileService->getPathWithoutHash();
+        return $this->outputFileService->getPathWithoutHash($configuration);
     }
 
     /**
      * Return the symlink URI
      */
-    public function getSymlinkUri(): string
+    public function getSymlinkUri(Configuration $configuration): string
     {
         return $this->symlinkService
-            ->getSymlinkPath($this->getPathWithoutHash())
+            ->getSymlinkPath(
+                $configuration,
+                $this->getPathWithoutHash($configuration)
+            )
             ->getPublicUri();
     }
 
-    private function getCreateDevelopmentSymlink(): bool
-    {
-        $addLivereloadJavaScript = $this->configurationProvider
-            ->getLiveReloadConfiguration()
-            ->getAddJavascript();
-        $createSymlink = $this->configurationProvider->getCreateSymlink();
-        if (!$createSymlink && !$addLivereloadJavaScript) {
+    private function getCreateDevelopmentSymlink(
+        Configuration $configuration,
+        CompilationContext $compilationContext,
+    ): bool {
+        $liveReloadEnabled = $configuration->liveReloadConfiguration
+            ->isEnabled;
+        $createSymlink = $configuration->createSymlink;
+        if (!$createSymlink && !$liveReloadEnabled) {
             return false;
         }
 
-        return 'cli' === php_sapi_name()
-            || BackendUserUtility::isUserLoggedIn()
-            || $this->configurationProvider->getAllowCompileWithoutLogin();
+        return $compilationContext->isCliEnvironment
+            || $compilationContext->isBackendUserLoggedIn
+            || $configuration->allowCompileWithoutLogin;
     }
 
     /**

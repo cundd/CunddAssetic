@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\BuildStep;
 
+use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
@@ -26,8 +27,10 @@ use function strpos;
  */
 class PatchExtensionPath implements BuildStepInterface
 {
-    public function process(BuildState $currentState): BuildStateResult
-    {
+    public function process(
+        Configuration $configuration,
+        BuildState $currentState,
+    ): BuildStateResult {
         $compiledFileUri = $currentState->getFilePath()->getAbsoluteUri();
         $contents = (string) file_get_contents($compiledFileUri);
         if (!preg_match_all('!EXT:([a-zA-Z0-9-_]+/Resources/Public/)!', $contents, $matches)) {
