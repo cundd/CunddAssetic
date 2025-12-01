@@ -24,6 +24,7 @@ final class ProfilingUtility
      */
     public static function profile(string $msg = ''): void
     {
+        $currentHrtime = hrtime(true);
         if (!getenv('CUNDD_ASSETIC_DEBUG')) {
             return;
         }
@@ -36,14 +37,14 @@ final class ProfilingUtility
         /** @var float|null $requestStartTime */
         static $requestStartTime = null;
         if (false === $didInitialize) {
-            $lastCall = hrtime(true);
-            $profilerStart = hrtime(true);
             $requestStartTime = isset($_SERVER['REQUEST_TIME_FLOAT']) && is_numeric($_SERVER['REQUEST_TIME_FLOAT'])
                 ? (float) $_SERVER['REQUEST_TIME_FLOAT']
                 : 0.0;
+            $lastCall = $currentHrtime;
+            $profilerStart = $currentHrtime;
+            $didInitialize = true;
         }
 
-        $currentHrtime = hrtime(true);
         $outputStream = defined('STDOUT')
             ? STDOUT
             : fopen('php://output', 'a');
@@ -52,17 +53,20 @@ final class ProfilingUtility
             throw new RuntimeException('Could not open STDOUT for writing');
         }
 
+        $lastCallDiff = $currentHrtime - $lastCall;
+        $profilerStartDiff = $currentHrtime - $profilerStart;
+        $requestStartDiff = microtime(true) - $requestStartTime;
         fwrite(
             $outputStream,
             sprintf(
-                '[%s] %8.4f %8.4fµs %8.4fµs %s' . PHP_EOL,
+                '[%s] %12.2fµs %12.2fµs @ %6.4f %s' . PHP_EOL,
                 date('Y-m-d H:i:s'),
-                microtime(true) - $requestStartTime,
-                ($currentHrtime - $profilerStart) / 1000,
-                ($currentHrtime - $lastCall) / 1000,
+                $lastCallDiff / 1000,
+                $profilerStartDiff / 1000,
+                $requestStartDiff,
                 $msg
             )
         );
-        $lastCall = $currentHrtime;
+        $lastCall = hrtime(true);
     }
 }
