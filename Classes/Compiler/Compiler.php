@@ -32,19 +32,14 @@ use function preg_match;
  *
  * The class that builds the connection between Assetic and TYPO3
  */
-class Compiler implements CompilerInterface, LoggerAwareInterface
+final class Compiler implements CompilerInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
     /**
      * Assetic asset manager
      */
-    protected AssetManager $assetManager;
-
-    /**
-     * Assetic filter manager
-     */
-    protected FilterManager $filterManager;
+    private AssetManager $assetManager;
 
     public function __construct()
     {
@@ -70,16 +65,17 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
 
         $assetCollection = new AssetCollection();
         $factory = new AssetFactory(Environment::getPublicPath() . '/');
-        $this->filterManager = new FilterManager();
+        $filterManager = new FilterManager();
 
         // Register the filter manager
-        $factory->setFilterManager($this->filterManager);
+        $factory->setFilterManager($filterManager);
 
         // Loop through all configured stylesheets
         $stylesheets = $configuration->stylesheetConfigurations;
         foreach ($stylesheets as $assetKey => $stylesheet) {
             if (!is_array($stylesheet)) {
                 $this->createAsset(
+                    $filterManager,
                     $configuration,
                     $assetKey,
                     $stylesheet,
@@ -124,13 +120,14 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      *
      * @throws LogicException if the required filter class does not exist
      */
-    protected function getFilterForType(
+    private function getFilterForType(
+        FilterManager $filterManager,
         Configuration $configuration,
         string $type,
     ): ?FilterInterface {
         // If the filter manager has an according filter return it
-        if ($this->filterManager->has($type)) {
-            return $this->filterManager->get($type);
+        if ($filterManager->has($type)) {
+            return $filterManager->get($type);
         }
 
         $filterClass = ucfirst($type) . 'Filter';
@@ -167,7 +164,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         assert($filter instanceof FilterInterface);
 
         // Store the just created filter
-        $this->filterManager->set($type, $filter);
+        $filterManager->set($type, $filter);
 
         return $filter;
     }
@@ -176,23 +173,14 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
     // HELPERS
     // =========================================================================
     /**
-     * Return the shared asset manager
-     *
-     * @deprecated
-     */
-    public function getAssetManager(): AssetManager
-    {
-        return $this->assetManager;
-    }
-
-    /**
      * Invoke the functions of the filter
      *
      * @param array<non-empty-string,string|string[]> $functions
      *
      * @throws UnexpectedValueException if the given stylesheet type is invalid
      */
-    protected function applyFunctionsToFilterForType(
+    private function applyFunctionsToFilterForType(
+        FilterManager $filterManager,
         Configuration $configuration,
         FilterInterface $filter,
         array $functions,
@@ -236,7 +224,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
             }
         }
 
-        $this->filterManager->set($stylesheetType, $filter);
+        $filterManager->set($stylesheetType, $filter);
 
         return $filter;
     }
@@ -245,12 +233,13 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      * Create and collect the Asset with the given key and stylesheet
      */
     public function createAsset(
+        FilterManager $filterManager,
         Configuration $configuration,
         string $assetKey,
         string $stylesheet,
         AssetCollection $assetCollection,
         AssetFactory $factory,
-    ): ?AssetCollection {
+    ): AssetCollection {
         $allStylesheetConfiguration = $configuration->stylesheetConfigurations;
         $stylesheetConf = is_array($allStylesheetConfiguration[$assetKey . '.'])
             ? $allStylesheetConfiguration[$assetKey . '.']
@@ -276,7 +265,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         // Make sure the filter manager knows the filter
-        $filter = $this->getFilterForType($configuration, $stylesheetType);
+        $filter = $this->getFilterForType($filterManager, $configuration, $stylesheetType);
         if ($filter) {
             $assetFilters = [$stylesheetType];
         } else {
@@ -288,6 +277,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
         $functions = $stylesheetConf['functions.'] ?? [];
         if ($filter && !empty($functions) && is_array($functions)) {
             $this->applyFunctionsToFilterForType(
+                $filterManager,
                 $configuration,
                 $filter,
                 $functions,
@@ -320,7 +310,7 @@ class Compiler implements CompilerInterface, LoggerAwareInterface
      *
      * @param array<string> $parameters Reference to the data array
      */
-    protected function prepareFunctionParameters(array &$parameters): void
+    private function prepareFunctionParameters(array &$parameters): void
     {
         foreach ($parameters as &$parameter) {
             if (false !== strpos($parameter, '.') || false !== strpos($parameter, DIRECTORY_SEPARATOR)) {

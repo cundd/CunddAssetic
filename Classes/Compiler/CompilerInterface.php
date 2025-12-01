@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Compiler;
 
 use Assetic\Asset\AssetCollection;
-use Assetic\Factory\AssetFactory;
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\ValueObject\Result;
 use LogicException;
@@ -32,15 +31,4 @@ interface CompilerInterface
      * @return Result<null,Throwable>
      */
     public function compile(Configuration $configuration): Result;
-
-    /**
-     * Create and collect the Asset with the given key and stylesheet
-     */
-    public function createAsset(
-        Configuration $configuration,
-        string $assetKey,
-        string $stylesheet,
-        AssetCollection $assetCollection,
-        AssetFactory $factory,
-    ): ?AssetCollection;
 }
