@@ -232,7 +232,7 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Create and collect the Asset with the given key and stylesheet
      */
-    public function createAsset(
+    private function createAsset(
         FilterManager $filterManager,
         Configuration $configuration,
         string $assetKey,
