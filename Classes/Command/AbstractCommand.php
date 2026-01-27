@@ -8,6 +8,7 @@ use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\Result;
@@ -15,7 +16,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Throwable;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Site\SiteFinder;
 
 use function basename;
@@ -95,7 +95,7 @@ abstract class AbstractCommand extends Command
             $destination .= '/' . basename($source);
         }
 
-        $destination = Environment::getPublicPath() . '/' . $destination;
+        $destination = PathUtility::getAbsolutePath($destination);
         if (!file_exists(dirname($destination))) {
             mkdir(dirname($destination), 0775, true);
         }
