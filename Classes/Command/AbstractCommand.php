@@ -12,10 +12,13 @@ use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\Result;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Throwable;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 
 use function basename;
@@ -110,7 +113,22 @@ abstract class AbstractCommand extends Command
         InputInterface $input,
     ): CompilationContext {
         $siteIdentifier = $input->getArgument(self::ARGUMENT_SITE);
-        $site = $this->siteFinder->getSiteByIdentifier($siteIdentifier);
+        try {
+            $site = $this->siteFinder->getSiteByIdentifier($siteIdentifier);
+        } catch (SiteNotFoundException $e) {
+            $options = implode(
+                ', ',
+                array_map(
+                    fn (Site $site) => $site->getIdentifier(),
+                    $this->siteFinder->getAllSites()
+                )
+            );
+            throw new RuntimeException(
+                $e->getMessage() . '. Valid options are: ' . $options,
+                1769528743,
+                $e
+            );
+        }
 
         return new CompilationContext(
             site: $site,
