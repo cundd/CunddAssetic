@@ -65,7 +65,7 @@ class WatchCommand extends AbstractWatchCommand
 
         $fileWatcher = $this->getFileWatcher();
         $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
-        while (true) { // @phpstan-ignore while.alwaysTrue
+        while (true) {
             $didRecompile = $this->recompileIfNeeded(
                 $configuration,
                 $compilationContext,
