@@ -1,1 +1,20 @@
-@import 'EXT:assetic/Configuration/TypoScript/setup.typoscript'
+plugin.CunddAssetic = USER
+plugin.CunddAssetic {
+    userFunc = Cundd\Assetic\Plugin->main
+
+    // Enable development mode to always compile files
+    development = 0
+}
+
+// If the TypoScript constant `developmentMode` is set, use the frontend plugin
+// in development mode too
+["{$developmentMode}"]
+    plugin.CunddAssetic = USER_INT
+    plugin.CunddAssetic.development = {$developmentMode}
+[end]
+
+// Mirror plugin configuration to the module configuration
+plugin.tx_assetic =< plugin.CunddAssetic
+
+// Include Assetic in page header
+page.headerData.40001 =< plugin.CunddAssetic

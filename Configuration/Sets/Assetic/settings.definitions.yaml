@@ -9,14 +9,14 @@ categories:
     parent: Assetic
 
 settings:
-  assetic.settings.create_symlink:
+  assetic.settings.createSymlink:
     type: bool
     default: false
     label: Symlink
     description: Always create a symlink to the compiled file
     category: Assetic.general
 
-  assetic.settings.allow_compile_without_login:
+  assetic.settings.allowCompileWithoutLogin:
     type: bool
     default: false
     label: Compile if no backend user is logged in
@@ -30,7 +30,7 @@ settings:
     description: Throw exceptions for missing filter functions
     category: Assetic.general
 
-  assetic.settings.livereload.add_javascript:
+  assetic.settings.livereload.addJavascript:
     type: bool
     default: false
     label: Add LiveReload JavaScript
@@ -44,7 +44,7 @@ settings:
     description: ""
     category: Assetic.livereload
 
-  assetic.settings.livereload.skip_server_test:
+  assetic.settings.livereload.skipServerTest:
     type: bool
     default: false
     label: Skip LiveReload test connection

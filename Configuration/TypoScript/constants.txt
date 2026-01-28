@@ -1,1 +1,0 @@
-@import 'EXT:assetic/Configuration/TypoScript/constants.typoscript'

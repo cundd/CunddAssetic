@@ -76,8 +76,12 @@ class Plugin
             ),
             isCliEnvironment: false
         );
-        $configuration = $this->configurationFactory
-            ->buildFromRequest($request, $compilationContext);
+
+        $configuration = $this->buildConfigurationWithPluginConfiguration(
+            $compilationContext,
+            $conf,
+            $request
+        );
 
         if (0 === count($this->manager->collectAssets($configuration)->all())) {
             throw new MissingConfigurationException('No assets have been defined', 4491033249);
@@ -208,5 +212,35 @@ class Plugin
         } else {
             return sprintf('<!-- Use pre-compiled assets in %s -->', $duration);
         }
+    }
+
+    /**
+     * @param array<string,mixed> $pluginConfiguration
+     */
+    private function buildConfigurationWithPluginConfiguration(
+        CompilationContext $compilationContext,
+        array $pluginConfiguration,
+        ServerRequestInterface $request,
+    ): Configuration {
+        $configuration = $this->configurationFactory
+            ->buildFromRequest($request, $compilationContext)
+            ->unwrap();
+        if (isset($pluginConfiguration['development'])) {
+            return new Configuration(
+                site: $configuration->site,
+                stylesheetConfigurations: $configuration->stylesheetConfigurations,
+                outputFileDir: $configuration->outputFileDir,
+                outputFileName: $configuration->outputFileName,
+                filterForType: $configuration->filterForType,
+                filterBinaries: $configuration->filterBinaries,
+                liveReloadConfiguration: $configuration->liveReloadConfiguration,
+                isDevelopment: (bool) $pluginConfiguration['development'],
+                createSymlink: $configuration->createSymlink,
+                allowCompileWithoutLogin: $configuration->allowCompileWithoutLogin,
+                strictModeEnabled: $configuration->strictModeEnabled,
+            );
+        }
+
+        return $configuration;
     }
 }

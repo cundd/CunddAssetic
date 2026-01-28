@@ -35,17 +35,30 @@ class AssetController extends ActionController
      */
     public function listAction(): ResponseInterface
     {
-        $compilationContext = $this->buildCompilationContext();
-        $configuration = $this->configurationFactory
-            ->buildFromRequest($this->request, $compilationContext);
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $assetCollection = $this->manager->collectAssets($configuration);
-        if (!empty($assetCollection->all())) {
-            $moduleTemplate->assign('assets', $assetCollection);
+        $compilationContext = $this->buildCompilationContext();
+        $configurationResult = $this->configurationFactory
+            ->buildFromRequest($this->request, $compilationContext);
+        if ($configurationResult->isOk()) {
+            $assetCollection = $this->manager->collectAssets(
+                $configurationResult->unwrap()
+            );
+            if (!empty($assetCollection->all())) {
+                $moduleTemplate->assign('assets', $assetCollection);
+            } else {
+                $this->addFlashMessage('No assets found', '', ContextualFeedbackSeverity::WARNING);
+            }
+            $moduleTemplate->assign(
+                'lastBuildError',
+                $this->sessionService->getErrorFromSession()
+            );
         } else {
-            $this->addFlashMessage('No assets found', '', ContextualFeedbackSeverity::WARNING);
+            $this->addFlashMessage(
+                $configurationResult->unwrapErr()->getMessage(),
+                '',
+                ContextualFeedbackSeverity::ERROR
+            );
         }
-        $moduleTemplate->assign('lastBuildError', $this->sessionService->getErrorFromSession());
 
         return $moduleTemplate->renderResponse('Asset/List');
     }
@@ -67,7 +80,8 @@ class AssetController extends ActionController
     {
         $compilationContext = $this->buildCompilationContext();
         $configuration = $this->configurationFactory
-            ->buildFromRequest($this->request, $compilationContext);
+            ->buildFromRequest($this->request, $compilationContext)
+            ->unwrap();
 
         $result = $this->manager->forceCompile()->collectAndCompile(
             $configuration,

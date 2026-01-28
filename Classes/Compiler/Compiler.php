@@ -12,6 +12,7 @@ use Assetic\Exception\FilterException;
 use Assetic\Factory\AssetFactory;
 use Assetic\FilterManager;
 use Cundd\Assetic\Configuration;
+use Cundd\Assetic\Configuration\StylesheetConfiguration;
 use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\Utility\ProfilingUtility;
@@ -31,6 +32,8 @@ use function preg_match;
  * Compiler
  *
  * The class that builds the connection between Assetic and TYPO3
+ *
+ * @phpstan-import-type FilterArgument from StylesheetConfiguration
  */
 final class Compiler implements CompilerInterface, LoggerAwareInterface
 {
@@ -72,17 +75,14 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
 
         // Loop through all configured stylesheets
         $stylesheets = $configuration->stylesheetConfigurations;
-        foreach ($stylesheets as $assetKey => $stylesheet) {
-            if (!is_array($stylesheet)) {
-                $this->createAsset(
-                    $filterManager,
-                    $configuration,
-                    $assetKey,
-                    $stylesheet,
-                    $assetCollection,
-                    $factory
-                );
-            }
+        foreach ($stylesheets as $stylesheet) {
+            $asset = $this->createAsset(
+                $filterManager,
+                $configuration,
+                $stylesheet,
+                $factory
+            );
+            $assetCollection->add($asset);
         }
 
         // Set the output file name
@@ -144,21 +144,15 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
             return null;
         }
 
-        if (class_exists($filterClass)) {
-            $filterBinaryPath = $this->getFilterBinaryPath(
-                $configuration,
-                $filterClass
-            );
-            if ($filterBinaryPath) {
-                $filter = new $filterClass($filterBinaryPath);
-            } else {
-                $filter = new $filterClass();
-            }
+        assert(class_exists($filterClass));
+        $filterBinaryPath = $this->getFilterBinaryPath(
+            $configuration,
+            $filterClass
+        );
+        if ($filterBinaryPath) {
+            $filter = new $filterClass($filterBinaryPath);
         } else {
-            throw new FilterException(
-                'Filter class ' . $filterClass . ' not found',
-                1355846301
-            );
+            $filter = new $filterClass();
         }
 
         assert($filter instanceof FilterInterface);
@@ -175,7 +169,7 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
     /**
      * Invoke the functions of the filter
      *
-     * @param array<non-empty-string,string|string[]> $functions
+     * @param array<non-empty-string,FilterArgument> $functions
      *
      * @throws UnexpectedValueException if the given stylesheet type is invalid
      */
@@ -193,10 +187,8 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
             );
         }
         ksort($functions);
-        foreach ($functions as $function => $data) {
-            if (!is_array($data)) {
-                $data = [$data];
-            }
+        foreach ($functions as $function => $argument) {
+            $data = [$argument];
             $this->prepareFunctionParameters($data);
 
             // Check if the function has a numerator as prefix and strip that off
@@ -214,11 +206,14 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
                 // the function parameters to be prepared beforehand
                 call_user_func_array($filter->$function(...), array_values($data));
             } elseif ($configuration->strictModeEnabled) {
-                throw new FilterException(sprintf(
-                    'Filter "%s" does not implement method "%s"',
-                    get_class($filter),
-                    $function
-                ), 1447161985);
+                throw new FilterException(
+                    sprintf(
+                        'Filter "%s" does not implement method "%s"',
+                        get_class($filter),
+                        $function
+                    ),
+                    1447161985
+                );
             } else {
                 trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
             }
@@ -235,30 +230,19 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
     private function createAsset(
         FilterManager $filterManager,
         Configuration $configuration,
-        string $assetKey,
-        string $stylesheet,
-        AssetCollection $assetCollection,
+        StylesheetConfiguration $stylesheetConfiguration,
         AssetFactory $factory,
     ): AssetCollection {
-        $allStylesheetConfiguration = $configuration->stylesheetConfigurations;
-        $stylesheetConf = is_array($allStylesheetConfiguration[$assetKey . '.'])
-            ? $allStylesheetConfiguration[$assetKey . '.']
-            : [];
+        // Get the type to find the matching filter
+        $stylesheetType = $stylesheetConfiguration->type
+            ?? substr((string) strrchr($stylesheetConfiguration->file, '.'), 1);
 
-        // Get the type to find the according filter
-        if (isset($stylesheetConf['type']) && is_scalar($stylesheetConf['type'])) {
-            $stylesheetType = (string) $stylesheetConf['type'];
-        } else {
-            $stylesheetType = substr((string) strrchr($stylesheet, '.'), 1);
-        }
-
-        $originalStylesheet = $stylesheet;
-        $stylesheet = PathUtility::getAbsolutePath($stylesheet);
-        if (!$stylesheet) {
+        $filePath = PathUtility::getAbsolutePath($stylesheetConfiguration->file);
+        if (!$filePath) {
             throw new FilePathException(
                 sprintf(
                     'Could not determine absolute path for asset file "%s"',
-                    $originalStylesheet
+                    $stylesheetConfiguration->file
                 ),
                 8511589451
             );
@@ -273,9 +257,8 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         // Check if there are filter functions
-        /** @var array<non-empty-string, string|string[]> $functions */
-        $functions = $stylesheetConf['functions.'] ?? [];
-        if ($filter && !empty($functions) && is_array($functions)) {
+        $functions = $stylesheetConfiguration->functions;
+        if ($filter && !empty($functions)) {
             $this->applyFunctionsToFilterForType(
                 $filterManager,
                 $configuration,
@@ -286,11 +269,9 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
         }
 
         $asset = $factory->createAsset(
-            [$stylesheet],
+            [$filePath],
             $assetFilters,
-            $currentOptions
         );
-        $assetCollection->add($asset);
 
         return $asset;
     }
@@ -300,12 +281,18 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
      *
      * I.e. expands paths to their absolute path
      *
-     * @param array<string> $parameters Reference to the data array
+     * @param array<string|int|float|bool> $parameters Reference to the data array
      */
     private function prepareFunctionParameters(array &$parameters): void
     {
         foreach ($parameters as &$parameter) {
-            if (false !== strpos($parameter, '.') || false !== strpos($parameter, DIRECTORY_SEPARATOR)) {
+            if (is_int($parameter)
+                || is_bool($parameter)
+                || is_float($parameter)) {
+                continue;
+            }
+            if (str_contains($parameter, '.')
+                || str_contains($parameter, DIRECTORY_SEPARATOR)) {
                 $path = PathUtility::getAbsolutePath($parameter);
                 $parameter = realpath($path) ?: $path;
             }

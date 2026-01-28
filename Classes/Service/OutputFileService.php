@@ -38,23 +38,20 @@ class OutputFileService implements OutputFileServiceInterface
 
         // Loop through all configured stylesheets
         $stylesheets = $configuration->stylesheetConfigurations;
-        foreach ($stylesheets as $assetKey => $stylesheet) {
-            // If the current value of $stylesheet is an array it's the detailed
-            // configuration of a stylesheet, not the stylesheet path itself
-            if (is_string($stylesheet)) {
-                $stylesheetFileName = basename($stylesheet);
-                $stylesheetFileName = str_replace(
-                    ['.css', '.scss', '.sass', '.less'],
-                    '',
-                    $stylesheetFileName
-                );
-                $stylesheetFileName = preg_replace(
-                    '![^0-9a-zA-Z-_]!',
-                    '',
-                    $stylesheetFileName
-                );
-                $outputFileNameParts[] = $stylesheetFileName;
-            }
+        foreach ($stylesheets as $stylesheet) {
+            $stylesheetPath = $stylesheet->file;
+            $stylesheetFileName = basename($stylesheetPath);
+            $stylesheetFileName = str_replace(
+                ['.css', '.scss', '.sass', '.less'],
+                '',
+                $stylesheetFileName
+            );
+            $stylesheetFileName = preg_replace(
+                '![^0-9a-zA-Z-_]!',
+                '',
+                $stylesheetFileName
+            );
+            $outputFileNameParts[] = $stylesheetFileName;
         }
 
         return new PathWithoutHash(

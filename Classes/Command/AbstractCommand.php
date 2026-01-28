@@ -140,6 +140,12 @@ abstract class AbstractCommand extends Command
     final protected function getConfiguration(
         CompilationContext $compilationContext,
     ): Configuration {
-        return $this->configurationFactory->buildFromCli($compilationContext);
+        $result = $this->configurationFactory
+            ->buildFromCli($compilationContext);
+        if ($result->isErr()) {
+            throw $result->unwrapErr();
+        }
+
+        return $result->unwrap();
     }
 }

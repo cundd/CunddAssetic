@@ -5,41 +5,44 @@ Integrate the [Assetic asset management framework](https://github.com/assetic-ph
 ## Installation
 
 1. `composer require cundd/assetic`
-2. Include the static TypoScript files
+2. Load the Site Set into the TYPO3 Site
 3. Configure the assets you want to be loaded
 
 ## Usage
 
 ### Basic
 
-    plugin.CunddAssetic {
-        stylesheets {
-            custom_identifier_for_the_asset = fileadmin/stylesheets/style.css
-        }
-    }
+```yaml
+# File: config/sites/my-site/settings.yaml or EXT:site_package/Configuration/Sets/Site/settings.yaml
+assetic:
+    stylesheets:
+        - file: EXT:site_package/Resources/Private/Stylesheets/main.css
+```
 
 ### Multiple assets
 
-    plugin.CunddAssetic {
-        stylesheets {
-            identifier_for_asset_1 = fileadmin/stylesheets/reset.css
-            identifier_for_asset_2 = fileadmin/stylesheets/style.css
-        }
-    }
+```yaml
+# File: config/sites/my-site/settings.yaml or EXT:site_package/Configuration/Sets/Site/settings.yaml
+assetic:
+    stylesheets:
+        - file: EXT:site_package/Resources/Private/Stylesheets/reset.css
+        - file: EXT:site_package/Resources/Private/Stylesheets/style.css
+```
 
 ### With SASS
 
 If your web server and web user are configured to be able to use the `sass` command line tool, from within your TYPO3 installation, you could use the following:
 
-    plugin.CunddAssetic {
-        stylesheets {
-            custom_identifier_for_the_asset = fileadmin/bootstrap/lib/bootstrap.scss
-        }
-    }
+```yaml
+# File: config/sites/my-site/settings.yaml or EXT:site_package/Configuration/Sets/Site/settings.yaml
+assetic:
+    stylesheets:
+        - file: EXT:site_package/Resources/Private/Stylesheets/main.scss
+```
 
 ### With other CSS preprocessors
 
-Analog you can use other CSS preprocessors. The [Assetic Github Page](https://github.com/assetic-php/assetic?tab=readme-ov-file#filters) provides a (incomplete) list of all filters provided with the installed Assetic version.
+Analog you can use other CSS preprocessors. The [Assetic Github Page](https://github.com/assetic-php/assetic?tab=readme-ov-file#filters) provides a (incomplete) list of all filters provided by the installed Assetic version.
 
 ## Development mode
 
@@ -49,65 +52,69 @@ To make sure that the assets are compiled each time the frontend page is refresh
     	development = 1
     }
 
-By default Cundd Assetic is configured not to compile files if NO backend user is logged in. To allow file compilation without a logged in backend user you can change the `allow_compile_without_login` configuration, in TypoScript or the Constant editor.
-
-    plugin.CunddAssetic {
-        allow_compile_without_login = 1
-    }
+By default Cundd Assetic is configured not to compile files if NO backend user is logged in. To allow file compilation without a logged in backend user you can change the `allowCompileWithoutLogin` configuration in Site Settings.
 
 ## Advanced
 
 ### Configure a filter
 
-Some filters allow futher customization. The Sass filter e.g. provides the method `addImportPath` which enables you to add another path to look for imported scss files. Cundd Assetic provides an interface to invoke such functions through TypoScript.
+Some filters allow further customization. The Sass filter e.g. provides the method `addImportPath` which allows you to add another path to look for imported Sass files. Cundd Assetic provides an interface to invoke such functions.
 
-    plugin.CunddAssetic.stylesheets.custom_identifier_for_the_asset {
-        ### Add functions that will be called on the filter
-        functions {
-            addImportPath = fileadmin/local/sass/
-        }
-    }
+```yaml
+# File: config/sites/my-site/settings.yaml or EXT:site_package/Configuration/Sets/Site/settings.yaml
+assetic:
+    stylesheets:
+        - file: EXT:site_package/Resources/Private/Stylesheets/main.scss
+          functions:
+              # Add functions that will be called on the filter
+              addImportPath: ProjectPath:/vendor/
+```
 
 If you want to invoke a method multiple times you can just add a numeric prefix to the function name:
 
-    plugin.CunddAssetic.stylesheets.custom_identifier_for_the_asset {
-        functions {
-            # Add a numeric prefix to allow the function to called multiple times
-            0-addImportPath = fileadmin/local/sass/
-            1-addImportPath = fileadmin/core/sass/
-        }
-    }
+```yaml
+# File: config/sites/my-site/settings.yaml or EXT:site_package/Configuration/Sets/Site/settings.yaml
+assetic:
+    stylesheets:
+        - file: EXT:site_package/Resources/Private/Stylesheets/main.scss
+          functions:
+              # Add a numeric prefix to allow the function to called multiple times
+              0-addImportPath: ProjectPath:/vendor/
+              1-addImportPath: EXT:site_package/Resources/Private/Library/
+```
 
 ### Configure the filter binary paths
 
-In some cases you may have to specify the path to a CSS preprocessor to match your system's configuration. This can be done through the `filter_binaries` directive in TypoScript:
+In some cases you may have to specify the path to a CSS preprocessor to match your system's configuration. This can be done through the `filterBinaries` configuration:
 
-    plugin.CunddAssetic {
-        filter_binaries {
+```yaml
+# File: config/sites/my-site/settings.yaml or EXT:site_package/Configuration/Sets/Site/settings.yaml
+assetic:
+    settings:
+        filterBinaries:
         	# Change the path to the filter binaries. I.e. if node.js is installed
         	# into /usr/local/bin/
-    		assetic_filter_lessfilter = /usr/local/bin/node
+            assetic_filter_lessfilter: /usr/local/bin/node
 
     		# The binary for filter class \Assetic\Filter\Sass\ScssFilter
-    		assetic_filter_sass_scssfilter = /usr/local/bin/sass
-        }
-    }
+    		assetic_filter_sass_scssfilter: /usr/local/bin/sass
+```
 
 ## Command line
 
 Assetic provides three different CLI commands.
 
-### assetic:run
+### assetic:compile
 
 Compiles the assets and exit.
 
 ```bash
-vendor/bin/typo3 assetic:run
+vendor/bin/typo3 assetic:compile
 ```
 
 ### assetic:watch
 
-Watches for file changes in fileadmin/ and re-compiles the assets if needed.
+Watches for file changes in `EXT:client` and re-compiles the assets if needed.
 
 ```bash
 vendor/bin/typo3 assetic:watch
@@ -115,7 +122,7 @@ vendor/bin/typo3 assetic:watch
 
 ### assetic:livereload
 
-Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in fileadmin/ and re-compiles the assets if needed. The TypoScript constant `assetic.settings.livereload.add_javascript` should be set to 1.
+Starts a [LiveReload](http://livereload.com/) compatible server that watches for file changes in `EXT:client` and re-compiles the assets if needed. The necessary JavaScript can be loaded be enabling `addJavascript` in Site Settings.
 
 ```bash
 vendor/bin/typo3 assetic:livereload
@@ -141,7 +148,7 @@ mutations:
 
 ### Standalone auto-refresh tool
 
-Cundd Assetic provides a JavaScript that observes the CSS and JavaScript assets on the page for changes and automatically reloads them. For more information and usage visit [/Resources/Public/JavaScript](/Resources/Public/JavaScript).
+Cundd Assetic provides a JavaScript tool that checks the CSS and JavaScript assets on the page for changes and automatically reloads them. For more information and usage visit [/Resources/Public/JavaScript](/Resources/Public/JavaScript).
 
 ## Sponsored by
 
