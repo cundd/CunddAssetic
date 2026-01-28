@@ -285,14 +285,6 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
             );
         }
 
-        // Check if there are special options for this stylesheet
-        $currentOptions = $stylesheetConf['options.'] ?? [];
-        $this->logger?->debug(
-            'Use stylesheet configuration options',
-            ['options' => $currentOptions]
-        );
-        assert(is_array($currentOptions));
-
         $asset = $factory->createAsset(
             [$stylesheet],
             $assetFilters,
