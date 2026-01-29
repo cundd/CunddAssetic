@@ -32,6 +32,7 @@ class OutputFileService implements OutputFileServiceInterface
             );
         }
 
+        // Add the `Site`'s identifier to the name to prevent collisions
         $outputFileNameParts = [
             $configuration->site->getIdentifier(),
         ];
