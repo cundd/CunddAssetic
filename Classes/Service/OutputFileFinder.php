@@ -15,7 +15,7 @@ class OutputFileFinder implements OutputFileFinderInterface
     public function findPreviousOutputFiles(string $filePath, string $suffix = '.css'): array
     {
         ProfilingUtility::profile('Will call glob for previous filtered Asset files');
-        $matchingFiles = glob($filePath . '_*' . $suffix);
+        $matchingFiles = glob($filePath . OutputFileService::NAME_PART_SEPARATOR . '*' . $suffix);
         ProfilingUtility::profile('Did call glob for previous filtered Asset files');
 
         // Glob will not return invalid symlinks
