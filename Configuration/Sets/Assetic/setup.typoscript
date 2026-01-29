@@ -6,13 +6,6 @@ plugin.CunddAssetic {
     development = 0
 }
 
-// If the TypoScript constant `developmentMode` is set, use the frontend plugin
-// in development mode too
-["{$developmentMode}"]
-    plugin.CunddAssetic = USER_INT
-    plugin.CunddAssetic.development = {$developmentMode}
-[end]
-
 [0 < "{$assetic.settings.development}"]
     plugin.CunddAssetic = USER_INT
     plugin.CunddAssetic.development = {$developmentMode}
