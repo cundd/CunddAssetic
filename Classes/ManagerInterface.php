@@ -34,11 +34,6 @@ interface ManagerInterface
     );
 
     /**
-     * Force asset re-compilation
-     */
-    public function forceCompile(): self;
-
-    /**
      * Return if the files should be compiled
      */
     public function willCompile(
