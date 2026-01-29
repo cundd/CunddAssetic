@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cundd\Assetic;
 
 use Assetic\Asset\AssetCollection;
-use Cundd\Assetic\Compiler\CompilerInterface;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\Result;
@@ -51,9 +50,4 @@ interface ManagerInterface
      * Return the symlink URI
      */
     public function getSymlinkUri(Configuration $configuration): string;
-
-    /**
-     * Return the Compiler instance
-     */
-    public function getCompiler(): CompilerInterface;
 }
