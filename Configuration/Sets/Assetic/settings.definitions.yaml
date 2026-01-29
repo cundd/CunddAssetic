@@ -9,6 +9,13 @@ categories:
     parent: Assetic
 
 settings:
+  assetic.settings.development:
+    type: bool
+    default: false
+    label: Development mode
+    description: Always re-compile assets
+    category: Assetic.general
+
   assetic.settings.createSymlink:
     type: bool
     default: false

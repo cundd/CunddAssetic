@@ -13,6 +13,10 @@ plugin.CunddAssetic {
     plugin.CunddAssetic.development = {$developmentMode}
 [end]
 
+[0 < "{$assetic.settings.development}"]
+    plugin.CunddAssetic = USER_INT
+    plugin.CunddAssetic.development = {$developmentMode}
+[end]
 // Mirror plugin configuration to the module configuration
 plugin.tx_assetic =< plugin.CunddAssetic
 
