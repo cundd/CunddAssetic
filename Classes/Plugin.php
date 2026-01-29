@@ -82,7 +82,6 @@ class Plugin
             $request
         );
 
-
         $collectAndCompileStart = hrtime(true);
         $result = $this->manager->collectAndCompile(
             $configuration,
@@ -107,7 +106,8 @@ class Plugin
 
         /** @var FilePath $filePath */
         $filePath = $result->unwrap();
-        $publicUri = $filePath->getPublicUri() . ($filePath->isSymlink() ? '?' . time() : '');
+        $publicUri = $filePath->getPublicUri()
+            . ($filePath->isSymlink() ? '?' . time() : '');
         $content = $this->getLiveReloadCode(
             $request,
             $configuration,
