@@ -12,6 +12,7 @@ final class CompilationContext
         public readonly Site $site,
         public readonly bool $isBackendUserLoggedIn,
         public readonly bool $isCliEnvironment,
+        public readonly bool $forceCompilation,
     ) {
     }
 }

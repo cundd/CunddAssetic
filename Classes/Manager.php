@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
-use Assetic\Asset\AssetCollection;
 use Cundd\Assetic\BuildStep\BuildStepInterface;
 use Cundd\Assetic\Compiler\CompilerFactory;
 use Cundd\Assetic\Compiler\CompilerInterface;
@@ -19,7 +18,6 @@ use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\PathWithoutHash;
 use Cundd\Assetic\ValueObject\Result;
-use LogicException;
 use Throwable;
 
 use function file_exists;
@@ -29,11 +27,6 @@ use function file_exists;
  */
 class Manager implements ManagerInterface
 {
-    /**
-     * Indicates if the assets will compile
-     */
-    private bool $forceCompilation = false;
-
     private readonly CompilerInterface $compiler;
 
     public function __construct(
@@ -66,14 +59,19 @@ class Manager implements ManagerInterface
             return Result::ok($expectedPath);
         }
 
-        // If expected output file does not exist clear the internal cache,
-        // set `willCompile` to TRUE and call the main routine again
-        $this->forceCompile();
+        // If the expected output file does not exist clear the internal cache,
+        // force compilation and call the main routine again
+        $newCompilationContext = new CompilationContext(
+            site: $compilationContext->site,
+            isBackendUserLoggedIn: $compilationContext->isBackendUserLoggedIn,
+            isCliEnvironment: $compilationContext->isCliEnvironment,
+            forceCompilation: true
+        );
         $this->cacheManager->clearHashCache($pathWithoutHash);
 
         return $this->collectAssetsAndCompile(
             $configuration,
-            $compilationContext
+            $newCompilationContext
         );
     }
 
@@ -84,19 +82,23 @@ class Manager implements ManagerInterface
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): Result {
-        $this->collectAssetsAndSetTarget($configuration);
+        ProfilingUtility::start('Will compile assets');
 
-        $outputFilePathWithoutHash = $this->outputFileService->getPathWithoutHash($configuration);
+        $outputFilePathWithoutHash = $this->outputFileService
+            ->getPathWithoutHash($configuration);
+
         $currentState = new BuildState(
             $outputFilePathWithoutHash,
             $outputFilePathWithoutHash,
             []
         );
 
-        $buildSteps = $this->getBuildSteps($this->getCreateDevelopmentSymlink(
+        $createDevelopmentSymlink = $this->getCreateDevelopmentSymlink(
             $configuration,
             $compilationContext
-        ));
+        );
+
+        $buildSteps = $this->getBuildSteps($createDevelopmentSymlink);
         foreach ($buildSteps as $buildStep) {
             ProfilingUtility::start('Will process build step ' . get_class($buildStep));
             $currentStateResult = $buildStep->process($configuration, $currentState);
@@ -107,48 +109,9 @@ class Manager implements ManagerInterface
             $currentState = $currentStateResult->unwrap();
         }
 
+        ProfilingUtility::end('Did compile assets');
+
         return Result::ok($currentState->getFilePath());
-    }
-
-    /**
-     * Return the Compiler instance
-     */
-    public function getCompiler(): CompilerInterface
-    {
-        return $this->compiler;
-    }
-
-    /**
-     * Collect all the assets and add them to the Asset Manager
-     *
-     * @throws LogicException if the Assetic classes could not be found
-     */
-    public function collectAssets(Configuration $configuration): AssetCollection
-    {
-        return $this->collectAssetsAndSetTarget($configuration);
-    }
-
-    /**
-     * Collect the assets and set the target path
-     */
-    protected function collectAssetsAndSetTarget(
-        Configuration $configuration,
-    ): AssetCollection {
-        $assetCollection = $this->getCompiler()->collectAssets($configuration);
-
-        $pathWithoutHashFileName = $this->getPathWithoutHash($configuration)
-            ->getFileName();
-        ProfilingUtility::profile('Set output file ' . $pathWithoutHashFileName);
-        $assetCollection->setTargetPath($pathWithoutHashFileName);
-
-        return $assetCollection;
-    }
-
-    public function forceCompile(): self
-    {
-        $this->forceCompilation = true;
-
-        return $this;
     }
 
     /**
@@ -158,7 +121,9 @@ class Manager implements ManagerInterface
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): bool {
-        if ($this->forceCompilation) {
+        // Check if compilation is force (e.g. because the file does not exist,
+        // when invoked from TYPO3 backend or CLI context)
+        if ($compilationContext->forceCompilation) {
             return true;
         }
 
@@ -177,19 +142,6 @@ class Manager implements ManagerInterface
     private function getPathWithoutHash(Configuration $configuration): PathWithoutHash
     {
         return $this->outputFileService->getPathWithoutHash($configuration);
-    }
-
-    /**
-     * Return the symlink URI
-     */
-    public function getSymlinkUri(Configuration $configuration): string
-    {
-        return $this->symlinkService
-            ->getSymlinkPath(
-                $configuration,
-                $this->getPathWithoutHash($configuration)
-            )
-            ->getPublicUri();
     }
 
     private function getCreateDevelopmentSymlink(

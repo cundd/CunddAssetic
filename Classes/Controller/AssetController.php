@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Controller;
 
+use Cundd\Assetic\Compiler\AssetCollector;
 use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Service\SessionServiceInterface;
@@ -27,6 +28,7 @@ class AssetController extends ActionController
         private readonly ModuleTemplateFactory $moduleTemplateFactory,
         private readonly ConfigurationFactory $configurationFactory,
         private readonly Context $context,
+        private readonly AssetCollector $assetCollector,
     ) {
     }
 
@@ -40,13 +42,17 @@ class AssetController extends ActionController
         $configurationResult = $this->configurationFactory
             ->buildFromRequest($this->request, $compilationContext);
         if ($configurationResult->isOk()) {
-            $assetCollection = $this->manager->collectAssets(
+            $assetCollection = $this->assetCollector->collectAssets(
                 $configurationResult->unwrap()
             );
             if (!empty($assetCollection->all())) {
                 $moduleTemplate->assign('assets', $assetCollection);
             } else {
-                $this->addFlashMessage('No assets found', '', ContextualFeedbackSeverity::WARNING);
+                $this->addFlashMessage(
+                    'No assets found',
+                    '',
+                    ContextualFeedbackSeverity::WARNING
+                );
             }
             $moduleTemplate->assign(
                 'lastBuildError',
@@ -83,7 +89,8 @@ class AssetController extends ActionController
             ->buildFromRequest($this->request, $compilationContext)
             ->unwrap();
 
-        $result = $this->manager->forceCompile()->collectAndCompile(
+        assert($compilationContext->forceCompilation);
+        $result = $this->manager->collectAndCompile(
             $configuration,
             $compilationContext
         );
@@ -117,7 +124,8 @@ class AssetController extends ActionController
                 'backend.user',
                 'isLoggedIn'
             ),
-            isCliEnvironment: false
+            isCliEnvironment: false,
+            forceCompilation: true
         );
     }
 }

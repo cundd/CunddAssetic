@@ -23,7 +23,10 @@ class Compile implements BuildStepInterface
         Configuration $configuration,
         BuildState $currentState,
     ): BuildStateResult {
-        $result = $this->compiler->compile($configuration);
+        $result = $this->compiler->compile(
+            $configuration,
+            $currentState->getOutputFilePathWithoutHash()
+        );
 
         return $result->isOk()
             ? BuildStateResult::ok($currentState)

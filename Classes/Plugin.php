@@ -6,7 +6,6 @@ namespace Cundd\Assetic;
 
 use Assetic\Exception\FilterException;
 use Cundd\Assetic\Configuration\ConfigurationFactory;
-use Cundd\Assetic\Exception\MissingConfigurationException;
 use Cundd\Assetic\Exception\OutputFileException;
 use Cundd\Assetic\Service\LiveReloadServiceInterface;
 use Cundd\Assetic\Utility\ExceptionPrinter;
@@ -21,7 +20,6 @@ use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
-use function count;
 use function hrtime;
 use function sprintf;
 
@@ -74,7 +72,8 @@ class Plugin
                 'backend.user',
                 'isLoggedIn'
             ),
-            isCliEnvironment: false
+            isCliEnvironment: false,
+            forceCompilation: false
         );
 
         $configuration = $this->buildConfigurationWithPluginConfiguration(
@@ -83,9 +82,6 @@ class Plugin
             $request
         );
 
-        if (0 === count($this->manager->collectAssets($configuration)->all())) {
-            throw new MissingConfigurationException('No assets have been defined', 4491033249);
-        }
 
         $collectAndCompileStart = hrtime(true);
         $result = $this->manager->collectAndCompile(
@@ -199,7 +195,8 @@ class Plugin
         float $collectAndCompileEnd,
         float $collectAndCompileStart,
     ): string {
-        if (false === $configuration->isDevelopment || false === $compilationContext->isBackendUserLoggedIn) {
+        if (false === $configuration->isDevelopment
+            || false === $compilationContext->isBackendUserLoggedIn) {
             return '';
         }
 
@@ -209,9 +206,9 @@ class Plugin
         );
         if ($this->manager->willCompile($configuration, $compilationContext)) {
             return sprintf('<!-- Compiled assets in %s -->', $duration);
-        } else {
-            return sprintf('<!-- Use pre-compiled assets in %s -->', $duration);
         }
+
+        return sprintf('<!-- Use pre-compiled assets in %s -->', $duration);
     }
 
     /**
@@ -222,9 +219,14 @@ class Plugin
         array $pluginConfiguration,
         ServerRequestInterface $request,
     ): Configuration {
-        $configuration = $this->configurationFactory
-            ->buildFromRequest($request, $compilationContext)
-            ->unwrap();
+        $configurationResult = $this->configurationFactory
+            ->buildFromRequest($request, $compilationContext);
+
+        if ($configurationResult->isErr()) {
+            throw $configurationResult->unwrapErr();
+        }
+
+        $configuration = $configurationResult->unwrap();
         if (isset($pluginConfiguration['development'])) {
             return new Configuration(
                 site: $configuration->site,

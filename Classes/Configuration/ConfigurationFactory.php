@@ -55,8 +55,7 @@ class ConfigurationFactory
         CompilationContext $compilationContext,
     ): Result {
         $settings = $compilationContext->site->getSettings();
-        $isDevelopment = $compilationContext->isCliEnvironment
-            || $settings->get('assetic.settings.development', false);
+        $isDevelopment = $settings->get('assetic.settings.development', false);
 
         $liveReloadConfiguration = new LiveReloadConfiguration(
             isEnabled: (bool) $settings->get(

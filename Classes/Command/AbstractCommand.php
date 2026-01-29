@@ -62,16 +62,15 @@ abstract class AbstractCommand extends Command
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): Result {
-        $this->manager->forceCompile();
-
-        if (0 === count($this->manager->collectAssets($configuration)->all())) {
+        assert($compilationContext->forceCompilation);
+        if (0 === count($configuration->stylesheetConfigurations)) {
             throw new MissingConfigurationException(
                 'No assets have been found',
                 1886548090
             );
         }
 
-        return $this->manager->forceCompile()->collectAndCompile(
+        return $this->manager->collectAndCompile(
             $configuration,
             $compilationContext
         );
@@ -134,6 +133,7 @@ abstract class AbstractCommand extends Command
             site: $site,
             isBackendUserLoggedIn: false,
             isCliEnvironment: true,
+            forceCompilation: true
         );
     }
 
