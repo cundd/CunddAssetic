@@ -7,6 +7,11 @@ Integrate the [Assetic asset management framework](https://github.com/assetic-ph
 1. `composer require cundd/assetic`
 2. Load the Site Set into the TYPO3 Site
 3. Configure the assets you want to be loaded
+4. Include the plugin the `page.headerData`
+    ```typoscript
+    // Example:
+    page.headerData.40001 =< plugin.tx_assetic
+    ```
 
 ## Usage
 
@@ -48,7 +53,7 @@ Analog you can use other CSS preprocessors. The [Assetic Github Page](https://gi
 
 To make sure that the assets are compiled each time the frontend page is refreshed, you can enable the development mode:
 
-    plugin.CunddAssetic {
+    plugin.tx_assetic {
     	development = 1
     }
 
@@ -85,7 +90,16 @@ assetic:
 
 ### Configure the filter binary paths
 
-In some cases you may have to specify the path to a CSS preprocessor to match your system's configuration. This can be done through the `filterBinaries` configuration:
+In some cases you may have to specify the path to a CSS preprocessor to match your system's configuration. This can be done through the `filterBinaries` configuration.
+
+The configuration keys are determined by replacing `\` with `_` and converting
+the string to lowercase:
+
+```
+1. \AsseticAdditions\Filter\DartSassFilter
+2. AsseticAdditions_Filter_DartSassFilter
+3. asseticadditions_filter_dartsassfilter
+```
 
 ```yaml
 # File: config/sites/my-site/settings.yaml or EXT:site_package/Configuration/Sets/Site/settings.yaml
@@ -96,8 +110,8 @@ assetic:
         	# into /usr/local/bin/
             assetic_filter_lessfilter: /usr/local/bin/node
 
-    		# The binary for filter class \Assetic\Filter\Sass\ScssFilter
-    		assetic_filter_sass_scssfilter: /usr/local/bin/sass
+    		# The binary for filter class \AsseticAdditions\Filter\DartSassFilter
+    		asseticadditions_filter_dartsassfilter: /usr/local/bin/sass
 ```
 
 ## Command line
