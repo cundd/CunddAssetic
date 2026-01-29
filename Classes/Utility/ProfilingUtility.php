@@ -19,8 +19,31 @@ use const STDOUT;
 
 final class ProfilingUtility
 {
+    private static int $level = 0;
+
+    /**
+     * Start a profiling section
+     */
+    public static function start(string $msg = ''): void
+    {
+        self::profile($msg);
+        ++self::$level;
+    }
+
+    /**
+     * End a profiling section
+     */
+    public static function end(string $msg = ''): void
+    {
+        --self::$level;
+        assert(self::$level >= 0);
+        self::profile($msg);
+    }
+
     /**
      * Print a profiling message
+     *
+     * @deprecated use start() and end() instead
      */
     public static function profile(string $msg = ''): void
     {
@@ -59,11 +82,12 @@ final class ProfilingUtility
         fwrite(
             $outputStream,
             sprintf(
-                '[%s] %12.2fµs %12.2fµs @ %6.4f %s' . PHP_EOL,
+                '[%s] %12.2fµs %12.2fµs @ %6.4f %s%s' . PHP_EOL,
                 date('Y-m-d H:i:s'),
                 $lastCallDiff / 1000,
                 $profilerStartDiff / 1000,
                 $requestStartDiff,
+                str_repeat('    ', self::$level),
                 $msg
             )
         );

@@ -98,7 +98,9 @@ class Manager implements ManagerInterface
             $compilationContext
         ));
         foreach ($buildSteps as $buildStep) {
+            ProfilingUtility::start('Will process build step ' . get_class($buildStep));
             $currentStateResult = $buildStep->process($configuration, $currentState);
+            ProfilingUtility::end('Did process build step ' . get_class($buildStep));
             if ($currentStateResult->isErr()) {
                 return Result::err($currentStateResult->unwrapErr());
             }

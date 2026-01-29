@@ -43,8 +43,11 @@ class OutputFileHashService
         PathWithoutHash $outputFilenameWithoutHash,
         string $hashAlgorithm = 'md5',
     ): Result {
+        ProfilingUtility::start('Will create file hash');
         $compileDestinationPath = $outputFilenameWithoutHash->getAbsoluteUri();
         if (!is_readable($compileDestinationPath)) {
+            ProfilingUtility::end();
+
             return Result::err(new UnexpectedValueException(
                 'Compiled destination path can not be read'
             ));
@@ -52,12 +55,13 @@ class OutputFileHashService
 
         $fileHash = hash_file($hashAlgorithm, $compileDestinationPath);
         if (false === $fileHash) {
+            ProfilingUtility::end();
+
             return Result::err(new UnexpectedValueException(
                 'Could not create hash of compiled destination path'
             ));
         }
-
-        ProfilingUtility::profile('Did create file hash');
+        ProfilingUtility::end('Did create file hash');
         $this->storeHash($outputFilenameWithoutHash, $fileHash);
 
         $finalFileName = $outputFilenameWithoutHash->getFileName()
@@ -94,29 +98,29 @@ class OutputFileHashService
         }
         $suffix = '.css';
 
-        ProfilingUtility::profile('Get previous hash from cache');
+        ProfilingUtility::start('Get previous hash from cache');
         $previousHash = $this->getCachedPreviousHash($currentOutputFilenameWithoutHash);
         $previousHashFilePath = $currentOutputFilenameWithoutHash->getAbsoluteUri()
             . OutputFileService::NAME_PART_SEPARATOR . $previousHash . $suffix;
 
         if ($previousHash && file_exists($previousHashFilePath)) {
-            ProfilingUtility::profile('Get previous hash from cache: Hit');
+            ProfilingUtility::end('Get previous hash from cache: Hit');
 
             return $previousHash;
         } else {
-            ProfilingUtility::profile('Get previous hash from cache: Miss');
+            ProfilingUtility::end('Get previous hash from cache: Miss');
         }
 
-        ProfilingUtility::profile('Find previous output files');
+        ProfilingUtility::start('Find previous output files');
         $publicUri = $currentOutputFilenameWithoutHash->getPublicUri();
         $matchingFiles = $this->outputFileFinder->findPreviousOutputFiles($publicUri, $suffix);
         if (!$matchingFiles) {
-            ProfilingUtility::profile('Find previous output files: None found');
+            ProfilingUtility::end('Find previous output files: None found');
 
             return '';
         }
 
-        ProfilingUtility::profile('Find previous output files: Found ' . count($matchingFiles));
+        ProfilingUtility::end('Find previous output files: Found ' . count($matchingFiles));
         $lastMatchingFile = end($matchingFiles);
 
         return substr($lastMatchingFile, strlen($publicUri) + 1, (-1 * strlen($suffix)));

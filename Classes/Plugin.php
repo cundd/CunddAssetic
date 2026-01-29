@@ -66,7 +66,7 @@ class Plugin
         array $conf,
         ServerRequestInterface $request,
     ): string {
-        ProfilingUtility::profile('Cundd Assetic plugin begin');
+        ProfilingUtility::start('Cundd Assetic plugin begin');
 
         $compilationContext = new CompilationContext(
             site: $request->getAttribute('site'),
@@ -128,7 +128,7 @@ class Plugin
             $publicUri
         );
 
-        ProfilingUtility::profile('Cundd Assetic plugin end');
+        ProfilingUtility::end('Cundd Assetic plugin end');
 
         return $content;
     }

@@ -37,7 +37,6 @@ class AddHashToFileName implements BuildStepInterface
         $outputFilenameWithoutHash = $currentState->getOutputFilePathWithoutHash();
 
         // Create the file hash and store it in the cache
-        ProfilingUtility::profile('Will create file hash');
 
         $finalFileNameResult = $this->outputFileHashService
             ->buildAndStoreFileHash($configuration, $outputFilenameWithoutHash, 'md5');
@@ -56,10 +55,12 @@ class AddHashToFileName implements BuildStepInterface
         $outputFileFinalPath = $finalFileName->getAbsoluteUri();
 
         // Move the temp file to the new file
-        ProfilingUtility::profile('Will move compiled asset');
+        ProfilingUtility::start('Will move compiled asset');
 
         clearstatcache(true, $outputFileFinalPath);
         if (is_link($outputFileFinalPath) && !unlink($outputFileFinalPath)) {
+            ProfilingUtility::end();
+
             return BuildStateResult::err(
                 new OutputFileException(
                     sprintf('Output file "%s" already exists', $outputFileFinalPath)
@@ -72,6 +73,8 @@ class AddHashToFileName implements BuildStepInterface
         if (!@rename($compileDestinationPath, $outputFileFinalPath)) {
             $reason = PathUtility::getReasonForWriteFailure($outputFileFinalPath);
 
+            ProfilingUtility::end();
+
             return BuildStateResult::err(
                 new OutputFileException(
                     sprintf(
@@ -83,7 +86,8 @@ class AddHashToFileName implements BuildStepInterface
                 )
             );
         }
-        ProfilingUtility::profile('Did move compiled asset');
+
+        ProfilingUtility::end('Did move compiled asset');
 
         return BuildStateResult::ok($currentState->withFilePath($finalFileName));
     }
