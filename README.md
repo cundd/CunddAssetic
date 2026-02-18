@@ -88,6 +88,22 @@ assetic:
               1-addImportPath: EXT:site_package/Resources/Private/Library/
 ```
 
+#### Development flags
+
+To apply functions only in development mode, entries can be added with key `developmentFunctions`:
+
+```yaml
+# File: config/sites/my-site/settings.yaml or EXT:site_package/Configuration/Sets/Site/settings.yaml
+assetic:
+    stylesheets:
+        - file: EXT:site_package/Resources/Private/Stylesheets/main.scss
+          functions:
+              setStyle: compressed
+
+          developmentFunctions:
+              setStyle: expanded
+```
+
 ### Configure the filter binary paths
 
 In some cases you may have to specify the path to a CSS preprocessor to match your system's configuration. This can be done through the `filterBinaries` configuration.

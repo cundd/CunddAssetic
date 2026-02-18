@@ -125,6 +125,18 @@ final class AssetCollector implements LoggerAwareInterface
                 $stylesheetType
             );
         }
+        if ($configuration->isDevelopment) {
+            $functions = $stylesheetConfiguration->developmentFunctions;
+            if ($filter && !empty($functions)) {
+                $this->applyFunctionsToFilterForType(
+                    $filterManager,
+                    $configuration,
+                    $filter,
+                    $functions,
+                    $stylesheetType
+                );
+            }
+        }
 
         $assetFilters = $filter ? [$stylesheetType] : [];
 

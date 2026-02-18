@@ -11,10 +11,12 @@ final class StylesheetConfiguration
 {
     /**
      * @param array<non-empty-string, FilterArgument> $functions
+     * @param array<non-empty-string, FilterArgument> $developmentFunctions
      */
     public function __construct(
         public readonly string $file,
         public readonly array $functions,
+        public readonly array $developmentFunctions,
         public readonly ?string $type,
     ) {
     }

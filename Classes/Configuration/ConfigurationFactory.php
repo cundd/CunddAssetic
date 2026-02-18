@@ -22,7 +22,8 @@ use TYPO3\CMS\Core\Site\Entity\SiteSettings;
  * @phpstan-type RawStylesheetConfiguration array{
  *      file:non-empty-string,
  *      type:non-empty-string|null,
- *      functions:array<non-empty-string,FilterArgument>
+ *      functions:array<non-empty-string,FilterArgument>,
+ *      developmentFunctions:array<non-empty-string,FilterArgument>
  *  }
  * @phpstan-type RawFilterBinaries array<non-empty-string, non-empty-string>
  * @phpstan-type RawFilterForType array<non-empty-string, class-string|'none'>
@@ -123,6 +124,7 @@ class ConfigurationFactory
             fn (array $stylesheet) => new StylesheetConfiguration(
                 $stylesheet['file'],
                 $stylesheet['functions'],
+                $stylesheet['developmentFunctions'],
                 $stylesheet['type'],
             ),
             $stylesheets
@@ -188,7 +190,7 @@ class ConfigurationFactory
     /**
      * @param array<string,mixed> $asseticConfiguration
      *
-     * @return Result<array<RawStylesheetConfiguration>, covariant ConfigurationException>
+     * @return Result<list<RawStylesheetConfiguration>, covariant ConfigurationException>
      */
     private function getValidatedRawStylesheetConfiguration(
         array $asseticConfiguration,
@@ -231,10 +233,18 @@ class ConfigurationFactory
                 return $validatedFunctionsResult->unwrapErr()->intoErr();
             }
 
+            $validatedDevelopmentFunctionsResult = $this->getValidatedStylesheetFunctions(
+                $stylesheet['developmentFunctions'] ?? []
+            );
+            if ($validatedDevelopmentFunctionsResult->isErr()) {
+                return $validatedDevelopmentFunctionsResult->unwrapErr()->intoErr();
+            }
+
             $validatedStylesheets[] = [
-                'file'      => $file,
-                'type'      => $type,
-                'functions' => $validatedFunctionsResult->unwrap(),
+                'file'                 => $file,
+                'type'                 => $type,
+                'functions'            => $validatedFunctionsResult->unwrap(),
+                'developmentFunctions' => $validatedDevelopmentFunctionsResult->unwrap(),
             ];
         }
 
