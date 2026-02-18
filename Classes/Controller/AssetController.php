@@ -15,6 +15,7 @@ use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Site\Entity\NullSite;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
@@ -37,6 +38,12 @@ class AssetController extends ActionController
      */
     public function listAction(): ResponseInterface
     {
+        if (!$this->isSiteSelected()) {
+            return $this->moduleTemplateFactory
+                ->create($this->request)
+                ->renderResponse('Asset/List');
+        }
+
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $compilationContext = $this->buildCompilationContext();
         $configurationResult = $this->configurationFactory
@@ -74,6 +81,12 @@ class AssetController extends ActionController
      */
     public function compileAction(bool $clearPageCache = false): ResponseInterface
     {
+        if (!$this->isSiteSelected()) {
+            return $this->moduleTemplateFactory
+                ->create($this->request)
+                ->renderResponse('Asset/List');
+        }
+
         $this->compile($clearPageCache);
 
         return $this->redirect('list');
@@ -127,5 +140,10 @@ class AssetController extends ActionController
             isCliEnvironment: false,
             forceCompilation: true
         );
+    }
+
+    private function isSiteSelected(): bool
+    {
+        return !$this->request->getAttribute('site') instanceof NullSite;
     }
 }
