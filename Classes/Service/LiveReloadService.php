@@ -8,7 +8,8 @@ use Cundd\Assetic\Configuration;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Exception;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\Domain\ConsumableString;
+use TYPO3\CMS\Core\Security\ContentSecurityPolicy\ConsumableNonce;
+use TYPO3\CMS\Core\Security\ContentSecurityPolicy\Directive;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility as Typo3PathUtility;
 
@@ -43,13 +44,13 @@ JAVASCRIPT_CODE_TEMPLATE;
             $resource = $this->getJavaScriptFileUri();
             $code = sprintf(self::JAVASCRIPT_CODE_TEMPLATE, $resource, $port);
 
-            /** @var ConsumableString|null $nonceAttribute */
+            /** @var ConsumableNonce|null $nonceAttribute */
             $nonceAttribute = $request->getAttribute('nonce');
-            if ($nonceAttribute instanceof ConsumableString) {
+            if ($nonceAttribute instanceof ConsumableNonce) {
                 // TODO: Set the correct CSP headers
                 //       This is not easy, because the hostname and port must be
                 //       known during configuration
-                $nonce = $nonceAttribute->consume();
+                $nonce = $nonceAttribute->consumeInline(Directive::ScriptSrcElem);
 
                 return sprintf('<script nonce="%s">%s</script>', $nonce, $code);
             }
