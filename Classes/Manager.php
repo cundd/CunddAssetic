@@ -7,7 +7,7 @@ namespace Cundd\Assetic;
 use Cundd\Assetic\BuildStep\BuildStepInterface;
 use Cundd\Assetic\Compiler\CompilerFactory;
 use Cundd\Assetic\Compiler\CompilerInterface;
-use Cundd\Assetic\Service\CacheManagerInterface;
+use Cundd\Assetic\Service\HashCacheManagerInterface;
 use Cundd\Assetic\Service\OutputFileFinderInterface;
 use Cundd\Assetic\Service\OutputFileHashService;
 use Cundd\Assetic\Service\OutputFileServiceInterface;
@@ -31,7 +31,7 @@ class Manager implements ManagerInterface
 
     public function __construct(
         CompilerFactory $compilerFactory,
-        private readonly CacheManagerInterface $cacheManager,
+        private readonly HashCacheManagerInterface $cacheManager,
         private readonly OutputFileHashService $outputFileHashService,
         private readonly OutputFileServiceInterface $outputFileService,
         private readonly SymlinkServiceInterface $symlinkService,

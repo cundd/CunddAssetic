@@ -12,37 +12,36 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use function sha1;
 
-class CacheManager implements CacheManagerInterface
+class HashCacheManager implements HashCacheManagerInterface
 {
     /**
      * Cache identifier for the hash
      */
     private const CACHE_IDENTIFIER_HASH = 'cundd_assetic_cache_identifier_hash';
 
-    public function getCache(PathWithoutHash $identifier): mixed
+    public function getCache(PathWithoutHash $path): mixed
     {
-        $identifier = $this->prepareIdentifier($identifier);
+        $path = $this->prepareIdentifier($path);
         $cacheInstance = $this->getCacheInstance();
 
-        return $cacheInstance ? $cacheInstance->get($identifier) : null;
+        return $cacheInstance?->get($path);
     }
 
-    public function setCache(PathWithoutHash $identifier, $value): void
+    public function setCache(PathWithoutHash $path, string $hash): void
     {
-        $identifier = $this->prepareIdentifier($identifier);
+        $path = $this->prepareIdentifier($path);
         $cacheInstance = $this->getCacheInstance();
-        if ($cacheInstance) {
-            $tags = [];
-            $lifetime = 60 * 60 * 24;
-
-            $cacheInstance->set($identifier, $value, $tags, $lifetime);
-        }
+        $cacheInstance?->set(
+            $path,
+            $hash,
+            tags: [],
+            lifetime: null
+        );
     }
 
-    public function clearHashCache(
-        PathWithoutHash $currentOutputFilenameWithoutHash,
-    ): void {
-        $this->setCache($currentOutputFilenameWithoutHash, '');
+    public function clearHashCache(PathWithoutHash $path): void
+    {
+        $this->setCache($path, '');
     }
 
     private function getCacheInstance(): ?FrontendInterface

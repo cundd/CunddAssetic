@@ -30,7 +30,7 @@ class OutputFileHashService
     private array $wasWritten;
 
     public function __construct(
-        private readonly CacheManagerInterface $cacheManager,
+        private readonly HashCacheManagerInterface $cacheManager,
         private readonly OutputFileFinderInterface $outputFileFinder,
     ) {
     }
