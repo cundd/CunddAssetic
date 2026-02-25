@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\ValueObject;
 
+use Cundd\Assetic\ValueObject\Result\Ok;
+
 /**
  * @template T
  * @template E
@@ -68,5 +70,17 @@ abstract class AbstractResult
         } else {
             return $err($this->inner);
         }
+    }
+
+    /**
+     * @template R
+     *
+     * @param callable(T): R $callback
+     *
+     * @return Ok<R>
+     */
+    public function map(callable $callback): Ok
+    {
+        return new Ok($callback($this->unwrap()));
     }
 }
