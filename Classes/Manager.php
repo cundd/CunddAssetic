@@ -45,7 +45,7 @@ class Manager implements ManagerInterface
         CompilationContext $compilationContext,
     ): Result {
         // Check if the assets should be compiled
-        if ($this->willCompile($configuration, $compilationContext)) {
+        if ($this->requestCompilation($configuration, $compilationContext)) {
             return $this->collectAssetsAndCompile(
                 $configuration,
                 $compilationContext
@@ -124,7 +124,7 @@ class Manager implements ManagerInterface
     /**
      * Return if the files should be compiled
      */
-    public function willCompile(
+    private function requestCompilation(
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): bool {
@@ -134,16 +134,7 @@ class Manager implements ManagerInterface
             return true;
         }
 
-        if ($configuration->isDevelopment) {
-            return true;
-        }
-
-        if (!$compilationContext->isBackendUserLoggedIn) {
-            // If no backend user is logged in, check if compiling is still allowed
-            return $configuration->allowCompileWithoutLogin;
-        } else {
-            return false;
-        }
+        return $configuration->isDevelopment;
     }
 
     private function getCreateDevelopmentSymlink(
