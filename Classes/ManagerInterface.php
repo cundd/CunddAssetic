@@ -23,12 +23,4 @@ interface ManagerInterface
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): Result;
-
-    /**
-     * Return if the files should be compiled
-     */
-    public function willCompile(
-        Configuration $configuration,
-        CompilationContext $compilationContext,
-    ): bool;
 }
