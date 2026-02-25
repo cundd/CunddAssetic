@@ -184,6 +184,7 @@ class Plugin
         if ($frontendCacheInstruction) {
             $frontendCacheInstruction->disableCache('Assetic error');
         } else {
+            // TODO: Remove when dropping TYPO3 v12 support
             /** @var TypoScriptFrontendController $typoScriptFrontendController */
             $typoScriptFrontendController = $GLOBALS['TSFE'];
             $typoScriptFrontendController->set_no_cache('Assetic error');
@@ -240,7 +241,7 @@ class Plugin
                 liveReloadConfiguration: $configuration->liveReloadConfiguration,
                 isDevelopment: (bool) $pluginConfiguration['development'],
                 createSymlink: $configuration->createSymlink,
-                allowCompileWithoutLogin: $configuration->allowCompileWithoutLogin,
+                allowDeveloperFeaturesWithoutLogin: $configuration->allowDeveloperFeaturesWithoutLogin,
                 strictModeEnabled: $configuration->strictModeEnabled,
             );
         }

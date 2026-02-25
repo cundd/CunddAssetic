@@ -152,7 +152,7 @@ class Manager implements ManagerInterface
         // callers permissions
         return $compilationContext->isCliEnvironment
             || $compilationContext->isBackendUserLoggedIn
-            || $configuration->allowCompileWithoutLogin;
+            || $configuration->allowDeveloperFeaturesWithoutLogin;
     }
 
     /**

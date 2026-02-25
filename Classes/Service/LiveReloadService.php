@@ -75,7 +75,7 @@ JAVASCRIPT_CODE_TEMPLATE;
         }
 
         return $compilationContext->isBackendUserLoggedIn
-            || $configuration->allowCompileWithoutLogin;
+            || $configuration->allowDeveloperFeaturesWithoutLogin;
     }
 
     /**

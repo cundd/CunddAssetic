@@ -57,7 +57,7 @@ To make sure that the assets are compiled each time the frontend page is refresh
     	development = 1
     }
 
-By default Cundd Assetic is configured not to compile files if NO backend user is logged in. To allow file compilation without a logged in backend user you can change the `allowCompileWithoutLogin` configuration in Site Settings.
+By default Cundd Assetic is configured not to compile files if NO backend user is logged in. To allow file compilation without a logged in backend user you can change the `allowDeveloperFeaturesWithoutLogin` configuration in Site Settings.
 
 ## Advanced
 

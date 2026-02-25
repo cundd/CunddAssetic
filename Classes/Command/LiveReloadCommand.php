@@ -367,7 +367,7 @@ class LiveReloadCommand extends AbstractWatchCommand
             liveReloadConfiguration: $liveReloadConfiguration,
             isDevelopment: $configuration->isDevelopment,
             createSymlink: $configuration->createSymlink,
-            allowCompileWithoutLogin: $configuration->allowCompileWithoutLogin,
+            allowDeveloperFeaturesWithoutLogin: $configuration->allowDeveloperFeaturesWithoutLogin,
             strictModeEnabled: $configuration->strictModeEnabled,
         );
     }

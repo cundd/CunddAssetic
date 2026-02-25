@@ -78,8 +78,8 @@ class ConfigurationFactory
                 'assetic.settings.createSymlink',
                 false
             );
-        $allowCompileWithoutLogin = $settings->get(
-            'assetic.settings.allowCompileWithoutLogin',
+        $allowDeveloperFeaturesWithoutLogin = $settings->get(
+            'assetic.settings.allowDeveloperFeaturesWithoutLogin',
             false
         );
         $strictModeEnabled = (bool) $settings->get('assetic.settings.strict');
@@ -99,7 +99,7 @@ class ConfigurationFactory
         return new Ok(
             new Configuration(
                 stylesheetConfigurations: $stylesheetConfigurations,
-                allowCompileWithoutLogin: $allowCompileWithoutLogin,
+                allowDeveloperFeaturesWithoutLogin: $allowDeveloperFeaturesWithoutLogin,
                 outputFileDir: Configuration::OUTPUT_FILE_DIR,
                 outputFileName: $settings->get('assetic.settings.output', null),
                 isDevelopment: $isDevelopment,

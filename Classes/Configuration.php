@@ -27,7 +27,7 @@ final class Configuration
         public readonly LiveReloadConfiguration $liveReloadConfiguration,
         public readonly bool $isDevelopment,
         public readonly bool $createSymlink,
-        public readonly bool $allowCompileWithoutLogin,
+        public readonly bool $allowDeveloperFeaturesWithoutLogin,
         public readonly bool $strictModeEnabled,
     ) {
     }

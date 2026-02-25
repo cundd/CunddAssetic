@@ -23,7 +23,7 @@ settings:
     description: Always create a symlink to the compiled file
     category: Assetic.general
 
-  assetic.settings.allowCompileWithoutLogin:
+  assetic.settings.allowDeveloperFeaturesWithoutLogin:
     type: bool
     default: false
     label: Compile if no backend user is logged in
