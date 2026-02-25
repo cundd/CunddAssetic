@@ -11,6 +11,7 @@ use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
+use Cundd\Assetic\ValueObject\ManagerResultInfo;
 use Cundd\Assetic\ValueObject\Result;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
@@ -73,7 +74,7 @@ abstract class AbstractCommand extends Command
         return $this->manager->collectAndCompile(
             $configuration,
             $compilationContext
-        );
+        )->map(fn (ManagerResultInfo $i) => $i->filePath);
     }
 
     /**

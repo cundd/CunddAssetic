@@ -11,7 +11,7 @@ use Cundd\Assetic\Service\LiveReloadServiceInterface;
 use Cundd\Assetic\Utility\ExceptionPrinter;
 use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\CompilationContext;
-use Cundd\Assetic\ValueObject\FilePath;
+use Cundd\Assetic\ValueObject\ManagerResultInfo;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -104,8 +104,8 @@ class Plugin
             ) . $liveReloadCode;
         }
 
-        /** @var FilePath $filePath */
-        $filePath = $result->unwrap();
+        $managerResultInfo = $result->unwrap();
+        $filePath = $managerResultInfo->filePath;
         $publicUri = $filePath->getPublicUri()
             . ($filePath->isSymlink() ? '?' . time() : '');
         $content = $this->getLiveReloadCode(
@@ -117,7 +117,8 @@ class Plugin
             $configuration,
             $compilationContext,
             $collectAndCompileEnd,
-            $collectAndCompileStart
+            $collectAndCompileStart,
+            $managerResultInfo
         );
         $content .= sprintf(
             '<link rel="stylesheet" type="text/css" href="%s" media="all">',
@@ -194,6 +195,7 @@ class Plugin
         CompilationContext $compilationContext,
         float $collectAndCompileEnd,
         float $collectAndCompileStart,
+        ManagerResultInfo $managerResultInfo,
     ): string {
         if (false === $configuration->isDevelopment
             || false === $compilationContext->isBackendUserLoggedIn) {
@@ -204,11 +206,11 @@ class Plugin
             '%.6fs',
             ($collectAndCompileEnd - $collectAndCompileStart) / 1_000 / 1_000 / 1_000
         );
-        if ($this->manager->willCompile($configuration, $compilationContext)) {
+        if (!$managerResultInfo->usedExistingFile) {
             return sprintf('<!-- Compiled assets in %s -->', $duration);
+        } else {
+            return sprintf('<!-- Use pre-compiled assets in %s -->', $duration);
         }
-
-        return sprintf('<!-- Use pre-compiled assets in %s -->', $duration);
     }
 
     /**

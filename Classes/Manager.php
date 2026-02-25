@@ -16,7 +16,7 @@ use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
-use Cundd\Assetic\ValueObject\PathWithoutHash;
+use Cundd\Assetic\ValueObject\ManagerResultInfo;
 use Cundd\Assetic\ValueObject\Result;
 use Throwable;
 
@@ -49,14 +49,19 @@ class Manager implements ManagerInterface
             return $this->collectAssetsAndCompile(
                 $configuration,
                 $compilationContext
+            )->map(
+                fn (FilePath $f) => new ManagerResultInfo($f, usedExistingFile: false)
             );
         }
 
-        $pathWithoutHash = $this->getPathWithoutHash($configuration);
+        $pathWithoutHash = $this->outputFileService
+            ->getPathWithoutHash($configuration);
         $expectedPath = $this->outputFileService
             ->getExpectedPathWithHash($configuration, $pathWithoutHash);
         if ($expectedPath && file_exists($expectedPath->getAbsoluteUri())) {
-            return Result::ok($expectedPath);
+            return Result::ok(
+                new ManagerResultInfo($expectedPath, usedExistingFile: true)
+            );
         }
 
         // If the expected output file does not exist clear the internal cache,
@@ -72,6 +77,8 @@ class Manager implements ManagerInterface
         return $this->collectAssetsAndCompile(
             $configuration,
             $newCompilationContext
+        )->map(
+            fn (FilePath $f) => new ManagerResultInfo($f, usedExistingFile: false)
         );
     }
 
@@ -139,11 +146,6 @@ class Manager implements ManagerInterface
         }
     }
 
-    private function getPathWithoutHash(Configuration $configuration): PathWithoutHash
-    {
-        return $this->outputFileService->getPathWithoutHash($configuration);
-    }
-
     private function getCreateDevelopmentSymlink(
         Configuration $configuration,
         CompilationContext $compilationContext,
@@ -155,6 +157,8 @@ class Manager implements ManagerInterface
             return false;
         }
 
+        // If symlink creation or Live Reload is enabled check the current
+        // callers permissions
         return $compilationContext->isCliEnvironment
             || $compilationContext->isBackendUserLoggedIn
             || $configuration->allowCompileWithoutLogin;
