@@ -5,26 +5,14 @@ declare(strict_types=1);
 namespace Cundd\Assetic\ValueObject;
 
 use Cundd\Assetic\ValueObject\Result\Ok;
+use Throwable;
 
 /**
  * @template T
- * @template E
+ * @template E of Throwable
  */
-abstract class AbstractResult
+trait ResultTrait
 {
-    /**
-     * @var T|E
-     */
-    protected readonly mixed $inner;
-
-    /**
-     * @param T|E $inner
-     */
-    protected function __construct(mixed $inner)
-    {
-        $this->inner = $inner;
-    }
-
     /**
      * @phpstan-assert-if-true =T $this->inner
      *
@@ -66,21 +54,9 @@ abstract class AbstractResult
     public function doMatch(callable $ok, callable $err): mixed
     {
         if ($this->isOk()) {
-            return $ok($this->inner);
+            return $ok($this->unwrap());
         } else {
-            return $err($this->inner);
+            return $err($this->unwrapErr());
         }
-    }
-
-    /**
-     * @template R
-     *
-     * @param callable(T): R $callback
-     *
-     * @return Ok<R>
-     */
-    public function map(callable $callback): Ok
-    {
-        return new Ok($callback($this->unwrap()));
     }
 }

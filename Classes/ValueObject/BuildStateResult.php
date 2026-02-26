@@ -10,12 +10,26 @@ use Throwable;
 
 /**
  * @template E of Throwable
- *
- * @extends AbstractResult<BuildState,E>
  */
-abstract class BuildStateResult extends AbstractResult
+abstract class BuildStateResult
 {
-    public static function ok(BuildState $inner): BuildOk
+    /**
+     * @use ResultTrait<BuildState,E>
+     */
+    use ResultTrait;
+
+    /**
+     * @param BuildState|E $inner
+     */
+    protected function __construct(
+        protected readonly BuildState|Throwable $inner,
+    ) {
+    }
+
+    /**
+     * @return self<never>
+     */
+    public static function ok(BuildState $inner): self
     {
         return new BuildOk($inner);
     }
@@ -27,8 +41,24 @@ abstract class BuildStateResult extends AbstractResult
      *
      * @return BuildErr<R>
      */
-    public static function err(Throwable $inner): BuildErr
+    public static function err(Throwable $inner): self
     {
         return new BuildErr($inner);
+    }
+
+    /**
+     * @template R
+     *
+     * @param callable(BuildState): R $callback
+     *
+     * @return self<E>
+     */
+    public function map(callable $callback): self
+    {
+        if ($this->isOk()) {
+            return static::ok($callback($this->inner));
+        } else {
+            return static::err($this->inner);
+        }
     }
 }

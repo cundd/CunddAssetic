@@ -33,7 +33,10 @@ class Err extends Result
     #[Override]
     public function unwrap(): never
     {
-        throw new RuntimeException('Tried to unwrap an Err', 6562984701);
+        throw new RuntimeException(
+            sprintf('Tried to unwrap an Err (%s)', $this->inner->getMessage()),
+            6562984701
+        );
     }
 
     #[Override]

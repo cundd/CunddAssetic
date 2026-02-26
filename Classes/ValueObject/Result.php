@@ -10,20 +10,30 @@ use Throwable;
 
 /**
  * @template T
- * @template E
- *
- * @extends AbstractResult<T,E>
+ * @template E of Throwable
  */
-abstract class Result extends AbstractResult
+abstract class Result
 {
+    /**
+     * @use ResultTrait<T,E>
+     */
+    use ResultTrait;
+
+    /**
+     * @param T|E $inner
+     */
+    protected function __construct(protected readonly mixed $inner)
+    {
+    }
+
     /**
      * @template R
      *
      * @param R $inner
      *
-     * @return Ok<R>
+     * @return self<R,never>
      */
-    public static function ok(mixed $inner): Ok
+    public static function ok(mixed $inner): self
     {
         return new Ok($inner);
     }
@@ -33,10 +43,26 @@ abstract class Result extends AbstractResult
      *
      * @param TE $inner
      *
-     * @return Err<TE>
+     * @return self<never,TE>
      */
-    public static function err(Throwable $inner): Err
+    public static function err(Throwable $inner): self
     {
         return new Err($inner);
+    }
+
+    /**
+     * @template R
+     *
+     * @param callable(T): R $callback
+     *
+     * @return self<R,E>
+     */
+    public function map(callable $callback): self
+    {
+        if ($this->isOk()) {
+            return static::ok($callback($this->inner));
+        } else {
+            return static::err($this->inner);
+        }
     }
 }
