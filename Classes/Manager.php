@@ -45,7 +45,7 @@ class Manager implements ManagerInterface
         CompilationContext $compilationContext,
     ): Result {
         // Check if the assets should be compiled
-        if ($this->requestCompilation($configuration, $compilationContext)) {
+        if ($this->shouldCompile($configuration, $compilationContext)) {
             return $this->collectAssetsAndCompile(
                 $configuration,
                 $compilationContext
@@ -124,7 +124,7 @@ class Manager implements ManagerInterface
     /**
      * Return if the files should be compiled
      */
-    private function requestCompilation(
+    private function shouldCompile(
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): bool {
@@ -134,25 +134,29 @@ class Manager implements ManagerInterface
             return true;
         }
 
-        return $configuration->isDevelopment;
+        if ($configuration->isDevelopment) {
+            return true;
+        }
+
+        return $compilationContext->shouldLoadLiveReload($configuration);
     }
 
     private function getCreateDevelopmentSymlink(
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): bool {
-        $liveReloadEnabled = $configuration->liveReloadConfiguration
-            ->isEnabled;
+        // `shouldLoadLiveReload()` also checks permissions
+        if ($compilationContext->shouldLoadLiveReload($configuration)) {
+            return true;
+        }
+
         $createSymlink = $configuration->createSymlink;
-        if (!$createSymlink && !$liveReloadEnabled) {
+        if (!$createSymlink) {
             return false;
         }
 
-        // If symlink creation or Live Reload is enabled check the current
-        // callers permissions
-        return $compilationContext->isCliEnvironment
-            || $compilationContext->isBackendUserLoggedIn
-            || $configuration->allowDeveloperFeaturesWithoutLogin;
+        // If symlink creation is enabled check the current callers permissions
+        return $compilationContext->hasAccessToDevelopmentFeatures($configuration);
     }
 
     /**

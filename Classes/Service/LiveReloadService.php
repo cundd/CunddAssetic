@@ -34,7 +34,7 @@ JAVASCRIPT_CODE_TEMPLATE;
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): string {
-        if (!$this->isEnabled($configuration, $compilationContext)) {
+        if (!$compilationContext->shouldLoadLiveReload($configuration)) {
             return '';
         }
 
@@ -64,18 +64,6 @@ JAVASCRIPT_CODE_TEMPLATE;
             $error?->getCode(),
             $error?->getMessage()
         );
-    }
-
-    private function isEnabled(
-        Configuration $configuration,
-        CompilationContext $compilationContext,
-    ): bool {
-        if (!$configuration->liveReloadConfiguration->isEnabled) {
-            return false;
-        }
-
-        return $compilationContext->isBackendUserLoggedIn
-            || $configuration->allowDeveloperFeaturesWithoutLogin;
     }
 
     /**
