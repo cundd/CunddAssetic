@@ -9,7 +9,6 @@ use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Service\SessionServiceInterface;
 use Cundd\Assetic\ValueObject\CompilationContext;
-use Cundd\Assetic\ValueObject\FilePath;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
@@ -108,9 +107,11 @@ class AssetController extends ActionController
             $compilationContext
         );
         if ($result->isOk()) {
-            /** @var FilePath $outputFilePath */
-            $outputFilePath = $result->unwrap();
-            $this->addFlashMessage('Stylesheets have been compiled to ' . $outputFilePath->getPublicUri());
+            $managerResultInfo = $result->unwrap();
+            $outputFilePath = $managerResultInfo->filePath;
+            $this->addFlashMessage(
+                'Stylesheets have been compiled to ' . $outputFilePath->getPublicUri()
+            );
             $this->sessionService->clearErrorInSession();
 
             if ($clearPageCache) {
