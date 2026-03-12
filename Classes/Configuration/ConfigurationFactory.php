@@ -12,6 +12,7 @@ use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\Result;
 use Cundd\Assetic\ValueObject\Result\Err;
 use Cundd\Assetic\ValueObject\Result\Ok;
+use JsonException;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 
@@ -275,10 +276,17 @@ class ConfigurationFactory
                 && !is_bool($argument)
                 && !is_float($argument)
             ) {
+                try {
+                    $argumentData = json_encode($argument, flags: JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                } catch (JsonException) {
+                    $argumentData = '';
+                }
+
                 return (new InvalidConfigurationException(
                     sprintf(
-                        'Argument of filter-function must be a string. %s given',
-                        get_debug_type($argument)
+                        'Argument of filter-function must be a scalar value. %s given%s',
+                        get_debug_type($argument),
+                        $argumentData ? ': ' . $argumentData : ''
                     )
                 ))->intoErr();
             }
