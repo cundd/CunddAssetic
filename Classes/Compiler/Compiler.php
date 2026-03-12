@@ -33,8 +33,7 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
         Configuration $configuration,
         PathWithoutHash $outputPath,
     ): Result {
-        $outputDirectory = Environment::getPublicPath()
-            . '/' . $configuration->outputFileDir;
+        $outputDirectory = Environment::getPublicPath() . $configuration->outputFileDir;
         GeneralUtility::mkdir($outputDirectory);
 
         $assetCollection = $this->assetCollector->collectAssets($configuration);

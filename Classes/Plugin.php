@@ -106,6 +106,7 @@ class Plugin
             ) . $liveReloadCode;
         }
 
+        /** @var ManagerResultInfo $managerResultInfo */
         $managerResultInfo = $result->unwrap();
         $filePath = $managerResultInfo->filePath;
         $publicUri = $filePath->getPublicUri()

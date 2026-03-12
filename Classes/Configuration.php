@@ -10,7 +10,7 @@ use TYPO3\CMS\Core\Site\Entity\Site;
 
 final class Configuration
 {
-    public const OUTPUT_FILE_DIR = 'typo3temp/cundd_assetic/';
+    public const OUTPUT_FILE_DIR = '/typo3temp/cundd_assetic/';
 
     /**
      * @param StylesheetConfiguration[]          $stylesheetConfigurations

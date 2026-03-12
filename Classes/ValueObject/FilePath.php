@@ -9,8 +9,6 @@ use TYPO3\CMS\Core\Core\Environment;
 
 use function rtrim;
 
-use const DIRECTORY_SEPARATOR;
-
 class FilePath
 {
     private string $fileName;
@@ -21,8 +19,9 @@ class FilePath
         string $fileName,
         string $relativeDirectoryPath,
     ) {
+        assert(str_starts_with($relativeDirectoryPath, '/'));
         $this->fileName = $fileName;
-        $this->relativeDirectoryPath = rtrim($relativeDirectoryPath, DIRECTORY_SEPARATOR);
+        $this->relativeDirectoryPath = rtrim($relativeDirectoryPath, '/');
     }
 
     public static function fromFileName(
@@ -50,7 +49,7 @@ class FilePath
     public function getAbsoluteUri(): string
     {
         return Environment::getPublicPath()
-            . '/' . $this->relativeDirectoryPath
+            . $this->relativeDirectoryPath
             . '/' . $this->fileName;
     }
 
