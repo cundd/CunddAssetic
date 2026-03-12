@@ -121,7 +121,7 @@ class Plugin
             $managerResultInfo
         );
         $content .= sprintf(
-            '<link rel="stylesheet" type="text/css" href="%s" media="all">',
+            '<link rel="stylesheet" href="%s" media="all">',
             $publicUri
         );
 
