@@ -15,6 +15,7 @@ use Cundd\Assetic\ValueObject\ManagerResultInfo;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
+use TYPO3\CMS\Core\Attribute\AsAllowedCallable;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -59,6 +60,7 @@ class Plugin
      *
      * @param array<string,mixed> $conf
      */
+    #[AsAllowedCallable]
     public function main(
         string $content,
         array $conf,
