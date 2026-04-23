@@ -15,9 +15,6 @@
             <table class="tx_assetic">
                 <tr>
                     <th>
-                        <f:translate key="tx_assetic_domain_model_asset.last_modified" />
-                    </th>
-                    <th>
                         <f:translate key="tx_assetic_domain_model_asset.path" />
                     </th>
                     <th>
@@ -27,9 +24,6 @@
 
                 <f:for each="{assets}" as="asset">
                     <tr>
-                        <td class="no-wrap">
-                            <f:format.date format="d.m.Y - H:i:s">@{asset.lastModified}</f:format.date>
-                        </td>
                         <td>{asset.sourceRoot}/{asset.sourcePath}</td>
                         <td>
                             <f:for each="{asset.filters}" as="filter">
