@@ -2,17 +2,17 @@
     xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:assetic="http://typo3.org/ns/Cundd/Assetic/ViewHelpers"
     data-namespace-typo3-fluid="true">
-    <f:layout name="Default" />
+    <f:layout name="Module" />
 
     <f:section name="Content">
-        <f:asset.css identifier="assetic" href="EXT:assetic/Resources/Public/Css/assetic.css?2024-12-03" />
+        <f:asset.css identifier="assetic" href="EXT:assetic/Resources/Public/Css/assetic.css" />
 
         <div class="assetic">
             <h1>Assets</h1>
 
             <f:flashMessages />
 
-            <table class="tx_assetic">
+            <table class="table table-striped table-hover">
                 <tr>
                     <th>
                         <f:translate key="tx_assetic_domain_model_asset.path" />
