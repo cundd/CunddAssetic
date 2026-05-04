@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-return [
-    //    'access' => 'user,group',
-    //    'icon'   => 'EXT:assetic/Resources/Public/Icons/logo_icon-white.svg',
+use Cundd\Assetic\Controller\AssetController;
+use TYPO3\CMS\Core\Information\Typo3Version;
 
+$version = (new Typo3Version())->getMajorVersion();
+
+return [
     'assetic_web' => [
         'parent'            => 'web',
         'position'          => ['after' => 'web_info'],
@@ -14,9 +16,9 @@ return [
         'path'              => '/module/assetic/asset',
         'labels'            => 'LLL:EXT:assetic/Resources/Private/Language/locallang_cunddassetic.xlf',
         'extensionName'     => 'Assetic',
-        'iconIdentifier'    => 'ext-cundd-assetic-icon',
+        'iconIdentifier'    => $version >= 14 ? 'ext-cundd-assetic-icon-v14' : 'ext-cundd-assetic-icon',
         'controllerActions' => [
-            Cundd\Assetic\Controller\AssetController::class => [
+            AssetController::class => [
                 'list',
                 'compile',
             ],
