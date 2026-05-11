@@ -105,11 +105,14 @@ class LiveReloadCommand extends AbstractWatchCommand
             $compilationContext,
             $input,
         );
-        if (false === $configuration->createSymlink) {
+        if (false === $configuration->liveReloadConfiguration->isEnabled) {
+            $io = new SymfonyStyle($input, $output);
+            $io->warning('LiveReload is not enabled in site settings');
+        } elseif (false === $configuration->createSymlink) {
             $io = new SymfonyStyle($input, $output);
             $io->warning(
-                'Creation of required symlinks is not yet configured in TypoScript' . PHP_EOL
-                    . 'LiveReload may not work properly'
+                'Creation of required symlinks is not enabled in site settings' . PHP_EOL
+                    . 'LiveReload will not work properly'
             );
         }
         $this->logger = new ConsoleLogger($output);
