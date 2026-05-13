@@ -249,7 +249,6 @@ class ConfigurationFactory
             ];
         }
 
-        // @phpstan-ignore return.type
         return new Ok($validatedStylesheets);
     }
 
