@@ -58,6 +58,19 @@ class LiveReloadCommand extends AbstractWatchCommand
     protected function configure(): void
     {
         $this->setDescription('Start a LiveReload server');
+        $this->setHelp(sprintf(
+            'To use encrypted communication with the LiveReload server (e.g. if your site is served with "https") a valid certificate must be provided in a PEM file.
+If the PEM file includes the private key, the single option `--%s` can be used. Otherwise the private key file must be specified with `--%s`.
+
+For additional information on the expected files see the following links:
+`--%s`: https://www.php.net/manual/context.ssl.php#context.ssl.local-cert
+`--%s`: https://www.php.net/manual/en/context.ssl.php#context.ssl.local-pk
+',
+            self::OPTION_TLS_CERTIFICATE,
+            self::OPTION_TLS_PRIVATE_KEY,
+            self::OPTION_TLS_CERTIFICATE,
+            self::OPTION_TLS_PRIVATE_KEY
+        ));
         $this->registerDefaultArgumentsAndOptions();
         $this
             ->addOption(
@@ -83,15 +96,15 @@ class LiveReloadCommand extends AbstractWatchCommand
             )
             ->addOption(
                 self::OPTION_TLS_CERTIFICATE,
-                null,
+                't',
                 InputOption::VALUE_REQUIRED,
-                'Path to the TLS certificate in a PEM file (php.net/manual/context.ssl.php#context.ssl.local-cert)'
+                'Path to the TLS certificate in a PEM file'
             )
             ->addOption(
                 self::OPTION_TLS_PRIVATE_KEY,
-                null,
+                'k',
                 InputOption::VALUE_REQUIRED,
-                'Path to the private key file (php.net/manual/context.ssl.php#context.ssl.local-pk)'
+                'Path to the private key file'
             );
     }
 
