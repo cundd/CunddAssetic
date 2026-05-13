@@ -158,7 +158,19 @@ Starts a [LiveReload](http://livereload.com/) compatible server that watches for
 vendor/bin/typo3 assetic:livereload
 ```
 
-## CSP & LiveReload
+## LiveReload
+
+### Setup
+
+To start the LiveReload server the PHP library ["Ratchet"](https://github.com/ratchetphp/Ratchet) must be installed. For example as a development dependency:
+
+```json
+  "require-dev": {
+    "cboden/ratchet": "^0.4.x-dev"
+  }
+```
+
+### LiveReload & CSP
 
 To use LiveReload with CSP enabled add `wss://your-domain.tld:35729/livereload` to `connect-src` in the site's CSP configuration file (`config/sites/your-site/csp.yaml`).
 
