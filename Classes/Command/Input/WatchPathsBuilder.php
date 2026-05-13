@@ -15,14 +15,17 @@ use function sprintf;
 class WatchPathsBuilder
 {
     /**
-     * Fetch the argument or option from the given CLI input and parse them as an array of absolute URLs
+     * Fetch the argument or option from the given CLI input and parse them as
+     * an array of absolute URLs
      *
      * @return string[]
      *
      * @phpstan-return non-empty-string[]
      */
-    public function buildPathsFromInput(InputInterface $input, string $name): array
-    {
+    public function buildPathsFromInput(
+        InputInterface $input,
+        string $name,
+    ): array {
         $rawInput = $this->getRawInput($input, $name);
         $normalizedInput = ArrayUtility::normalizeInput($rawInput);
 
@@ -52,7 +55,10 @@ class WatchPathsBuilder
             function (string $inputPath) {
                 $resolvedPath = PathUtility::getAbsolutePath($inputPath);
                 if ('' === $resolvedPath) {
-                    throw new FilePathException(sprintf('Watch path "%s" could not be resolved', $inputPath), 6952901911);
+                    throw new FilePathException(sprintf(
+                        'Watch path "%s" could not be resolved',
+                        $inputPath
+                    ), 6952901911);
                 }
 
                 return $resolvedPath;
