@@ -22,7 +22,7 @@ use const JSON_UNESCAPED_SLASHES;
 /**
  * LiveReload message component
  */
-class LiveReload implements MessageComponentInterface
+class LiveReloadComponent implements MessageComponentInterface
 {
     /**
      * Emergency: system is unusable

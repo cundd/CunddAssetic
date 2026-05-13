@@ -7,17 +7,14 @@ namespace Cundd\Assetic\Command;
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Configuration\LiveReloadConfiguration;
 use Cundd\Assetic\FileWatcher\FileCategories;
-use Cundd\Assetic\Server\LiveReload;
+use Cundd\Assetic\Server\IoServer;
+use Cundd\Assetic\Server\IoServerFactory;
+use Cundd\Assetic\Server\LiveReloadComponent;
 use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use InvalidArgumentException;
 use LogicException;
 use Ratchet\Http\HttpServer;
-use Ratchet\Server\IoServer;
-use Ratchet\WebSocket\WsServer;
-use React\EventLoop\Loop;
-use React\Socket\SecureServer;
-use React\Socket\SocketServer;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -43,6 +40,8 @@ use const PHP_VERSION;
 
 /**
  * Command to start the LiveReload server
+ *
+ * @phpstan-import-type SecureServerContext from IoServerFactory
  */
 class LiveReloadCommand extends AbstractWatchCommand
 {
@@ -51,8 +50,6 @@ class LiveReloadCommand extends AbstractWatchCommand
     private const OPTION_NOTIFICATION_DELAY = 'notification-delay';
     private const OPTION_TLS_CERTIFICATE = 'tls-certificate';
     private const OPTION_TLS_PRIVATE_KEY = 'tls-private-key';
-
-    private LiveReload $liveReloadServer;
 
     private bool $lastCompilationFailed = false;
 
@@ -100,6 +97,14 @@ class LiveReloadCommand extends AbstractWatchCommand
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (!class_exists(HttpServer::class)) {
+            throw new LogicException(
+                'The Ratchet classes could not be found' . PHP_EOL
+                    . 'See README.md#livereload for configuration instructions',
+                1356543545
+            );
+        }
+
         $compilationContext = $this->getCompilationContext($input);
         $configuration = $this->getConfigurationWithPort(
             $compilationContext,
@@ -132,11 +137,13 @@ class LiveReloadCommand extends AbstractWatchCommand
     }
 
     /**
-     * Re-compiles the sources if needed and additionally informs the LiveReload server about the changes
+     * Re-compiles the sources if needed and additionally informs the LiveReload
+     * server component about the changes
      */
     public function recompileIfNeededAndInformLiveReloadServer(
         Configuration $configuration,
         CompilationContext $compilationContext,
+        LiveReloadComponent $liveReloadServerComponent,
     ): void {
         $fileNeedsRecompile = $this->needsRecompile($this->getFileWatcher());
         if (!$fileNeedsRecompile) {
@@ -145,24 +152,27 @@ class LiveReloadCommand extends AbstractWatchCommand
             return;
         }
 
-        $this->logger->info(sprintf('File {file} did change'), ['file' => $fileNeedsRecompile]);
+        $this->logger->info(
+            sprintf('File {file} did change'),
+            ['file' => $fileNeedsRecompile]
+        );
 
         $needFullPageReload = $this->needsFullPageReload($fileNeedsRecompile);
         if ($needFullPageReload) {
-            $this->liveReloadServer->fileDidChange($fileNeedsRecompile, false);
+            $liveReloadServerComponent->fileDidChange($fileNeedsRecompile, false);
         } else {
             $result = $this->compile($configuration, $compilationContext);
             if ($result->isErr()) {
                 /** @var Throwable $error */
                 $error = $result->unwrapErr();
                 $this->logger->error($error->getMessage(), ['error' => $error]);
-                $this->liveReloadServer->fileDidChange('', false);
+                $liveReloadServerComponent->fileDidChange('', false);
             } else {
                 $compiledFile = $result->unwrap()->getPublicUri();
                 if (!$this->lastCompilationFailed) {
-                    $this->liveReloadServer->fileDidChange($compiledFile, true);
+                    $liveReloadServerComponent->fileDidChange($compiledFile, true);
                 } else {
-                    $this->liveReloadServer->fileDidChange('', false);
+                    $liveReloadServerComponent->fileDidChange('', false);
                 }
             }
 
@@ -171,7 +181,7 @@ class LiveReloadCommand extends AbstractWatchCommand
     }
 
     /**
-     * @return array{local_cert: string, local_pk?: string, allow_self_signed: true, verify_peer: false}
+     * @return SecureServerContext
      */
     private function buildSecureServerContext(InputInterface $input): array
     {
@@ -249,24 +259,39 @@ class LiveReloadCommand extends AbstractWatchCommand
         InputInterface $input,
         OutputInterface $output,
     ): IoServer {
-        $address = (string) $input->getOption(self::OPTION_ADDRESS);
+        $address = trim((string) $input->getOption(self::OPTION_ADDRESS));
+        if (!$address) {
+            throw new InvalidArgumentException(
+                'Argument "address" must not be empty'
+            );
+        }
 
-        $port = (int) $input->getOption(self::OPTION_PORT);
         $port = $configuration->liveReloadConfiguration->port;
+        $notificationDelay = (float) $input->getOption(
+            self::OPTION_NOTIFICATION_DELAY
+        );
+        $periodicInterval = $this->getInterval($input, 0.5);
 
-        $notificationDelay = (float) $input->getOption(self::OPTION_NOTIFICATION_DELAY);
-        $interval = $this->getInterval($input, 0.5);
+        $liveReloadServerComponent = new LiveReloadComponent($notificationDelay);
 
         $useTLS = (bool) $input->getOption(self::OPTION_TLS_CERTIFICATE);
-        $server = $this->buildServer(
+        $secureServerContext = $useTLS
+            ? $this->buildSecureServerContext($input)
+            : null;
+        $server = (new IoServerFactory())->buildServer(
             $configuration,
             $compilationContext,
-            $input,
+            $liveReloadServerComponent,
             $address,
             $port,
             $notificationDelay,
-            $useTLS,
-            $interval
+            $secureServerContext,
+            $periodicInterval,
+            fn () => $this->recompileIfNeededAndInformLiveReloadServer(
+                $configuration,
+                $compilationContext,
+                $liveReloadServerComponent,
+            ),
         );
         $prefix = $useTLS ? 'Secure ' : '';
         $output->writeln(
@@ -276,74 +301,18 @@ class LiveReloadCommand extends AbstractWatchCommand
         return $server;
     }
 
-    /**
-     * @param int|float $interval the number of seconds to wait before execution
-     */
-    private function buildServer(
-        Configuration $configuration,
-        CompilationContext $compilationContext,
-        InputInterface $input,
-        string $address,
-        int $port,
-        float $notificationDelay,
-        bool $useTLS,
-        $interval,
-    ): IoServer {
-        if (!class_exists(HttpServer::class)) {
-            throw new LogicException('The Ratchet classes could not be found', 1356543545);
-        }
-
-        // LiveReload server
-        $this->liveReloadServer = new LiveReload($notificationDelay);
-
-        $component = new HttpServer(
-            new WsServer(
-                $this->liveReloadServer
-            )
-        );
-
-        if (!$useTLS) {
-            $server = IoServer::factory(
-                $component,
-                $port,
-                $address
-            );
-        } else {
-            $context = $this->buildSecureServerContext($input);
-            $loop = Loop::get();
-
-            $server = new SecureServer(
-                new SocketServer($address . ':' . $port),
-                $loop,
-                $context
-            );
-
-            $server = new IoServer($component, $server, $loop);
-        }
-
-        assert(null !== $server->loop);
-
-        $server->loop->addPeriodicTimer(
-            $interval,
-            fn () => $this->recompileIfNeededAndInformLiveReloadServer(
-                $configuration,
-                $compilationContext
-            ),
-        );
-        $this->liveReloadServer->setEventLoop($server->loop);
-
-        return $server;
-    }
-
     private function needsFullPageReload(string $fileNeedsRecompile): bool
     {
         return in_array(
             pathinfo($fileNeedsRecompile, PATHINFO_EXTENSION),
-            array_merge(FileCategories::$scriptAssetSuffixes, FileCategories::$otherAssetSuffixes)
+            array_merge(
+                FileCategories::$scriptAssetSuffixes,
+                FileCategories::$otherAssetSuffixes
+            )
         );
     }
 
-    protected function getConfigurationWithPort(
+    private function getConfigurationWithPort(
         CompilationContext $compilationContext,
         InputInterface $input,
     ): Configuration {
