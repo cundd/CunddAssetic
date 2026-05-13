@@ -54,7 +54,7 @@ Analog you can use other CSS preprocessors. The [Assetic Github Page](https://gi
 To make sure that the assets are compiled each time the frontend page is refreshed, you can enable the development mode:
 
     plugin.tx_assetic {
-    	development = 1
+        development = 1
     }
 
 By default Cundd Assetic is configured not to compile files if NO backend user is logged in. To allow file compilation without a logged in backend user you can change the `allowDeveloperFeaturesWithoutLogin` configuration in Site Settings.
@@ -122,12 +122,12 @@ the string to lowercase:
 assetic:
     settings:
         filterBinaries:
-        	# Change the path to the filter binaries. I.e. if node.js is installed
-        	# into /usr/local/bin/
+            # Change the path to the filter binaries. I.e. if node.js is installed
+            # into /usr/local/bin/
             assetic_filter_lessfilter: /usr/local/bin/node
 
-    		# The binary for filter class \AsseticAdditions\Filter\DartSassFilter
-    		asseticadditions_filter_dartsassfilter: /usr/local/bin/sass
+            # The binary for filter class \AsseticAdditions\Filter\DartSassFilter
+            asseticadditions_filter_dartsassfilter: /usr/local/bin/sass
 ```
 
 ## Command line
