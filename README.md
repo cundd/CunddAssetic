@@ -162,7 +162,7 @@ vendor/bin/typo3 assetic:livereload
 
 ### Setup
 
-To start the LiveReload server the PHP library ["Ratchet"](https://github.com/ratchetphp/Ratchet) must be installed. For example as a development dependency:
+To start the LiveReload server "Add LiveReload JavaScript" (`assetic.settings.livereload.addJavascript`) must be enabled in site settings and the PHP library ["Ratchet"](https://github.com/ratchetphp/Ratchet) must be installed. For example as a development dependency:
 
 ```json
   "require-dev": {
