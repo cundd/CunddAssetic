@@ -53,9 +53,11 @@ Analog you can use other CSS preprocessors. The [Assetic Github Page](https://gi
 
 To make sure that the assets are compiled each time the frontend page is refreshed, you can enable the development mode:
 
-    plugin.tx_assetic {
-        development = 1
-    }
+```yaml
+assetic:
+    settings:
+        development: true
+```
 
 By default Cundd Assetic is configured not to compile files if NO backend user is logged in. To allow file compilation without a logged in backend user you can change the `allowDeveloperFeaturesWithoutLogin` configuration in Site Settings.
 
