@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\BuildStep;
+namespace Cundd\Assetic\BuildSystem\BuildStep;
 
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Exception\OutputFileException;
-use Cundd\Assetic\Service\OutputFileHashService;
+use Cundd\Assetic\Output\OutputFileHashService;
 use Cundd\Assetic\Utility\PathUtility;
 use Cundd\Assetic\Utility\ProfilingUtility;
 use Cundd\Assetic\ValueObject\BuildState;
@@ -21,7 +21,7 @@ use function unlink;
 /**
  * @implements BuildStepInterface<OutputFileException>
  */
-class AddHashToFileName implements BuildStepInterface
+final class AddHashToFileName implements BuildStepInterface
 {
     private OutputFileHashService $outputFileHashService;
 
@@ -37,12 +37,12 @@ class AddHashToFileName implements BuildStepInterface
         if ($configuration->outputFileName) {
             return BuildStateResult::ok($currentState);
         }
+
         $outputFilenameWithoutHash = $currentState->getOutputFilePathWithoutHash();
 
-        // Create the file hash and store it in the cache
-
+        // Create the file hash
         $finalFileNameResult = $this->outputFileHashService
-            ->buildAndStoreFileHash($configuration, $outputFilenameWithoutHash, 'md5');
+            ->buildFilenameWithHash($configuration, $outputFilenameWithoutHash);
         if ($finalFileNameResult->isErr()) {
             $finalFileNameErr = $finalFileNameResult->unwrapErr();
 

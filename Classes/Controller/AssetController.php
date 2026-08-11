@@ -9,6 +9,7 @@ use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\ManagerInterface;
 use Cundd\Assetic\Service\SessionServiceInterface;
 use Cundd\Assetic\ValueObject\CompilationContext;
+use Cundd\Assetic\ValueObject\SymlinkFilePath;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
@@ -109,9 +110,19 @@ class AssetController extends ActionController
         if ($result->isOk()) {
             $managerResultInfo = $result->unwrap();
             $outputFilePath = $managerResultInfo->filePath;
-            $this->addFlashMessage(
-                'Stylesheets have been compiled to ' . $outputFilePath->getPublicUri()
-            );
+            if (!$outputFilePath->isSymlink()) {
+                $this->addFlashMessage(sprintf(
+                    'Stylesheets have been compiled to %s',
+                    $outputFilePath->getPublicUri()
+                ));
+            } else {
+                assert($outputFilePath instanceof SymlinkFilePath);
+                $this->addFlashMessage(sprintf(
+                    'Stylesheets have been compiled to %s (symlinked to %s)',
+                    $outputFilePath->readlink()->getPublicUri(),
+                    $outputFilePath->getPublicUri(),
+                ));
+            }
             $this->sessionService->clearErrorInSession();
 
             if ($clearPageCache) {

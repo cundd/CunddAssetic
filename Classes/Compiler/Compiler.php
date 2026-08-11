@@ -13,7 +13,6 @@ use Cundd\Assetic\ValueObject\Result;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Throwable;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -33,7 +32,7 @@ final class Compiler implements CompilerInterface, LoggerAwareInterface
         Configuration $configuration,
         PathWithoutHash $outputPath,
     ): Result {
-        $outputDirectory = Environment::getPublicPath() . $configuration->outputFileDir;
+        $outputDirectory = $configuration->outputFileDir;
         GeneralUtility::mkdir($outputDirectory);
 
         $assetCollection = $this->assetCollector->collectAssets($configuration);

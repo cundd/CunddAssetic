@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\Service;
+namespace Cundd\Assetic\Output;
 
 use Cundd\Assetic\Configuration;
-use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\PathWithoutHash;
 
 interface OutputFileServiceInterface
@@ -19,12 +18,4 @@ interface OutputFileServiceInterface
     public function getPathWithoutHash(
         Configuration $configuration,
     ): PathWithoutHash;
-
-    /**
-     * Return the expected final File Path
-     */
-    public function getExpectedPathWithHash(
-        Configuration $configuration,
-        PathWithoutHash $outputFilenameWithoutHash,
-    ): ?FilePath;
 }

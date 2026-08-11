@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\BuildStep;
+namespace Cundd\Assetic\BuildSystem\BuildStep;
 
 use Cundd\Assetic\Compiler\CompilerInterface;
 use Cundd\Assetic\Configuration;
@@ -13,7 +13,7 @@ use Throwable;
 /**
  * @implements BuildStepInterface<Throwable>
  */
-class Compile implements BuildStepInterface
+final class Compile implements BuildStepInterface
 {
     public function __construct(private readonly CompilerInterface $compiler)
     {

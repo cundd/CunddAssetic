@@ -16,7 +16,7 @@ use function realpath;
 use function rtrim;
 use function substr;
 
-class PathUtility
+final class PathUtility
 {
     public static function getAbsolutePath(string $path): string
     {

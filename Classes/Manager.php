@@ -4,40 +4,28 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic;
 
-use Cundd\Assetic\BuildStep\BuildStepInterface;
-use Cundd\Assetic\Compiler\CompilerFactory;
-use Cundd\Assetic\Compiler\CompilerInterface;
-use Cundd\Assetic\Service\HashCacheManagerInterface;
-use Cundd\Assetic\Service\OutputFileFinderInterface;
-use Cundd\Assetic\Service\OutputFileHashService;
-use Cundd\Assetic\Service\OutputFileServiceInterface;
-use Cundd\Assetic\Service\SymlinkServiceInterface;
-use Cundd\Assetic\Utility\ProfilingUtility;
+use Cundd\Assetic\BuildSystem\ExecutorInterface;
+use Cundd\Assetic\Output\CacheManagerInterface;
+use Cundd\Assetic\Output\OutputFileServiceInterface;
+use Cundd\Assetic\Output\PreviousOutputFileServiceInterface;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\ManagerResultInfo;
 use Cundd\Assetic\ValueObject\Result;
+use Cundd\Assetic\ValueObject\SymlinkFilePath;
 use Throwable;
 
 use function file_exists;
 
-/**
- * Assetic Manager
- */
-class Manager implements ManagerInterface
+final class Manager implements ManagerInterface
 {
-    private readonly CompilerInterface $compiler;
-
     public function __construct(
-        CompilerFactory $compilerFactory,
-        private readonly HashCacheManagerInterface $cacheManager,
-        private readonly OutputFileHashService $outputFileHashService,
+        private readonly CacheManagerInterface $cacheManager,
         private readonly OutputFileServiceInterface $outputFileService,
-        private readonly SymlinkServiceInterface $symlinkService,
-        private readonly OutputFileFinderInterface $outputFileFinder,
+        private readonly PreviousOutputFileServiceInterface $previousOutputFileService,
+        private readonly ExecutorInterface $executor,
     ) {
-        $this->compiler = $compilerFactory->build();
     }
 
     public function collectAndCompile(
@@ -46,7 +34,7 @@ class Manager implements ManagerInterface
     ): Result {
         // Check if the assets should be compiled
         if ($this->shouldCompile($configuration, $compilationContext)) {
-            return $this->collectAssetsAndCompile(
+            return $this->build(
                 $configuration,
                 $compilationContext
             )->map(
@@ -54,10 +42,11 @@ class Manager implements ManagerInterface
             );
         }
 
+        // Check if the cached file exists
         $pathWithoutHash = $this->outputFileService
             ->getPathWithoutHash($configuration);
-        $expectedPath = $this->outputFileService
-            ->getExpectedPathWithHash($configuration, $pathWithoutHash);
+        $expectedPath = $this->previousOutputFileService
+            ->getPreviousPathWithHash($configuration, $pathWithoutHash);
         if ($expectedPath && file_exists($expectedPath->getAbsoluteUri())) {
             return Result::ok(
                 new ManagerResultInfo($expectedPath, usedExistingFile: true)
@@ -72,9 +61,9 @@ class Manager implements ManagerInterface
             isCliEnvironment: $compilationContext->isCliEnvironment,
             forceCompilation: true
         );
-        $this->cacheManager->clearHashCache($pathWithoutHash);
+        $this->cacheManager->clearFinalFilePath($pathWithoutHash);
 
-        return $this->collectAssetsAndCompile(
+        return $this->build(
             $configuration,
             $newCompilationContext
         )->map(
@@ -85,40 +74,41 @@ class Manager implements ManagerInterface
     /**
      * @return Result<FilePath,Throwable>
      */
-    private function collectAssetsAndCompile(
+    private function build(
         Configuration $configuration,
         CompilationContext $compilationContext,
     ): Result {
-        ProfilingUtility::start('Will compile assets');
-
-        $outputFilePathWithoutHash = $this->outputFileService
-            ->getPathWithoutHash($configuration);
-
-        $currentState = new BuildState(
-            $outputFilePathWithoutHash,
-            $outputFilePathWithoutHash,
-            []
-        );
-
         $createDevelopmentSymlink = $this->getCreateDevelopmentSymlink(
             $configuration,
             $compilationContext
         );
 
-        $buildSteps = $this->getBuildSteps($createDevelopmentSymlink);
-        foreach ($buildSteps as $buildStep) {
-            ProfilingUtility::start('Will process build step ' . get_class($buildStep));
-            $currentStateResult = $buildStep->process($configuration, $currentState);
-            ProfilingUtility::end('Did process build step ' . get_class($buildStep));
-            if ($currentStateResult->isErr()) {
-                return Result::err($currentStateResult->unwrapErr());
-            }
+        $builderConfiguration = $configuration->withCreateSymlink(
+            $createDevelopmentSymlink
+        );
+
+        $currentStateResult = $this->executor->build($configuration);
+
+        if ($currentStateResult->isOk()) {
+            /** @var BuildState $currentState */
             $currentState = $currentStateResult->unwrap();
+            $outputFile = $currentState->getFilePath();
+
+            // Cache the latest compiled file path
+            assert(!$outputFile->isSymlink() || $outputFile instanceof SymlinkFilePath);
+            $pathToCache = $outputFile instanceof SymlinkFilePath
+                ? $outputFile->readlink()
+                : $outputFile;
+
+            $this->cacheManager->setFinalFilePath(
+                $currentState->getOutputFilePathWithoutHash(),
+                $pathToCache
+            );
+
+            return Result::ok($currentState->getFilePath());
+        } else {
+            return Result::err($currentStateResult->unwrapErr());
         }
-
-        ProfilingUtility::end('Did compile assets');
-
-        return Result::ok($currentState->getFilePath());
     }
 
     /**
@@ -157,38 +147,5 @@ class Manager implements ManagerInterface
 
         // If symlink creation is enabled check the current callers permissions
         return $compilationContext->hasAccessToDevelopmentFeatures($configuration);
-    }
-
-    /**
-     * @return BuildStepInterface<covariant Throwable>[]
-     */
-    private function getBuildSteps(bool $createDevelopmentSymlink): array
-    {
-        $buildSteps = [
-            // Collect old compiled files to clean up
-            new BuildStep\CollectFilesToCleanUp($this->outputFileFinder),
-
-            // Remove old symlinks
-            new BuildStep\RemoveOldSymlinks($this->symlinkService),
-
-            // Compile
-            new BuildStep\Compile($this->compiler),
-
-            // Patch extension paths
-            new BuildStep\PatchExtensionPath(),
-
-            // Clean up old files
-            new BuildStep\CleanUpOldFiles(),
-
-            // Build hashed file
-            new BuildStep\AddHashToFileName($this->outputFileHashService),
-        ];
-
-        if ($createDevelopmentSymlink) {
-            // Create new symlink
-            $buildSteps[] = new BuildStep\CreateNewSymlink($this->symlinkService);
-        }
-
-        return $buildSteps;
     }
 }

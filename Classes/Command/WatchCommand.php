@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\BuildSystem\ExecutorInterface;
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\FileWatcher\FileWatcherInterface;
-use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Output\CacheManagerInterface as OutputCacheManagerInterface;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
-use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Cache\CacheManager as TYPO3CacheManager;
 use TYPO3\CMS\Core\Site\SiteFinder;
 
 use function usleep;
@@ -21,19 +22,23 @@ use function usleep;
 /**
  * Command to watch and compile assets
  */
-class WatchCommand extends AbstractWatchCommand
+final class WatchCommand extends AbstractWatchCommand
 {
+    use ClearPageCacheTrait;
+
     public function __construct(
-        ManagerInterface $manager,
+        ExecutorInterface $executor,
         ConfigurationFactory $configurationFactory,
         SiteFinder $siteFinder,
         FileWatcherInterface $fileWatcher,
-        private readonly CacheManager $cacheManager,
+        OutputCacheManagerInterface $outputCacheManager,
+        private readonly TYPO3CacheManager $pageCacheManager,
     ) {
         parent::__construct(
-            $manager,
+            $executor,
             $configurationFactory,
             $siteFinder,
+            $outputCacheManager,
             $fileWatcher,
         );
     }
@@ -76,7 +81,7 @@ class WatchCommand extends AbstractWatchCommand
                 $this->fileWatcher
             );
             if ($didRecompile && $clearPageCache) {
-                $this->cacheManager->flushCachesInGroup('pages');
+                $this->tryClearPageCache($this->pageCacheManager, $output);
             }
             usleep((int) ($interval * 1000000));
         }

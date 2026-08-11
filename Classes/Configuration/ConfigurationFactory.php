@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Configuration;
 
+use Assetic\Contracts\Filter\FilterInterface;
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Exception\ConfigurationException;
 use Cundd\Assetic\Exception\InvalidConfigurationException;
@@ -14,6 +15,7 @@ use Cundd\Assetic\ValueObject\Result\Err;
 use Cundd\Assetic\ValueObject\Result\Ok;
 use JsonException;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Site\Entity\SiteSettings;
 
 /**
@@ -27,7 +29,7 @@ use TYPO3\CMS\Core\Site\Entity\SiteSettings;
  *      developmentFunctions:array<non-empty-string,FilterArgument>
  *  }
  * @phpstan-type RawFilterBinaries array<non-empty-string, non-empty-string>
- * @phpstan-type RawFilterForType array<non-empty-string, class-string|'none'>
+ * @phpstan-type RawFilterForType array<non-empty-string, class-string<FilterInterface>|'none'>
  */
 class ConfigurationFactory
 {
@@ -101,7 +103,7 @@ class ConfigurationFactory
             new Configuration(
                 stylesheetConfigurations: $stylesheetConfigurations,
                 allowDeveloperFeaturesWithoutLogin: $allowDeveloperFeaturesWithoutLogin,
-                outputFileDir: Configuration::OUTPUT_FILE_DIR,
+                outputFileDir: Environment::getPublicPath() . Configuration::OUTPUT_FILE_DIR,
                 outputFileName: $settings->get('assetic.settings.output', null),
                 isDevelopment: $isDevelopment,
                 liveReloadConfiguration: $liveReloadConfiguration,
@@ -334,18 +336,31 @@ class ConfigurationFactory
 
             if ('none' === $filterClass) {
                 // noop
-            } elseif (!is_string($filterClass) || !class_exists($filterClass)) {
-                $filterClassInfo = is_string($filterClass)
-                    ? $filterClass
-                    : get_debug_type($filterClass);
+            } else {
+                if (!is_string($filterClass) || !class_exists($filterClass)) {
+                    $filterClassInfo = is_string($filterClass)
+                        ? $filterClass
+                        : get_debug_type($filterClass);
 
-                return (new InvalidConfigurationException(
-                    sprintf(
-                        'Invalid configuration for `filterForType` `filterClass`. Expected class name or \'none\' got %s',
-                        $filterClassInfo
-                    ),
-                    1769590000
-                ))->intoErr();
+                    return (new InvalidConfigurationException(
+                        sprintf(
+                            'Invalid configuration for `filterForType` `filterClass`. Expected class name or \'none\' got %s',
+                            $filterClassInfo
+                        ),
+                        1769590000
+                    ))->intoErr();
+                }
+
+                if (!is_a($filterClass, FilterInterface::class, true)) {
+                    return (new InvalidConfigurationException(
+                        sprintf(
+                            'Invalid configuration for `filterForType` `filterClass`. Filter \'%s\' does not implement required interface \'%s\'',
+                            $filterClass,
+                            FilterInterface::class
+                        ),
+                        1786524409
+                    ))->intoErr();
+                }
             }
             $validatedFilterForType[$fileType] = $filterClass;
         }

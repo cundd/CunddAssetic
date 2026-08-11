@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\BuildStep;
+namespace Cundd\Assetic\BuildSystem\BuildStep;
 
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\ValueObject\BuildState;

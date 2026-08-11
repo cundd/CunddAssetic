@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\BuildSystem\ExecutorInterface;
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Configuration\ConfigurationFactory;
-use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Output\CacheManagerInterface as OutputCacheManagerInterface;
 use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\Result;
 use Cundd\Assetic\ValueObject\Result\Err;
 use Cundd\Assetic\ValueObject\Result\Ok;
+use Cundd\Assetic\ValueObject\SymlinkFilePath;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Cache\CacheManager as TYPO3CacheManager;
 use TYPO3\CMS\Core\Site\SiteFinder;
 
 use function sprintf;
@@ -25,18 +27,22 @@ use function sprintf;
 /**
  * Command to compile assets
  */
-class CompileCommand extends AbstractCommand
+final class CompileCommand extends AbstractCommand
 {
+    use ClearPageCacheTrait;
+
     public function __construct(
-        ManagerInterface $manager,
+        ExecutorInterface $executor,
         ConfigurationFactory $configurationFactory,
         SiteFinder $siteFinder,
-        private readonly CacheManager $cacheManager,
+        OutputCacheManagerInterface $outputCacheManager,
+        private readonly TYPO3CacheManager $pageCacheManager,
     ) {
         parent::__construct(
-            $manager,
+            $executor,
             $configurationFactory,
-            $siteFinder
+            $siteFinder,
+            $outputCacheManager
         );
     }
 
@@ -83,7 +89,7 @@ class CompileCommand extends AbstractCommand
         );
 
         if ($input->getOption('clear-page-cache')) {
-            $this->cacheManager->flushCachesInGroup('pages');
+            $this->tryClearPageCache($this->pageCacheManager, $output);
         }
 
         return $result->isOk() ? self::SUCCESS : self::FAILURE;
@@ -109,15 +115,29 @@ class CompileCommand extends AbstractCommand
                 $file->getAbsoluteUri(),
                 $destination
             );
+
+            $output->writeln(sprintf(
+                "Compiled assets and saved file to '%s' in %0.4fs",
+                $finalPath,
+                $compileTime
+            ));
+        } elseif ($file->isSymlink()) {
+            assert($file instanceof SymlinkFilePath);
+            $output->writeln(sprintf(
+                "Compiled assets and saved file to '%s' (symlinked to '%s') in %0.4fs",
+                $file->readlink()->getAbsoluteUri(),
+                $file->getAbsoluteUri(),
+                $compileTime
+            ));
         } else {
             $finalPath = $file->getAbsoluteUri();
-        }
 
-        $output->writeln(sprintf(
-            "Compiled assets and saved file to '%s' in %0.4fs",
-            $finalPath,
-            $compileTime
-        ));
+            $output->writeln(sprintf(
+                "Compiled assets and saved file to '%s' in %0.4fs",
+                $finalPath,
+                $compileTime
+            ));
+        }
 
         return new Ok(null);
     }

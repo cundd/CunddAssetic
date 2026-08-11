@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Configuration;
 
-class LiveReloadConfiguration
+final class LiveReloadConfiguration
 {
     /**
      * @param bool $isEnabled      Specify if LiveReload support is generally enabled

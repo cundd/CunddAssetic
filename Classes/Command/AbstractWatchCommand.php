@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\BuildSystem\ExecutorInterface;
 use Cundd\Assetic\Command\Input\ArrayUtility;
 use Cundd\Assetic\Command\Input\WatchPathsBuilder;
 use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\FileWatcher\FileWatcher;
 use Cundd\Assetic\FileWatcher\FileWatcherInterface;
-use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Output\CacheManagerInterface as OutputCacheManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -30,16 +31,17 @@ abstract class AbstractWatchCommand extends AbstractCommand
     private const OPTION_MAX_DEPTH = 'max-depth';
 
     public function __construct(
-        ManagerInterface $manager,
+        ExecutorInterface $executor,
         ConfigurationFactory $configurationFactory,
         SiteFinder $siteFinder,
-        private readonly FileWatcherInterface $fileWatcher,
+        OutputCacheManagerInterface $outputCacheManager,
         protected readonly FileWatcherInterface $fileWatcher,
     ) {
         parent::__construct(
-            $manager,
+            $executor,
             $configurationFactory,
-            $siteFinder
+            $siteFinder,
+            $outputCacheManager
         );
     }
 

@@ -2,33 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\Service;
+namespace Cundd\Assetic\Output;
 
 use Cundd\Assetic\Configuration;
-use Cundd\Assetic\ValueObject\FilePath;
 use Cundd\Assetic\ValueObject\PathWithoutHash;
 
 use function basename;
 use function implode;
 
-class OutputFileService implements OutputFileServiceInterface
+final class OutputFileService implements OutputFileServiceInterface
 {
     public const NAME_PART_SEPARATOR = '-';
 
-    public function __construct(
-        private readonly OutputFileHashService $outputFileHashService,
-    ) {
-    }
-
-    public function getPathWithoutHash(Configuration $configuration): PathWithoutHash
-    {
+    public function getPathWithoutHash(
+        Configuration $configuration,
+    ): PathWithoutHash {
         // Get the output name from the configuration
         // If the custom `outputFileName` is defined nothing is added to the
         // filename, so users must prevent collisions
         if ($configuration->outputFileName) {
-            return new PathWithoutHash(
+            return PathWithoutHash::fromFileName(
                 $configuration->outputFileName,
-                $configuration->outputFileDir,
+                $configuration
             );
         }
 
@@ -55,28 +50,9 @@ class OutputFileService implements OutputFileServiceInterface
             $outputFileNameParts[] = $stylesheetFileName;
         }
 
-        return new PathWithoutHash(
+        return PathWithoutHash::fromFileName(
             implode(self::NAME_PART_SEPARATOR, $outputFileNameParts),
-            $configuration->outputFileDir,
+            $configuration
         );
-    }
-
-    public function getExpectedPathWithHash(
-        Configuration $configuration,
-        PathWithoutHash $outputFilenameWithoutHash,
-    ): ?FilePath {
-        $previousHash = $this->outputFileHashService->getPreviousHash($outputFilenameWithoutHash);
-
-        if ($previousHash) {
-            return FilePath::fromFileName(
-                $outputFilenameWithoutHash->getFileName()
-                    . self::NAME_PART_SEPARATOR
-                    . $previousHash
-                    . '.css',
-                $configuration
-            );
-        } else {
-            return null;
-        }
     }
 }

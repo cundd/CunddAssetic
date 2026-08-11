@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\BuildStep;
+namespace Cundd\Assetic\BuildSystem\BuildStep;
 
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\ValueObject\BuildState;
@@ -14,7 +14,7 @@ use function unlink;
 /**
  * @implements BuildStepInterface<Throwable>
  */
-class CleanUpOldFiles implements BuildStepInterface
+final class CleanUpOldFiles implements BuildStepInterface
 {
     public function process(
         Configuration $configuration,

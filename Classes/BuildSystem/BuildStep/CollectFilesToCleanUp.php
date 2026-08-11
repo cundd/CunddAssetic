@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\BuildStep;
+namespace Cundd\Assetic\BuildSystem\BuildStep;
 
 use Cundd\Assetic\Configuration;
-use Cundd\Assetic\Service\OutputFileFinderInterface;
+use Cundd\Assetic\Output\OutputFileFinderInterface;
 use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\BuildStateResult;
 use Throwable;
@@ -13,7 +13,7 @@ use Throwable;
 /**
  * @implements BuildStepInterface<Throwable>
  */
-class CollectFilesToCleanUp implements BuildStepInterface
+final class CollectFilesToCleanUp implements BuildStepInterface
 {
     public function __construct(
         private readonly OutputFileFinderInterface $outputFileFinder,

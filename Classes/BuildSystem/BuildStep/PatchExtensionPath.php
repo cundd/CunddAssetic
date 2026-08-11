@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cundd\Assetic\BuildStep;
+namespace Cundd\Assetic\BuildSystem\BuildStep;
 
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Exception\OutputFileException;
@@ -25,7 +25,7 @@ use function strpos;
  *
  * @implements BuildStepInterface<OutputFileException>
  */
-class PatchExtensionPath implements BuildStepInterface
+final class PatchExtensionPath implements BuildStepInterface
 {
     public function process(
         Configuration $configuration,

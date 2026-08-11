@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace Cundd\Assetic\Command;
 
+use Cundd\Assetic\BuildSystem\ExecutorInterface;
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Configuration\ConfigurationFactory;
 use Cundd\Assetic\Exception\MissingConfigurationException;
-use Cundd\Assetic\ManagerInterface;
+use Cundd\Assetic\Output\CacheManagerInterface;
 use Cundd\Assetic\Utility\PathUtility;
+use Cundd\Assetic\ValueObject\BuildState;
 use Cundd\Assetic\ValueObject\CompilationContext;
 use Cundd\Assetic\ValueObject\FilePath;
-use Cundd\Assetic\ValueObject\ManagerResultInfo;
 use Cundd\Assetic\ValueObject\Result;
+use Doctrine\DBAL\Exception\ConnectionException;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Throwable;
+use TYPO3\CMS\Core\Cache\Exception as CacheException;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -37,9 +40,10 @@ abstract class AbstractCommand extends Command
     protected const ARGUMENT_SITE = 'site';
 
     public function __construct(
-        private readonly ManagerInterface $manager,
+        private readonly ExecutorInterface $executor,
         private readonly ConfigurationFactory $configurationFactory,
         private readonly SiteFinder $siteFinder,
+        private readonly CacheManagerInterface $outputCacheManager,
     ) {
         parent::__construct();
     }
@@ -71,10 +75,26 @@ abstract class AbstractCommand extends Command
             );
         }
 
-        return $this->manager->collectAndCompile(
-            $configuration,
-            $compilationContext
-        )->map(fn (ManagerResultInfo $i) => $i->filePath);
+        $result = $this->executor->build($configuration);
+        if ($result->isOk()) {
+            /** @var BuildState $buildState */
+            $buildState = $result->unwrap();
+
+            // Try to update the cached final path
+            // This operation may fail if the command is executed without a
+            // valid database and/or missing cache-drivers (e.g. for redis)
+            try {
+                $this->outputCacheManager->setFinalFilePath(
+                    $buildState->getOutputFilePathWithoutHash(),
+                    $buildState->getFilePath()
+                );
+            } catch (ConnectionException|CacheException $_) {
+            }
+
+            return Result::ok($buildState->getFilePath());
+        } else {
+            return Result::err($result->unwrapErr());
+        }
     }
 
     /**
