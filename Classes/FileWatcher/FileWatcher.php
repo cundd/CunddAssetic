@@ -15,9 +15,9 @@ use function is_dir;
 use function sprintf;
 
 /**
- * Class to test files for changes
+ * Class to monitor files for changes
  */
-class FileWatcher implements FileWatcherInterface
+final class FileWatcher implements FileWatcherInterface
 {
     /**
      * Array of watched files
@@ -58,9 +58,6 @@ class FileWatcher implements FileWatcherInterface
      */
     private array $assetSuffixes;
 
-    /**
-     * FileWatcher constructor
-     */
     public function __construct()
     {
         $this->assetSuffixes = array_merge(
@@ -126,7 +123,8 @@ class FileWatcher implements FileWatcherInterface
      */
     public function setWatchPaths(array $watchPaths): FileWatcherInterface
     {
-        if ($watchPaths && 0 === count(array_filter($watchPaths, 'file_exists'))) {
+        $existingPaths = array_filter($watchPaths, file_exists(...));
+        if ($watchPaths && 0 === count($existingPaths)) {
             $errorMessage = count($watchPaths) > 1
                 ? sprintf('None of the watch paths "%s" exist', implode('", "', $watchPaths))
                 : sprintf('Watch path "%s" does not exist', end($watchPaths));
@@ -156,21 +154,23 @@ class FileWatcher implements FileWatcherInterface
         return null;
     }
 
-    /**
-     * Returns the files that are watched
-     *
-     * @return string[]
-     */
     public function collectFilesToWatch(): array
     {
         $currentTime = time();
-        if (($currentTime - $this->watchedFilesCacheTime) > $this->watchedFilesCacheLifetime) {
+        $elapsed = $currentTime - $this->watchedFilesCacheTime;
+        if ($elapsed > $this->watchedFilesCacheLifetime) {
             $foundFiles = [];
 
             foreach ($this->watchPaths as $currentWatchPath) {
-                $foundFilesForCurrentPath = $this->findFilesBySuffix($this->assetSuffixes, $currentWatchPath);
+                $foundFilesForCurrentPath = $this->findFilesBySuffix(
+                    $this->assetSuffixes,
+                    $currentWatchPath
+                );
                 if ($foundFilesForCurrentPath) {
-                    $foundFiles = array_merge($foundFiles, $foundFilesForCurrentPath);
+                    $foundFiles = array_merge(
+                        $foundFiles,
+                        $foundFilesForCurrentPath
+                    );
                 }
             }
 
@@ -199,10 +199,15 @@ class FileWatcher implements FileWatcherInterface
     private function findFilesBySuffix(string|array $suffix, string $startDirectory): array
     {
         if (!is_dir($startDirectory)) {
-            throw new InvalidArgumentException(sprintf('Start-directory "%s" is not a directory', $startDirectory), 5407933418);
+            throw new InvalidArgumentException(sprintf(
+                'Start-directory "%s" is not a directory',
+                $startDirectory
+            ), 5407933418);
         }
 
-        $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($startDirectory));
+        $directoryIterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($startDirectory)
+        );
         $regexIterator = new RegexIterator(
             $directoryIterator,
             sprintf('/^.+\.(%s)$/i', implode('|', (array) $suffix)),
