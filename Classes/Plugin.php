@@ -210,11 +210,8 @@ class Plugin
             '%.6fs',
             ($collectAndCompileEnd - $collectAndCompileStart) / 1_000 / 1_000 / 1_000
         );
-        if (!$managerResultInfo->usedExistingFile) {
-            return sprintf('<!-- Compiled assets in %s -->', $duration);
-        } else {
-            return sprintf('<!-- Use pre-compiled assets in %s -->', $duration);
-        }
+
+        return sprintf('<!-- Compiled assets in %s -->', $duration);
     }
 
     /**
