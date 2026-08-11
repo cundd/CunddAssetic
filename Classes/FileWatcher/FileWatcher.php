@@ -51,7 +51,7 @@ class FileWatcher implements FileWatcherInterface
     /**
      * Timestamp of the last re-compile
      */
-    private int $lastChangeTime = 0;
+    private int $lastChangeTime;
 
     /**
      * @var string[]
@@ -68,6 +68,7 @@ class FileWatcher implements FileWatcherInterface
             FileCategories::$styleAssetSuffixes,
             FileCategories::$otherAssetSuffixes
         );
+        $this->lastChangeTime = time();
     }
 
     /**
