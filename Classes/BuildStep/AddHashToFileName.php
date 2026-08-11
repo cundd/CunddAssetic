@@ -34,6 +34,9 @@ class AddHashToFileName implements BuildStepInterface
         Configuration $configuration,
         BuildState $currentState,
     ): BuildStateResult {
+        if ($configuration->outputFileName) {
+            return BuildStateResult::ok($currentState);
+        }
         $outputFilenameWithoutHash = $currentState->getOutputFilePathWithoutHash();
 
         // Create the file hash and store it in the cache
