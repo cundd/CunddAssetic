@@ -42,10 +42,8 @@ final class ProfilingUtility
 
     /**
      * Print a profiling message
-     *
-     * @deprecated use start() and end() instead
      */
-    public static function profile(string $msg = ''): void
+    private static function profile(string $msg = ''): void
     {
         $currentHrtime = hrtime(true);
         if (!getenv('CUNDD_ASSETIC_DEBUG')) {
