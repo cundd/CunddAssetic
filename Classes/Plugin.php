@@ -234,18 +234,8 @@ class Plugin
 
         $configuration = $configurationResult->unwrap();
         if (isset($pluginConfiguration['development'])) {
-            return new Configuration(
-                site: $configuration->site,
-                stylesheetConfigurations: $configuration->stylesheetConfigurations,
-                outputFileDir: $configuration->outputFileDir,
-                outputFileName: $configuration->outputFileName,
-                filterForType: $configuration->filterForType,
-                filterBinaries: $configuration->filterBinaries,
-                liveReloadConfiguration: $configuration->liveReloadConfiguration,
-                isDevelopment: (bool) $pluginConfiguration['development'],
-                createSymlink: $configuration->createSymlink,
-                allowDeveloperFeaturesWithoutLogin: $configuration->allowDeveloperFeaturesWithoutLogin,
-                strictModeEnabled: $configuration->strictModeEnabled,
+            return $configuration->withIsDevelopment(
+                (bool) $pluginConfiguration['development']
             );
         }
 

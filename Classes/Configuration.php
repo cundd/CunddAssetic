@@ -31,4 +31,21 @@ final class Configuration
         public readonly bool $strictModeEnabled,
     ) {
     }
+
+    public function withIsDevelopment(bool $isDevelopment): self
+    {
+        return new self(
+            site: $this->site,
+            stylesheetConfigurations: $this->stylesheetConfigurations,
+            outputFileDir: $this->outputFileDir,
+            outputFileName: $this->outputFileName,
+            filterForType: $this->filterForType,
+            filterBinaries: $this->filterBinaries,
+            liveReloadConfiguration: $this->liveReloadConfiguration,
+            isDevelopment: $isDevelopment,
+            createSymlink: $this->createSymlink,
+            allowDeveloperFeaturesWithoutLogin: $this->allowDeveloperFeaturesWithoutLogin,
+            strictModeEnabled: $this->strictModeEnabled,
+        );
+    }
 }
