@@ -8,7 +8,6 @@ use Cundd\Assetic\ValueObject\PathWithoutHash;
 use TYPO3\CMS\Core\Cache\CacheManager as TYPO3CacheManager;
 use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use function sha1;
 
@@ -19,19 +18,28 @@ class HashCacheManager implements HashCacheManagerInterface
      */
     private const CACHE_IDENTIFIER_HASH = 'cundd_assetic_cache_identifier_hash';
 
+    private ?FrontendInterface $cacheInstance;
+
+    public function __construct(TYPO3CacheManager $cacheManager)
+    {
+        try {
+            $this->cacheInstance = $cacheManager->getCache('assetic_cache');
+        } catch (NoSuchCacheException $e) {
+            $this->cacheInstance = null;
+        }
+    }
+
     public function getCache(PathWithoutHash $path): mixed
     {
         $path = $this->prepareIdentifier($path);
-        $cacheInstance = $this->getCacheInstance();
 
-        return $cacheInstance?->get($path);
+        return $this->cacheInstance?->get($path);
     }
 
     public function setCache(PathWithoutHash $path, string $hash): void
     {
         $path = $this->prepareIdentifier($path);
-        $cacheInstance = $this->getCacheInstance();
-        $cacheInstance?->set(
+        $this->cacheInstance?->set(
             $path,
             $hash,
             tags: [],
@@ -42,16 +50,6 @@ class HashCacheManager implements HashCacheManagerInterface
     public function clearHashCache(PathWithoutHash $path): void
     {
         $this->setCache($path, '');
-    }
-
-    private function getCacheInstance(): ?FrontendInterface
-    {
-        try {
-            return GeneralUtility::makeInstance(TYPO3CacheManager::class)
-                ->getCache('assetic_cache');
-        } catch (NoSuchCacheException $e) {
-            return null;
-        }
     }
 
     private function prepareIdentifier(PathWithoutHash $identifier): string
