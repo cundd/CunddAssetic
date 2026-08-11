@@ -13,7 +13,7 @@ settings:
     type: bool
     default: false
     label: Development mode
-    description: Always re-compile assets
+    description: Always re-compile assets, add debug information and apply `developmentFunctions`
     category: Assetic.general
 
   assetic.settings.createSymlink:
