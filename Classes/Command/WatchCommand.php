@@ -63,14 +63,17 @@ class WatchCommand extends AbstractWatchCommand
         $interval = $this->getInterval($input, 1);
         $clearPageCache = (bool) $input->getOption('clear-page-cache');
 
-        $fileWatcher = $this->getFileWatcher();
-        $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
+        $this->configureFileWatcherFromInput(
+            $input,
+            $output,
+            $this->fileWatcher
+        );
         while (true) {
             $didRecompile = $this->recompileIfNeeded(
                 $configuration,
                 $compilationContext,
                 $output,
-                $fileWatcher
+                $this->fileWatcher
             );
             if ($didRecompile && $clearPageCache) {
                 $this->cacheManager->flushCachesInGroup('pages');

@@ -34,6 +34,7 @@ abstract class AbstractWatchCommand extends AbstractCommand
         ConfigurationFactory $configurationFactory,
         SiteFinder $siteFinder,
         private readonly FileWatcherInterface $fileWatcher,
+        protected readonly FileWatcherInterface $fileWatcher,
     ) {
         parent::__construct(
             $manager,
@@ -77,11 +78,6 @@ abstract class AbstractWatchCommand extends AbstractCommand
                 'Maximum directory depth of file to watch',
                 7
             );
-    }
-
-    protected function getFileWatcher(): FileWatcherInterface
-    {
-        return $this->fileWatcher;
     }
 
     protected function getInterval(InputInterface $input, float $min): float

@@ -134,8 +134,11 @@ For additional information on the expected files see the following links:
             );
         }
         $this->logger = new ConsoleLogger($output);
-        $fileWatcher = $this->getFileWatcher();
-        $this->configureFileWatcherFromInput($input, $output, $fileWatcher);
+        $this->configureFileWatcherFromInput(
+            $input,
+            $output,
+            $this->fileWatcher
+        );
 
         $server = $this->buildServerFromInput(
             $configuration,
@@ -158,7 +161,7 @@ For additional information on the expected files see the following links:
         CompilationContext $compilationContext,
         LiveReloadComponent $liveReloadServerComponent,
     ): void {
-        $fileNeedsRecompile = $this->needsRecompile($this->getFileWatcher());
+        $fileNeedsRecompile = $this->needsRecompile($this->fileWatcher);
         if (!$fileNeedsRecompile) {
             $this->logger->debug('No files changed');
 
