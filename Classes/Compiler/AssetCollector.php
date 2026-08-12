@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Cundd\Assetic\Compiler;
 
 use Assetic\Asset\AssetCollection;
+use Assetic\Asset\FileAsset;
+use Assetic\Contracts\Asset\AssetInterface;
 use Assetic\Contracts\Filter\FilterInterface;
 use Assetic\Exception\FilterException;
-use Assetic\Factory\AssetFactory;
-use Assetic\FilterManager;
 use Cundd\Assetic\Configuration;
 use Cundd\Assetic\Configuration\StylesheetConfiguration;
+use Cundd\Assetic\Exception\ConfigurationException;
 use Cundd\Assetic\Exception\FilePathException;
 use Cundd\Assetic\Exception\InvalidConfigurationException;
 use Cundd\Assetic\Utility\PathUtility;
@@ -18,7 +19,6 @@ use Cundd\Assetic\Utility\ProfilingUtility;
 use LogicException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use TYPO3\CMS\Core\Core\Environment;
 
 use function get_class;
 use function preg_match;
@@ -50,20 +50,13 @@ final class AssetCollector implements LoggerAwareInterface
         }
 
         $assetCollection = new AssetCollection();
-        $factory = new AssetFactory(Environment::getPublicPath() . '/');
-        $filterManager = new FilterManager();
-
-        // Register the filter manager
-        $factory->setFilterManager($filterManager);
 
         // Loop through all configured stylesheets
         $stylesheets = $configuration->stylesheetConfigurations;
         foreach ($stylesheets as $stylesheet) {
             $asset = $this->createAsset(
-                $filterManager,
                 $configuration,
                 $stylesheet,
-                $factory
             );
             $assetCollection->add($asset);
         }
@@ -77,11 +70,9 @@ final class AssetCollector implements LoggerAwareInterface
      * Create and collect the Asset with the given key and stylesheet
      */
     private function createAsset(
-        FilterManager $filterManager,
         Configuration $configuration,
         StylesheetConfiguration $stylesheetConfiguration,
-        AssetFactory $factory,
-    ): AssetCollection {
+    ): AssetInterface {
         // Get the type to find the matching filter
         $stylesheetType = $stylesheetConfiguration->type
             ?? substr((string) strrchr($stylesheetConfiguration->file, '.'), 1);
@@ -109,7 +100,6 @@ final class AssetCollector implements LoggerAwareInterface
 
         // Make sure the filter manager knows the filter
         $filter = $this->getFilterForType(
-            $filterManager,
             $configuration,
             $stylesheetType
         );
@@ -118,7 +108,6 @@ final class AssetCollector implements LoggerAwareInterface
         $functions = $stylesheetConfiguration->functions;
         if ($filter && !empty($functions)) {
             $this->applyFunctionsToFilterForType(
-                $filterManager,
                 $configuration,
                 $filter,
                 $functions,
@@ -129,7 +118,6 @@ final class AssetCollector implements LoggerAwareInterface
             $functions = $stylesheetConfiguration->developmentFunctions;
             if ($filter && !empty($functions)) {
                 $this->applyFunctionsToFilterForType(
-                    $filterManager,
                     $configuration,
                     $filter,
                     $functions,
@@ -138,12 +126,7 @@ final class AssetCollector implements LoggerAwareInterface
             }
         }
 
-        $assetFilters = $filter ? [$stylesheetType] : [];
-
-        return $factory->createAsset(
-            [$filePath],
-            $assetFilters,
-        );
+        return new FileAsset($filePath, [$filter]);
     }
 
     // =========================================================================
@@ -155,15 +138,9 @@ final class AssetCollector implements LoggerAwareInterface
      * @throws LogicException if the required filter class does not exist
      */
     private function getFilterForType(
-        FilterManager $filterManager,
         Configuration $configuration,
         string $type,
     ): ?FilterInterface {
-        // If the filter manager has an according filter return it
-        if ($filterManager->has($type)) {
-            return $filterManager->get($type);
-        }
-
         // Default to `CssFilter` or `SassFilter` depending on the input file
         // type
         $filterClass = ucfirst($type) . 'Filter';
@@ -179,23 +156,27 @@ final class AssetCollector implements LoggerAwareInterface
             return null;
         }
 
-        assert(class_exists($filterClass));
+        assert(
+            class_exists($filterClass),
+            sprintf("Class '$filterClass' could not be found")
+        );
+
+        if (!is_a($filterClass, FilterInterface::class, true)) {
+            throw new ConfigurationException(sprintf(
+                "Filter '%s' does not implement required interface '%s'",
+                $filterClass,
+                FilterInterface::class
+            ));
+        }
+
         $filterBinaryPath = $this->getFilterBinaryPath(
             $configuration,
             $filterClass
         );
-        if ($filterBinaryPath) {
-            $filter = new $filterClass($filterBinaryPath);
-        } else {
-            $filter = new $filterClass();
-        }
 
-        assert($filter instanceof FilterInterface);
-
-        // Store the just created filter
-        $filterManager->set($type, $filter);
-
-        return $filter;
+        return $filterBinaryPath
+            ? new $filterClass($filterBinaryPath)
+            : new $filterClass();
     }
 
     // =========================================================================
@@ -208,7 +189,6 @@ final class AssetCollector implements LoggerAwareInterface
      * @param non-empty-string                       $stylesheetType
      */
     private function applyFunctionsToFilterForType(
-        FilterManager $filterManager,
         Configuration $configuration,
         FilterInterface $filter,
         array $functions,
@@ -246,8 +226,6 @@ final class AssetCollector implements LoggerAwareInterface
                 trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
             }
         }
-
-        $filterManager->set($stylesheetType, $filter);
 
         return $filter;
     }
