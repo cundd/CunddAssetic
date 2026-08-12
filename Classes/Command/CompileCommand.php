@@ -117,14 +117,14 @@ final class CompileCommand extends AbstractCommand
             );
 
             $output->writeln(sprintf(
-                "Compiled assets and saved file to '%s' in %0.4fs",
+                "Stylesheets have been compiled to '%s' in %0.4fs",
                 $finalPath,
                 $compileTime
             ));
         } elseif ($file->isSymlink()) {
             assert($file instanceof SymlinkFilePath);
             $output->writeln(sprintf(
-                "Compiled assets and saved file to '%s' (symlinked to '%s') in %0.4fs",
+                "Stylesheets have been compiled to '%s' (symlinked to '%s') in %0.4fs",
                 $file->readlink()->getAbsoluteUri(),
                 $file->getAbsoluteUri(),
                 $compileTime
@@ -133,7 +133,7 @@ final class CompileCommand extends AbstractCommand
             $finalPath = $file->getAbsoluteUri();
 
             $output->writeln(sprintf(
-                "Compiled assets and saved file to '%s' in %0.4fs",
+                "Stylesheets have been compiled to '%s' in %0.4fs",
                 $finalPath,
                 $compileTime
             ));

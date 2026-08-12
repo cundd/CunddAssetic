@@ -112,13 +112,13 @@ class AssetController extends ActionController
             $outputFilePath = $managerResultInfo->filePath;
             if (!$outputFilePath->isSymlink()) {
                 $this->addFlashMessage(sprintf(
-                    'Stylesheets have been compiled to %s',
+                    "Stylesheets have been compiled to '%s'",
                     $outputFilePath->getPublicUri()
                 ));
             } else {
                 assert($outputFilePath instanceof SymlinkFilePath);
                 $this->addFlashMessage(sprintf(
-                    'Stylesheets have been compiled to %s (symlinked to %s)',
+                    "Stylesheets have been compiled to '%s' (symlinked to '%s')",
                     $outputFilePath->readlink()->getPublicUri(),
                     $outputFilePath->getPublicUri(),
                 ));
