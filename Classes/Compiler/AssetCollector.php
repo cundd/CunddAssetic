@@ -223,7 +223,7 @@ final class AssetCollector implements LoggerAwareInterface
                     1447161985
                 );
             } else {
-                trigger_error('Filter does not implement ' . $function, E_USER_NOTICE);
+                trigger_error('Filter ' . get_class($filter) . ' does not implement ' . $function, E_USER_NOTICE);
             }
         }
 
