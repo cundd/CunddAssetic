@@ -156,10 +156,12 @@ final class AssetCollector implements LoggerAwareInterface
             return null;
         }
 
-        assert(
-            class_exists($filterClass),
-            sprintf("Class '$filterClass' could not be found")
-        );
+        if (!class_exists($filterClass)) {
+            throw new ConfigurationException(sprintf(
+                "Filter class '%s' could not be found",
+                $filterClass,
+            ));
+        }
 
         if (!is_a($filterClass, FilterInterface::class, true)) {
             throw new ConfigurationException(sprintf(
