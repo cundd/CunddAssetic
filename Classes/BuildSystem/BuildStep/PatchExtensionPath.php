@@ -32,7 +32,17 @@ final class PatchExtensionPath implements BuildStepInterface
         BuildState $currentState,
     ): BuildStateResult {
         $compiledFileUri = $currentState->getFilePath()->getAbsoluteUri();
-        $contents = (string) file_get_contents($compiledFileUri);
+        $contents = @file_get_contents($compiledFileUri);
+        if (false === $contents) {
+            return BuildStateResult::err(new OutputFileException(
+                sprintf(
+                    'Compiled destination path "%s" can not be read',
+                    $compiledFileUri
+                ),
+                1795548145
+            ));
+        }
+
         if (!preg_match_all('!EXT:([a-zA-Z0-9-_]+/Resources/Public/)!', $contents, $matches)) {
             return BuildStateResult::ok($currentState);
         }
